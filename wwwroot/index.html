@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>MyBookHeaven.Reader</title>
+    <base href="/" />
+    <link rel="preload" href="fonts/Bookerly/Bookerly.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Bookerly/Bookerly-Bold.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Bookerly/Bookerly-Italic.ttf" as="font" crossorigin="anonymous" />
+    <link rel="preload" href="fonts/Bookerly/Bookerly-BoldItalic.ttf" as="font" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/app.min.css" />
+    <link href="_content/Blazor.ContextMenu/blazorContextMenu.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/bootstrap-icons/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="MyBookHeaven.Reader.styles.css" />
+
+    <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+
+<body>
+
+    <div class="status-bar-safe-area"></div>
+
+    <div id="app">
+        <div class="absolute flex h-full w-full items-center justify-center">
+            <span>Loading...</span>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_content/Blazor.ContextMenu/blazorContextMenu.min.js"></script>
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
+
+</body>
+
+</html>

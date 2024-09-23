@@ -1,0 +1,12 @@
+﻿nav ::deep a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-right: 2px solid lightgray;
+}
+
+nav ::deep a.active {
+    border-bottom: 2px solid black;
+}

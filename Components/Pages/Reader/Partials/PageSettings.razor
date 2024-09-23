@@ -1,0 +1,9 @@
+﻿<div class="settings border-t-2 border-black bg-white" @onclick:stopPropagation="true">
+    <NavigationSettings ProfileSettings="ProfileSettings"/>
+    <TextSetting Label="Vertical Margin" Min="0" Max="10" Increment="0.5" @bind-Value="ProfileSettings.VerticalMargin"/>
+    <TextSetting Label="Horizontal Margin" Min="0" Max="10" Increment="0.5" @bind-Value="ProfileSettings.HorizontalMargin"/>
+</div>
+
+@code {
+    [Parameter] public ProfileSettings ProfileSettings { get; set; } = null!;
+}

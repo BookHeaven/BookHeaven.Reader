@@ -1,0 +1,16 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page overflow-hidden">
+    <SectionOutlet SectionName="Header"/>
+    <main class="overflow-y-auto">
+        @Body
+    </main>
+    <nav>
+        <NavLink href="/books" ActiveClass="active" Match="NavLinkMatch.Prefix">
+            <span class="flex items-center"><i class="bi bi-book me-2 text-xl"></i> @Translations.BOOKS</span>
+        </NavLink>
+        <NavLink href="/apps" ActiveClass="active" Match="NavLinkMatch.All">
+            <span class="flex items-center"><i class="bi bi-grid me-2 text-xl"></i> @Translations.APPS</span>
+        </NavLink>
+    </nav>
+</div>

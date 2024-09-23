@@ -1,0 +1,35 @@
+﻿@page "/apps"
+@using AppInfo = BookHeaven.Reader.Entities.AppInfo
+@inject IAppsService AppsService
+
+<SectionContent SectionName="Header">
+    <RadioButtonGroup Class="m-3" TOptions="@Sorting" OnChange="Sort"/>
+</SectionContent>
+
+@if (_apps.Count > 0)
+{
+    <ContextMenu Id="AppMenu" Context="appContext" Animation="Animation.Grow" OverrideDefaultCssClass="absolute border bg-white">
+        @{
+            var app = (AppInfo)appContext.Data;
+        }
+        <Item OverrideDefaultCssClass="p-2">@app.Name</Item>
+        <Item OnClick="@(() => AppsService.OpenApp(app.PackageName!))"><i class="bi bi-box-arrow-up-right me-5"></i>@Translations.OPEN</Item>
+        <Item OnClick="@(() => AppsService.OpenInfo(app.PackageName!))"><i class="bi bi-info-circle me-5"></i>@Translations.INFO</Item>
+        @if (AppsService.CanBeUninstalled(app.PackageName!))
+        {
+            <Item OnClick="@(() => AppsService.UninstallApp(app.PackageName!))"><i class="bi bi-trash me-5"></i>@Translations.UNINSTALL</Item>
+        }
+    </ContextMenu>
+
+    <div id="drawer">
+        @foreach (var app in _filteredApps)
+        {
+            <ContextMenuTrigger MenuId="AppMenu" Data="@app">
+                <div class="app rounded active:ring active:ring-black" @onclick="@(() => AppsService.OpenApp(app.PackageName!))">
+                    <img src="data:image/png;base64,@app.IconBase64" alt="App icon"/>
+                    <div>@app.Name</div>
+                </div>
+            </ContextMenuTrigger>
+        }
+    </div>
+}

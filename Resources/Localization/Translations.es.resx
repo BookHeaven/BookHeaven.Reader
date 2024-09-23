@@ -1,0 +1,113 @@
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="LOCAL" xml:space="preserve">
+        <value>Local</value>
+    </data>
+    <data name="REMOTE" xml:space="preserve">
+        <value>Remoto</value>
+    </data>
+    <data name="SETTINGS" xml:space="preserve">
+        <value>Ajustes</value>
+    </data>
+    <data name="SYNC_PROGRESS" xml:space="preserve">
+        <value>Sincr. Progreso</value>
+    </data>
+    <data name="BOOKS" xml:space="preserve">
+        <value>Libros</value>
+    </data>
+    <data name="APPS" xml:space="preserve">
+        <value>Apps</value>
+    </data>
+    <data name="LOADING" xml:space="preserve">
+        <value>Cargando...</value>
+    </data>
+    <data name="INITIALIZING" xml:space="preserve">
+        <value>Inicializando</value>
+    </data>
+    <data name="CONNECTION_ESTABLISHED" xml:space="preserve">
+        <value>Conexión establecida</value>
+    </data>
+    <data name="WELCOME" xml:space="preserve">
+        <value>Bienvenido/a a {0}</value>
+    </data>
+    <data name="SET_UP" xml:space="preserve">
+        <value>Vamos a prepararlo todo</value>
+    </data>
+    <data name="ENTER_SERVER_URL" xml:space="preserve">
+        <value>Por favor, introduce la URL de tu servidor</value>
+    </data>
+    <data name="HTTPS_ONLY" xml:space="preserve">
+        <value>Solo se permite el protocolo HTTPS</value>
+    </data>
+    <data name="CONTINUE" xml:space="preserve">
+        <value>Continuar</value>
+    </data>
+    <data name="RETRY" xml:space="preserve">
+        <value>Reintentar</value>
+    </data>
+    <data name="Connection_failed" xml:space="preserve">
+        <value>Conexión fallida</value>
+    </data>
+    <data name="CHECK_THE_URL" xml:space="preserve">
+        <value>Por favor comprueba la URL y vuelve a intentarlo</value>
+    </data>
+    <data name="LANG_EN" xml:space="preserve">
+        <value>Inglés</value>
+    </data>
+    <data name="LANG_ES" xml:space="preserve">
+        <value>Español</value>
+    </data>
+    <data name="NO_BOOKS_FOUND" xml:space="preserve">
+        <value>Tu librería está vacía</value>
+    </data>
+    <data name="BOOKS_NO_FILTER_MATCH" xml:space="preserve">
+        <value>No se han encontrado libros con el filtro seleccionado</value>
+    </data>
+    <data name="NEW" xml:space="preserve">
+        <value>Nuevo</value>
+    </data>
+    <data name="OPEN" xml:space="preserve">
+        <value>Abrir</value>
+    </data>
+    <data name="INFO" xml:space="preserve">
+        <value>Info</value>
+    </data>
+    <data name="UNINSTALL" xml:space="preserve">
+        <value>Desinstalar</value>
+    </data>
+    <data name="ALL_M" xml:space="preserve">
+        <value>Todos</value>
+    </data>
+    <data name="BY_AUTHOR" xml:space="preserve">
+        <value>Por Autor</value>
+    </data>
+    <data name="BY_MISSING" xml:space="preserve">
+        <value>Por descargar</value>
+    </data>
+    <data name="DOWNLOAD" xml:space="preserve">
+        <value>Descargar</value>
+    </data>
+    <data name="DOWNLOADING" xml:space="preserve">
+        <value>Descargando...</value>
+    </data>
+    <data name="LOADING_BOOK" xml:space="preserve">
+        <value>Cargando tu libro...</value>
+    </data>
+    <data name="READING" xml:space="preserve">
+        <value>Leyendo</value>
+    </data>
+    <data name="SYNC_COMPLETED" xml:space="preserve">
+        <value>Sincronización completada</value>
+    </data>
+</root>

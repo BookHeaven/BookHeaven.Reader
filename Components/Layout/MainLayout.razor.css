@@ -1,0 +1,41 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+main {
+    flex: 1;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: stretch;
+    justify-content: center;
+    height: 60px;
+}
+
+nav ::deep a {
+    flex: 1;
+    text-align: center;
+    border-top: 2px solid lightgray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+nav ::deep a:nth-child(1) {
+    border-right: 2px solid lightgray;
+}
+
+nav ::deep a:nth-child(2) {
+    border-left: 2px solid lightgray;
+}
+
+nav ::deep a.active {
+    border: none;
+    border-top: 4px solid black;
+}

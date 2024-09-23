@@ -1,0 +1,36 @@
+﻿<div>
+    @clock
+</div>
+
+@using System.Timers
+@implements IDisposable
+
+@code {
+    string clock = DateTime.Now.ToString("HH:mm");
+    Timer clockTimer = new() { Interval = 1000 };
+
+
+    protected override void OnInitialized()
+    {
+        clockTimer.Elapsed += OnTimerTick;
+        clockTimer.Start();
+    }
+
+    private async Task UpdateClock()
+    {
+        clock = DateTime.Now.ToString("HH:mm");
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnTimerTick(object? sender, EventArgs e)
+    {
+        InvokeAsync(UpdateClock);
+    }
+
+    public void Dispose()
+    {
+        clockTimer.Stop();
+        clockTimer.Dispose();
+        GC.SuppressFinalize(this);
+    }
+}

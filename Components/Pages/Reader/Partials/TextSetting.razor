@@ -1,0 +1,10 @@
+﻿<span class="my-auto ms-3 text-nowrap">@Label</span>
+<div class="my-auto flex items-center">
+    <Button OnClick="@(() => AddAmount(-Increment))">
+        <i class="bi bi-dash text-xl"></i>
+    </Button>
+    <Progress Value="@(Math.Round((Value - Min) / (Max - Min) * 100))"/>
+    <Button OnClick="@(() => AddAmount(Increment))">
+        <i class="bi bi-plus text-xl"></i>
+    </Button>
+</div>

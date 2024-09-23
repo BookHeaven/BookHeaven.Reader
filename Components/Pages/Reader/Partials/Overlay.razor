@@ -1,0 +1,42 @@
+﻿@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<div class="z-[1000] absolute bottom-0 left-0 right-0 top-0 flex flex-col" @onclick="@(() => ShowOverlayChanged.InvokeAsync(false))">
+    <div class="border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white pr-2" @onclick:stopPropagation="true">
+        <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
+            <i class="bi bi-arrow-left text-xl"></i>
+        </Button>
+        <span class="ms-auto">@BookTitle</span>
+    </div>
+    @if (_overlayViewModel.ShowFontSettings)
+    {
+        <TextSettings ProfileSettings="ProfileSettings"/>
+    }
+    @if (_overlayViewModel.ShowPageSettings)
+    {
+        <PageSettings ProfileSettings="ProfileSettings"/>
+    }
+    <div id="bottombar" class="border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
+        <div class="flex items-center gap-3 px-2">
+            <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Previous))">
+                <i class="bi bi-chevron-double-left text-xl"></i>
+            </Button>
+            <Progress Value="@(Math.Round((double)(CurrentChapter ?? 1) / (TotalChapters ?? 1) * 100))"/>
+            <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Next))">
+                <i class="bi bi-chevron-double-right text-xl"></i>
+            </Button>
+        </div>
+        <div class="flex items-center gap-3 px-2">
+            <Button OnClick="@(() => ShowSpineChanged.InvokeAsync(!ShowSpine))">
+                <i class="bi bi-list-ol text-xl"></i>
+            </Button>
+            <span class="flex-1">@ChapterTitle</span>
+            <Button OnClick="@(() => _overlayViewModel.ShowFontSettings = !_overlayViewModel.ShowFontSettings)">
+                <i class="bi bi-type text-xl"></i>
+            </Button>
+            <Button OnClick="@(() => _overlayViewModel.ShowPageSettings = !_overlayViewModel.ShowPageSettings)">
+                <i class="bi bi-gear text-xl"></i>
+            </Button>
+        </div>
+    </div>
+</div>

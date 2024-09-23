@@ -1,0 +1,27 @@
+﻿#drawer {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: 1rem;
+    row-gap: 2rem;
+    padding: 2rem;
+    padding-top: 0;
+}
+
+.app {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.app img {
+    margin: 0 auto;
+    width: 64px;
+    height: auto;
+}
+
+.app div {
+    text-align: center;
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

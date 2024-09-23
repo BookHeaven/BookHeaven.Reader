@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="LOCAL" xml:space="preserve">
+        <value>Local</value>
+    </data>
+    <data name="REMOTE" xml:space="preserve">
+        <value>Remote</value>
+    </data>
+    <data name="SETTINGS" xml:space="preserve">
+        <value>Settings</value>
+    </data>
+    <data name="SYNC_PROGRESS" xml:space="preserve">
+        <value>Sync Progress</value>
+    </data>
+    <data name="BOOKS" xml:space="preserve">
+        <value>Books</value>
+    </data>
+    <data name="APPS" xml:space="preserve">
+        <value>Apps</value>
+    </data>
+    <data name="LOADING" xml:space="preserve">
+        <value>Loading...</value>
+    </data>
+    <data name="INITIALIZING" xml:space="preserve">
+        <value>Initializing</value>
+    </data>
+    <data name="CONNECTION_ESTABLISHED" xml:space="preserve">
+        <value>Connection established</value>
+    </data>
+    <data name="WELCOME" xml:space="preserve">
+        <value>Welcome to {0}</value>
+    </data>
+    <data name="SET_UP" xml:space="preserve">
+        <value>Let's set things up</value>
+    </data>
+    <data name="ENTER_SERVER_URL" xml:space="preserve">
+        <value>Please, enter your server's URL</value>
+    </data>
+    <data name="HTTPS_ONLY" xml:space="preserve">
+        <value>Only HTTPS protocol is supported</value>
+    </data>
+    <data name="CONTINUE" xml:space="preserve">
+        <value>Continue</value>
+    </data>
+    <data name="RETRY" xml:space="preserve">
+        <value>Retry</value>
+    </data>
+    <data name="Connection_failed" xml:space="preserve">
+        <value>Connection failed</value>
+    </data>
+    <data name="CHECK_THE_URL" xml:space="preserve">
+        <value>Please check the URL and try again</value>
+    </data>
+    <data name="LANG_EN" xml:space="preserve">
+        <value>English</value>
+    </data>
+    <data name="LANG_ES" xml:space="preserve">
+        <value>Spanish</value>
+    </data>
+    <data name="NO_BOOKS_FOUND" xml:space="preserve">
+        <value>No books found in your library</value>
+    </data>
+    <data name="BOOKS_NO_FILTER_MATCH" xml:space="preserve">
+        <value>No books matching the current filter</value>
+    </data>
+    <data name="NEW" xml:space="preserve">
+        <value>New</value>
+    </data>
+    <data name="OPEN" xml:space="preserve">
+        <value>Open</value>
+    </data>
+    <data name="INFO" xml:space="preserve">
+        <value>Info</value>
+    </data>
+    <data name="UNINSTALL" xml:space="preserve">
+        <value>Uninstall</value>
+    </data>
+    <data name="ALL_M" xml:space="preserve">
+        <value>All</value>
+    </data>
+    <data name="BY_AUTHOR" xml:space="preserve">
+        <value>By Author</value>
+    </data>
+    <data name="BY_MISSING" xml:space="preserve">
+        <value>Missing</value>
+    </data>
+    <data name="DOWNLOAD" xml:space="preserve">
+        <value>Download</value>
+    </data>
+    <data name="DOWNLOADING" xml:space="preserve">
+        <value>Downloading...</value>
+    </data>
+    <data name="LOADING_BOOK" xml:space="preserve">
+        <value>Loading your book...</value>
+    </data>
+    <data name="READING" xml:space="preserve">
+        <value>Reading</value>
+    </data>
+    <data name="SYNC_COMPLETED" xml:space="preserve">
+        <value>Sync completed</value>
+    </data>
+</root>

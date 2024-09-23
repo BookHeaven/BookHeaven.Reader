@@ -1,0 +1,32 @@
+﻿<button @attributes="@AdditionalAttributes" class="flex items-center justify-center rounded px-4 py-2 active:bg-black active:text-white @((Kind == ButtonType.Secondary).Then("bg-gray-600 text-white")) @(Class) @(Disabled.Then("bg-gray-300"))" @onclick="@(() => OnClick.InvokeAsync())" @onmousedown="@(() => OnMouseDown.InvokeAsync())" disabled="@Disabled">
+    @ChildContent
+</button>
+
+@code {
+
+    public enum ButtonType
+    {
+        Default,
+        Secondary
+    }
+    
+    [Parameter] public string? Id { get; set; }
+
+    [Parameter] public ButtonType Kind { get; set; } = ButtonType.Default;
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    [Parameter] public EventCallback OnMouseDown { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private Dictionary<string, object?> AdditionalAttributes => new()
+    {
+        { "id", !string.IsNullOrEmpty(Id) ? Id : null }
+    };
+
+}

@@ -1,0 +1,124 @@
+﻿@page "/reader/{id:guid}"
+@using System.Globalization
+@using BookHeaven.Reader.Components.Pages.Reader.Partials
+@layout EmptyLayout
+
+<!--suppress CssUnresolvedCustomProperty -->
+<style>
+	#viewer {
+		--chapter-page: @_readerViewModel.CurrentPage;
+		--font-size: @_profileSettings.FontSize;
+		--line-height: @_profileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
+		--letter-spacing: @_profileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+		--paragraph-spacing: @_profileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+		--text-indent: @_profileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
+		--word-spacing: @_profileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+		--margin-vertical: @_profileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+		--margin-horizontal: @_profileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+		--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
+		--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
+		--column-gap: 4px;
+		font-family: 'Bookerly', serif;
+		margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
+	}
+	body {
+		margin: 0 !important;
+		overflow: hidden;
+	}
+
+	#viewer > .chapter {
+			
+		height: var(--page-height);
+		column-width: var(--page-width);
+		font-size: calc(var(--font-size) * 1px) !important;
+		column-fill: auto;
+		column-gap: var(--column-gap);
+		padding: 0px 2px;
+	}
+	
+	#viewer > .chapter p:not([class]) {
+		margin: calc(var(--paragraph-spacing) * 1pt) 0;
+	}
+
+	#viewer > .chapter.current {
+		transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
+	}
+
+	#viewer > .chapter img, svg {
+		box-sizing: border-box;
+		object-fit: contain;
+		break-inside: avoid;
+		max-width: 100%;
+		max-height: var(--page-height);
+	}
+</style>
+@if (_styles?.Count > 0)
+{
+    @foreach (var style in _styles)
+    {
+        <style>@style</style>
+    }
+}
+
+@if (_bookLoading)
+{
+    <Message Content="@(Translations.LOADING_BOOK)"/>
+}
+@if (_readerViewModel.ShowOverlay)
+{
+    <Overlay
+        @bind-ShowOverlay="@_readerViewModel.ShowOverlay"
+        @bind-ShowSpine="@_readerViewModel.ShowSpine"
+        CurrentChapter="_readerViewModel.CurrentChapter"
+        TotalChapters="_epubBook?.Content.ReadingOrder.Count"
+        ProfileSettings="@_profileSettings"
+        BookTitle="@_book?.Title"
+        ChapterTitle="@_epubChapter?.Title"
+        SettingsChanged="@OnSettingsChanged"
+        GoToChapter="@OnGoToChapter"/>
+}
+
+@if (_readerViewModel.ShowSpine)
+{
+    <Spine
+        @bind-ShowSpine="@_readerViewModel.ShowSpine"
+        Index="@_epubBook?.Content.Spine"
+        ChapterPath="@_epubChapter?.Path"
+        OnChapterSelected="@OnChapterSelected"/>
+}
+
+@*<div id="navigation">
+    <span @onclick="@(() => ChangePage(NavigationButtons.Previous))"></span>
+    <span @onclick="@(() => { if (epubBook != null) _readerViewModel.ShowOverlay = !_readerViewModel.ShowOverlay; })"></span>
+    <span @onclick="@(() => ChangePage(NavigationButtons.Next))"></span>
+</div>*@
+@if (_profileSettings != null)
+{
+	<Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="_profileSettings"/>
+}
+<div class="flex h-screen flex-col">
+
+    <div id="viewer" class="flex-1 overflow-hidden">
+        <div class="chapter current">
+            @((MarkupString)_epubChapter?.Content!)
+        </div>
+        <div class="chapter prev invisible">
+            @((MarkupString)_epubChapterPrev?.Content!)
+        </div>
+        <div class="chapter next invisible">
+            @((MarkupString)_epubChapterNext?.Content!)
+        </div>
+    </div>
+
+    <div class="h-[24px] relative mt-auto flex gap-2 px-2">
+        @if (!_bookLoading)
+        {
+            <Clock/>
+            <BatteryInfo/>
+            <ChapterTitle Title="@_epubChapter?.Title" CurrentPage="_readerViewModel.CurrentPage" TotalPages="_readerViewModel.TotalPages"/>
+            <div class="ms-auto text-end">
+                @(Progress.ToString("0.00"))%
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,30 @@
+@using BookHeaven.Reader.Functions
+<div class="absolute w-screen h-screen z-[999] grid grid-cols-3">
+    @foreach(var button in _buttons)
+    {
+        <span @onclick="@(() => OnNavigationButtonClicked.InvokeAsync(button))"></span>
+    }
+    @*<span @onclick="@(() => ChangePage(NavigationButtons.Previous))"></span>
+    <span @onclick="@(() => { if (epubBook != null) _readerViewModel.ShowOverlay = !_readerViewModel.ShowOverlay; })"></span>
+    <span @onclick="@(() => ChangePage(NavigationButtons.Next))"></span>*@
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<NavigationButton> OnNavigationButtonClicked { get; set; }
+    
+    [Parameter]
+    public ProfileSettings? ProfileSettings { get; set; }
+    
+    private NavigationLayoutType SelectedLayout { get; set; }
+    
+    private List<NavigationButton> _buttons = [];
+    
+    protected override void OnParametersSet()
+    {
+        SelectedLayout = (NavigationLayoutType)ProfileSettings!.SelectedLayout;
+
+        _buttons = ReaderNavigation.GetLayoutForType(SelectedLayout);
+    }
+
+}

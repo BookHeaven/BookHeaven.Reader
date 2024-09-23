@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+@inject NavigationManager NavigationManager
+
+<SectionContent SectionName="Header">
+    <Header>
+        <nav class="flex h-full flex-row items-stretch justify-center">
+            <NavLink href="/books" ActiveClass="active" Match="NavLinkMatch.All">
+                <span class="flex items-center"><i class="bi bi-tablet me-2 text-xl"></i> @Translations.LOCAL</span>
+            </NavLink>
+            <NavLink href="/books/remote" ActiveClass="active" Match="NavLinkMatch.All">
+                <span class="flex items-center"><i class="bi bi-cloud me-2 text-xl"></i> @Translations.REMOTE</span>
+            </NavLink>
+        </nav>
+        <div class="ms-auto flex">
+            <div class="relative inline-block" @onfocusout="@CloseDropdownMenu">
+                <Button OnClick="@ToggleDropdownMenu">
+                    <i class="bi bi-three-dots-vertical"></i>
+                </Button>
+                <div class="@(_showDropdownMenu ? "block" : "hidden") fs-6 border-2 absolute right-0 flex flex-col bg-white">
+                    <Button OnMouseDown="@(() => NavigationManager.NavigateTo("/settings"))">@Translations.SETTINGS</Button>
+                    <Button Class="text-nowrap" OnMouseDown="@SyncProgress">@Translations.SYNC_PROGRESS</Button>
+                </div>
+            </div>
+        </div>
+    </Header>
+</SectionContent>
+@Body

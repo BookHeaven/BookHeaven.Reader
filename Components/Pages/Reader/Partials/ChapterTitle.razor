@@ -1,0 +1,27 @@
+﻿<div class="absolute left-0 right-0 flex justify-center">
+    @if (Title?.Length > MaxCharacters)
+    {
+        var maxWidth = (Title.Length - MaxCharacters) / 2;
+
+        var left = Title.Substring(0, Title.Length / 2 - maxWidth).Trim();
+        var right = Title.Substring(Title.Length / 2 + maxWidth).Trim();
+        <span class="flex">
+            <span class="inline-block">@left...</span>
+            <span class="inline-block text-right">@right</span>
+        </span>
+    }
+    else
+    {
+        <span>@Title</span>
+    }
+    <span class="ms-1">(@(CurrentPage + 1) / @(TotalPages + 1))</span>
+
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public int? CurrentPage { get; set; }
+    [Parameter] public int? TotalPages { get; set; }
+
+    public int MaxCharacters { get; set; } = 40;
+}

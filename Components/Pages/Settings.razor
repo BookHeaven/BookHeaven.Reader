@@ -1,0 +1,37 @@
+﻿@page "/settings"
+@layout EmptyLayout
+@inject NavigationManager NavigationManager
+
+<Header>
+    <div>
+        <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
+            <i class="bi bi-arrow-left"></i>
+        </Button>
+    </div>
+    @*<div class="ms-auto">
+        <Button OnClick="Save">
+            <i class="bi bi-floppy"></i>
+        </Button>
+    </div>*@
+</Header>
+<main class="p-4">
+    <div class="mb-3 flex flex-col">
+        <label for="server-url" class="form-label">Server URL:</label>
+        <input type="text" class="border-2 w-full rounded border-gray-400 p-2.5 focus:ring-black-500" id="server-url" @bind-value="AppStateService.ServerUrl">
+    </div>
+</main>
+
+@code{
+    [Inject] AppStateService AppStateService { get; set; } = null!;
+
+    /*private async Task Save()
+    {
+        if (!string.IsNullOrEmpty(LocalSettings.ServerURL) && !LocalSettings.ServerURL.StartsWith("https://"))
+        {
+            LocalSettings.ServerURL = "https://" + LocalSettings.ServerURL;
+        }
+
+        await DatabaseService.Save(LocalSettings);
+    }*/
+
+}

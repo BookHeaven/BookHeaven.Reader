@@ -1,0 +1,6 @@
+﻿header {
+    border-bottom: 1px solid black;
+    height: 40px;
+    position: relative;
+    z-index: 10;
+}

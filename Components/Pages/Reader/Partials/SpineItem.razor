@@ -1,0 +1,27 @@
+﻿@if (EpubChapter.Title != null)
+{
+    <span id="@EpubChapter.Path" class="flex items-center scroll-mt-40">
+        @if (EpubChapter.Chapters?.Count > 0)
+        {
+            <Button OnClick="ToggleCollapse">
+                <i class="bi @(_collapsed ? "bi-chevron-right" : "bi-chevron-down")"></i>
+            </Button>
+        }
+        <Button Class="@(_isSelected.Then("font-bold") + " text-left")" OnClick="() => { if (EpubChapter.Path != null) OnChapterSelected.InvokeAsync(EpubChapter.Path); }">@EpubChapter.Title</Button>
+    </span>
+}
+
+@if (EpubChapter.Chapters?.Count > 0)
+{
+    @if (!_collapsed || EpubChapter.Title == null)
+    {
+        <ul class="ms-5">
+            @foreach (var chapter in EpubChapter.Chapters)
+            {
+                <li>
+                    <SpineItem EpubChapter="chapter" CurrentChapterPath="@CurrentChapterPath" OnChapterSelected="@OnChapterSelected" DoScroll="@DoScroll"/>
+                </li>
+            }
+        </ul>
+    }
+}

@@ -1,0 +1,12 @@
+﻿<div class="settings border-t-2 border-black bg-white" @onclick:stopPropagation="true">
+    <TextSetting Label="Font Size" Min="10" Max="32" @bind-Value="ProfileSettings.FontSize"/>
+    @* <TextSetting Label="Letter Spacing" Min="0" Max="2" Increment="0.1" @bind-Value="ProfileSettings.LetterSpacing" /> *@
+    @* <TextSetting Label="Word Spacing" Min="0" Max="5" Increment="0.25" @bind-Value="ProfileSettings.WordSpacing" /> *@
+    <TextSetting Label="Line Height" Min="-0.5" Max="1" Increment="0.1" @bind-Value="ProfileSettings.LineHeight"/>
+    <TextSetting Label="Text Indent" Min="0" Max="3" Increment="0.5" @bind-Value="ProfileSettings.TextIndent"/>
+    <TextSetting Label="Paragraph Spacing" Min="0" Max="20" Increment="2" @bind-Value="ProfileSettings.ParagraphSpacing"/>
+</div>
+
+@code {
+    [Parameter] public ProfileSettings ProfileSettings { get; set; } = null!;
+}
