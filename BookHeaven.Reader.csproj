@@ -49,27 +49,27 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
       <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
-      <ApplicationTitle>MyBookHeaven</ApplicationTitle>
+      <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows10.0.19041.0|AnyCPU'">
       <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
-      <ApplicationTitle>MyBookHeaven</ApplicationTitle>
+      <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
       <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
-      <ApplicationTitle>MyBookHeaven</ApplicationTitle>
+      <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">
       <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
-      <ApplicationTitle>MyBookHeaven</ApplicationTitle>
+      <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android34.0|AnyCPU'">
       <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
-      <ApplicationTitle>MyBookHeaven</ApplicationTitle>
+      <ApplicationTitle>BookHeaven</ApplicationTitle>
       <AndroidKeyStore>False</AndroidKeyStore>
     </PropertyGroup>
 

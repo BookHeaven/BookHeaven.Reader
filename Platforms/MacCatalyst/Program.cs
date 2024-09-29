@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace MyBookHeaven.Reader
+namespace BookHeaven.Reader
 {
 	public class Program
 	{

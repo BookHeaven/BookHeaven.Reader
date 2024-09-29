@@ -16,7 +16,7 @@
         }
         else
         {
-            <h1 class="mt-10 text-xl">@string.Format(Translations.WELCOME, "MyBookHeaven")</h1>
+            <h1 class="mt-10 text-xl">@string.Format(Translations.WELCOME, "BookHeaven")</h1>
             <p class="mt-2">@Translations.SET_UP</p>
             <p class="mt-10">@Translations.ENTER_SERVER_URL</p>
             <input type="text" class="border-2 mt-2 w-full rounded border-gray-400 p-2.5 focus:ring-black-500" placeholder="https://yourbookheaven.com" @bind="AppStateService.ServerUrl"/>
@@ -72,7 +72,7 @@
             NavigationManager.NavigateTo("/books");
             return;
         }
-        AppStateService.ServerUrl = "https://mybookheaven.ggarrido.dev";
+        AppStateService.ServerUrl = "https://bookheaven.ggarrido.dev";
         _initialized = true;
     }
 

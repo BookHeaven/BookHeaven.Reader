@@ -1,11 +1,11 @@
-﻿using MyBookHeaven.Reader.Interfaces;
+﻿using BookHeaven.Reader.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyBookHeaven.Reader.Platforms.Services
+namespace BookHeaven.Reader.Platforms.Services
 {
 	public class AppsService : IAppsService
 	{

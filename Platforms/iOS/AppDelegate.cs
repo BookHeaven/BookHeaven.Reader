@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace MyBookHeaven.Reader
+namespace BookHeaven.Reader
 {
 	[Register("AppDelegate")]
 	public class AppDelegate : MauiUIApplicationDelegate
