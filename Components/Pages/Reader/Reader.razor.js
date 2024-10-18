@@ -27,3 +27,7 @@ export async function GetPageCount() {
 
     return [pagesPrev, pages, pagesNext];
 }
+
+export function Dispose() {
+    window.removeEventListener('keydown', keyDownHandler);
+}

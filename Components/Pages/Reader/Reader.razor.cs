@@ -9,6 +9,9 @@ using BookHeaven.Reader.ViewModels;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Enums;
+#if ANDROID
+using Android.Views;
+#endif
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
@@ -20,13 +23,14 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
-    
+
     private readonly ReaderViewModel _readerViewModel = new();
 
     private DateTime _entryTime;
     private DateTime _exitTime;
     private bool _isSuspended;
 
+    private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference _module = null!;
     private ProfileSettings? _profileSettings;
     private DateTime _suspendStartTime;
@@ -59,11 +63,15 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Paused -= OnPaused;
         LifeCycleService.Destroyed -= OnDestroy;
         await SaveState();
-        await _module.DisposeAsync();
+        if(_module is not null)
+        {
+            await _module.InvokeVoidAsync("Dispose");
+            await _module.DisposeAsync();
+        }
+        _dotNetReference.Dispose();
 #if ANDROID
-            var activity = Platform.CurrentActivity!;
-            var flags = Android.Views.WindowManagerFlags.Fullscreen;
-            activity.Window?.ClearFlags(flags);
+        var activity = Platform.CurrentActivity!;
+        activity.Window?.ClearFlags(WindowManagerFlags.Fullscreen);
 #endif
         GC.SuppressFinalize(this);
     }
@@ -72,8 +80,7 @@ public partial class Reader : IAsyncDisposable
     {
 #if ANDROID
             var activity = Platform.CurrentActivity!;
-            var flags = Android.Views.WindowManagerFlags.Fullscreen;
-            activity.Window?.AddFlags(flags);
+            activity.Window?.AddFlags(WindowManagerFlags.Fullscreen);
 #endif
 
         var bookTask = DatabaseService.Get<Book>(Id);
@@ -91,7 +98,8 @@ public partial class Reader : IAsyncDisposable
 
         _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
             "./Components/Pages/Reader/Reader.razor.js");
-        await _module.InvokeVoidAsync("SetDotNetReference", DotNetObjectReference.Create(this));
+        _dotNetReference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
 
         _readerViewModel.PropertyChanged += ViewModel_PropertyChanged;
 

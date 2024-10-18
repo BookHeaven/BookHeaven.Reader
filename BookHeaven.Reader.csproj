@@ -107,13 +107,13 @@
 
     <ItemGroup>
         <PackageReference Include="Blazor.ContextMenu" Version="2.1.0" />
-        <PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="9.1.0" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.90" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-        <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
-        <PackageReference Include="System.Text.Json" Version="8.0.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="8.0.91" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
+        <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
+        <PackageReference Include="System.Text.Json" Version="8.0.5" />
     </ItemGroup>
 
     <ItemGroup>
@@ -138,11 +138,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.90" />
+      <PackageReference Update="Microsoft.Maui.Controls" Version="8.0.91" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.90" />
+      <PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.91" />
     </ItemGroup>
 
     <ItemGroup>
