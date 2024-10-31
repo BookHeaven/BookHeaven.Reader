@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="npm run buildcss" />
-	</Target>
-
 	<PropertyGroup>
-        <TargetFrameworks>net8.0-android34.0</TargetFrameworks>
+        <TargetFrameworks>net8.0-android</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
@@ -45,25 +41,26 @@
         <IsPackable>false</IsPackable>
         <NeutralLanguage>en</NeutralLanguage>
 		<WindowsSdkPackageVersion>10.0.19041.38</WindowsSdkPackageVersion>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
-      <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
+      <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
       <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows10.0.19041.0|AnyCPU'">
-      <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
+      <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
       <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
-      <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
+      <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
       <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows10.0.19041.0|AnyCPU'">
-      <ApplicationId>com.ggarrido.bookheaven</ApplicationId>
+      <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
       <ApplicationTitle>BookHeaven</ApplicationTitle>
     </PropertyGroup>
 
@@ -154,5 +151,9 @@
         <Generator>PublicResXFileCodeGenerator</Generator>
       </EmbeddedResource>
     </ItemGroup>
+
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+      <Exec Command="npm run buildcss" />
+    </Target>
 
 </Project>
