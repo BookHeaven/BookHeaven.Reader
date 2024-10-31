@@ -123,8 +123,6 @@ namespace BookHeaven.Reader.Services
 				if(await databaseService.Get<Book>(book.BookId) != null)
 				{
 					//If the book is already downloaded, we remove the local cache
-					//File.Delete(Path.Combine(MauiProgram.CachePath, $"{book.BookId}-progress.cache"));
-					//File.Delete(Path.Combine(MauiProgram.CachePath, $"{book.BookId}-styles.cache"));
 					Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
 				}
 
