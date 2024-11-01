@@ -152,6 +152,10 @@
       </EmbeddedResource>
     </ItemGroup>
 
+    <PropertyGroup>
+        <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    </PropertyGroup>
+
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
       <Exec Command="npm run buildcss" />
     </Target>
