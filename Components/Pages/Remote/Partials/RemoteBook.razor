@@ -1,16 +1,16 @@
 ﻿<div class="flex bg-white">
-    <img src="@(_serverUrl + Book.CoverUrl)" class="w-[100px]"/>
+    <img src="@(_serverUrl + Book.CoverUrl)" class="w-[100px]" alt=""/>
     <div class="flex w-full flex-col justify-between">
-        <div class="flex flex-col py-2 ps-3">
-            <h4>@Book.Title</h4>
+        <div class="flex flex-col py-2 ps-3 gap-2">
+            <p class="font-bold text-sm text-balance">@Book.Title</p>
             @if (Book.Series != null)
             {
-                <span>@Book.Series?.Name - #@Book.SeriesIndex</span>
+                <p class="text-xs">@Book.Series?.Name - #@Book.SeriesIndex</p>
             }
-            <span>@Book.Author?.Name</span>
+            <p class="text-xs">@Book.Author?.Name</p>
         </div>
         <div class="flex justify-end">
-            <Button OnClick="@(() => Download(Book))" Disabled="@Downloading">
+            <Button OnClick="@(() => Download(Book))" Disabled="@Downloading" Class="text-xs">
 
                 @if (Downloading)
                 {

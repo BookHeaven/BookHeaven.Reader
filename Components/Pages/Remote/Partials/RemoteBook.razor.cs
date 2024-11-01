@@ -9,6 +9,9 @@ public partial class RemoteBook
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Parameter] public IServerService ServerService { get; set; } = null!;
     [Parameter] public Book Book { get; set; } = null!;
+    
+    [Parameter] public EventCallback OnBookDownloaded { get; set; }
+    
     private string _serverUrl = null!;
     private bool Downloading { get; set; }
 
@@ -22,5 +25,6 @@ public partial class RemoteBook
         Downloading = true;
         await ServerService.Download(book, AppStateService.ProfileId);
         Downloading = false;
+        await OnBookDownloaded.InvokeAsync();
     }
 }

@@ -7,45 +7,60 @@
     <Message Content="@Translations.Connection_failed" ExtraInfo="@_serverUrl" ButtonText="@Translations.RETRY" OnButtonClick="@OnButtonClick"/>
     return;
 }
-
-<div id="filters" class="my-2 ms-3">
-    <div class="flex items-center gap-3">
-        <div class="col-auto">
-            <select @bind="@_selectedFilter" @bind:after="FilterChanged" class="form-select">
-                <option value="@Filters.All" selected>@Translations.ALL_M</option>
-                <option value="@Filters.Author">@Translations.BY_AUTHOR</option>
-                <option value="@Filters.Missing">@Translations.BY_MISSING</option>
-            </select>
-        </div>
-        @if (_selectedFilter == Filters.Author && _authors is { Count: > 0 })
-        {
+<div class="flex flex-col h-full">
+    <div class="my-2 ms-3">
+        <div class="flex items-center gap-3">
             <div class="col-auto">
-                <select @bind="@_selectedAuthor" @bind:after="FilterChanged" class="form-select">
-                    @foreach (var author in _authors!)
-                    {
-                        <option value="@author.AuthorId">@author.Name</option>
-                    }
+                <select @bind="@_selectedFilter" @bind:after="FilterChanged" class="form-select">
+                    <option value="@Filters.All" selected>@Translations.ALL_M</option>
+                    <option value="@Filters.Author">@Translations.BY_AUTHOR</option>
+                    <option value="@Filters.Missing">@Translations.BY_MISSING</option>
                 </select>
             </div>
-        }
-
+            @if (_selectedFilter == Filters.Author && _authors is { Count: > 0 })
+            {
+                <div class="col-auto">
+                    <select @bind="@_selectedAuthor" @bind:after="FilterChanged" class="form-select">
+                        @foreach (var author in _authors!)
+                        {
+                            <option value="@author.AuthorId">@author.Name</option>
+                        }
+                    </select>
+                </div>
+            }
+        </div>
     </div>
-</div>
-@if (_filteredBooks == null)
-{
-    <Message Content="@Translations.LOADING"/>
-    return;
-}
-
-@if (_filteredBooks.Count == 0)
-{
-    <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
-    return;
-}
-
-<div class="grid gap-1 bg-[lightgray]">
-    @foreach (var book in _filteredBooks)
+    <div class="flex-1 overflow-hidden">
+        @if (_filteredBooks == null)
+        {
+            <Message Content="@Translations.LOADING"/>
+        }
+        else if (_filteredBooks.Count == 0)
+        {
+            <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
+        }
+        else
+        {
+            <div class="grid grid-cols-2 grid-rows-3 gap-2 p-2 bg-[lightgray] h-full">
+                @foreach (var book in _currentPageBooks ?? [])
+                {
+                    <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="FilterBooks"/>
+                }
+            </div>
+        }
+    </div>
+    @if (_filteredBooks != null)
     {
-        <RemoteBook Book="@book" ServerService="@ServerService"/>
+        <div class="flex justify-center py-1">
+            <Pagination
+                ItemCount="@_filteredBooks?.Count"
+                ItemsPerPage="ItemsPerPage"
+                @bind-CurrentPage="_currentPage"
+                @bind-CurrentPage:after="UpdateCurrentPageBooks" />
+        </div>
+        
     }
+   
 </div>
+
+
