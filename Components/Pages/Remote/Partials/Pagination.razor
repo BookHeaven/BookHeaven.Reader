@@ -1,0 +1,84 @@
+﻿@implements IAsyncDisposable
+<div class="flex gap-5 items-center">
+	<button class="py-1 px-3 active:bg-black active:text-white rounded-xl" disabled="@(CurrentPage == 1)" @onclick="() => ChangePage(Direction.Previous)">
+		<i class="bi bi-chevron-left"></i>
+	</button>
+	<p>Page @CurrentPage of @TotalPages</p>
+	<button class="py-1 px-3 active:bg-black active:text-white rounded-xl" disabled="@(CurrentPage == TotalPages)" @onclick="() => ChangePage(Direction.Next)">
+		<i class="bi bi-chevron-right"></i>
+	</button>
+</div>
+
+@code {
+	[Inject] private IJSRuntime JsRuntime { get; set; } = null!;
+	
+	[Parameter] public int ItemsPerPage { get; set; }
+	[Parameter] public int? ItemCount { get; set; }
+	
+	[Parameter] public int CurrentPage { get; set; }
+	[Parameter] public EventCallback<int> CurrentPageChanged { get; set; }
+	
+	private DotNetObjectReference<Pagination> _dotNetReference = null!;
+	private IJSObjectReference? _module = null!;
+	
+	private int TotalPages => (int)Math.Ceiling(decimal.Divide(ItemCount ?? 1, ItemsPerPage));
+
+	private enum Direction
+	{
+		Previous,
+		Next
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			_dotNetReference = DotNetObjectReference.Create(this);
+			_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Remote/Partials/Pagination.razor.js");
+			await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
+		}
+	}
+
+	private void ChangePage(Direction direction)
+	{
+		if (direction == Direction.Previous)
+		{
+			if (CurrentPage > 1)
+			{
+				CurrentPage--;
+			}
+		}
+		else
+		{
+			if (CurrentPage < TotalPages)
+			{
+				CurrentPage++;
+			}
+		}
+		CurrentPageChanged.InvokeAsync(CurrentPage);
+	}
+	
+	[JSInvokable("OnKeyDown")]
+	public void OnKeyDown(string key)
+	{
+		switch (key)
+		{
+			case "PageDown":
+				ChangePage(Direction.Next);
+				break;
+			case "PageUp":
+				ChangePage(Direction.Previous);
+				break;
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_module is not null)
+		{
+			await _module.DisposeAsync();
+			_dotNetReference.Dispose();
+		}
+	}
+
+}
