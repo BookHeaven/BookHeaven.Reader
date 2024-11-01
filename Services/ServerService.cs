@@ -147,7 +147,7 @@ namespace BookHeaven.Reader.Services
 				await databaseService.AddOrUpdate(localBook);
 				await databaseService.SaveChanges();
 
-				await DownloadFile(localBook.BookUrl, localBook.BookId);
+				await DownloadFile(localBook.EpubUrl, localBook.BookId);
 				await DownloadFile(localBook.CoverUrl, localBook.BookId);
 
 				var localProgress = await databaseService.GetBy<BookProgress>(p => p.ProfileId == profileId && p.BookId == localBook.BookId);
