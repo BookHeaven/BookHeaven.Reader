@@ -110,4 +110,28 @@
     <data name="SYNC_COMPLETED" xml:space="preserve">
         <value>Sincronización completada</value>
     </data>
+    <data name="IN_PROGRESS" xml:space="preserve">
+        <value>En Progreso</value>
+    </data>
+    <data name="FINISHED" xml:space="preserve">
+        <value>Finalizado</value>
+    </data>
+    <data name="START_DATE" xml:space="preserve">
+        <value>Fecha Inicio</value>
+    </data>
+    <data name="END_DATE" xml:space="preserve">
+        <value>Fecha Fin</value>
+    </data>
+    <data name="PROGRESS" xml:space="preserve">
+        <value>Progreso</value>
+    </data>
+    <data name="READ_TIME" xml:space="preserve">
+        <value>Tiempo</value>
+    </data>
+    <data name="DETAILS" xml:space="preserve">
+        <value>Detalles</value>
+    </data>
+    <data name="STATS" xml:space="preserve">
+        <value>Estadísticas</value>
+    </data>
 </root>
