@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Components;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Resources.Localization;
 using BookHeaven.Reader.Services;
+using Microsoft.AspNetCore.Components;
 
-namespace BookHeaven.Reader.Components.Pages;
+namespace BookHeaven.Reader.Components.Pages.Books;
 
 public partial class Books
 {
@@ -22,7 +22,9 @@ public partial class Books
     
     private List<Book> _books = [];
     private List<Book> _filteredBooks = [];
-    private Filter _selectedFilter = Filter.Reading;
+    private Filter _selectedFilter;
+    
+    private Book? _selectedBook;
     
 
     protected override async Task OnInitializedAsync()
@@ -31,16 +33,15 @@ public partial class Books
         _books = (await DatabaseService.GetAllIncluding<Book>(b => b.Author, b => b.Series,
                 b => b.Progresses.Where(p => p.ProfileId == AppStateService.ProfileId)))
             ?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList()!;
-        FilterBooks(_selectedFilter);
+        _selectedFilter = _books.AnyReading() ? Filter.Reading : Filter.All;
+        FilterBooks();
     }
 
-    private void FilterBooks(Filter filter)
+    private void FilterBooks()
     {
-        _selectedFilter = filter;
         _filteredBooks = _selectedFilter switch
         {
-            Filter.Reading => _books.Where(b => b.Progresses.Any(x => x.ElapsedTime != TimeSpan.Zero && x.EndDate == null))
-                .ToList(),
+            Filter.Reading => _books.GetReadingBooks(),
             Filter.All => _books.ToList(),
             _ => _filteredBooks
         };

@@ -1,0 +1,56 @@
+﻿@page "/books"
+@using BookHeaven.Reader.Extensions
+@using BookHeaven.Reader.Components.Pages.Books.Components
+@layout BooksLayout
+
+@if (_books.Count == 0)
+{
+    <Message Content="@Translations.NO_BOOKS_FOUND"/>
+    return;
+}
+
+<BookInfo @bind-Book="_selectedBook"></BookInfo>
+
+<ContextMenu Id="BookMenu" Context="context" Animation="Animation.Grow" OverrideDefaultCssClass="absolute border bg-white">
+    @{
+        var book = (Book)context.Data;
+    }
+    <Item OverrideDefaultCssClass="p-2">@book.Title</Item>
+    <Item OnClick="@(() => _selectedBook = book)"><i class="bi bi-info-circle me-5"></i>@Translations.INFO</Item>
+</ContextMenu>
+
+<RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" @bind-SelectedOption:after="FilterBooks" />
+
+<div class="p-3 grid grid-cols-[repeat(auto-fill,120px)] gap-2 justify-evenly">
+    @if (_filteredBooks.Count == 0)
+    {
+        <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
+    }
+    else
+    {
+        @foreach (var book in _filteredBooks)
+        {
+            <ContextMenuTrigger MenuId="BookMenu" Data="@book">
+                <a class="flex flex-col items-center" href="/reader/@book.BookId">
+                    <div class="cover h-[190px] relative w-full">
+                        <img class="h-full w-full" src="@book.CoverUrl" alt=""/>
+                        <span class="progress-badge -top-[1px] w-[40%] absolute right-0 font-bold">
+                        <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
+                            @if (book.IsStartedReading())
+                            {
+                                <span>@book.Progresses.First().Progress.ToString("0.##")%</span>
+                            }
+                            else
+                            {
+                                <span>@Translations.NEW</span>
+                            }
+                    </span>
+
+                    </div>
+                    <div class="text-xs">@book.Title</div>
+                </a>
+            </ContextMenuTrigger>
+        }
+    }
+
+</div>

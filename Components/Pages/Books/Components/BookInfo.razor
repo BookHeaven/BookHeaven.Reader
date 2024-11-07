@@ -1,0 +1,75 @@
+﻿@using BookHeaven.Reader.Extensions
+@if (Book == null)
+{
+	return;
+}
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+	<div class="w-[90%] h-[95%] overflow-hidden bg-white border-2 border-gray-700 p-5">
+		<div class="flex mb-2 items-center">
+			<button class="ms-auto" @onclick="(() => BookChanged.InvokeAsync(null))">
+				<i class="bi bi-x-lg text-2xl"></i>
+			</button>
+		</div>
+		<div class="grid grid-cols-[150px_1fr] gap-5 items-start">
+			<div class="grid gap-2">
+				<img src="@Book.CoverUrl" class="block w-full" alt=""/>
+				<span class="bg-gray-600 text-white px-2 py-1 text-xs text-center">
+					@if (Book.IsStartedReading())
+					{
+						@Translations.IN_PROGRESS
+					}
+					else if (Book.IsFinishedReading())
+					{
+						@Translations.FINISHED
+					}
+					else
+					{
+						@Translations.NEW
+					}
+				</span>
+			</div>
+			<div>
+				<hr />
+				<p class="my-1 font-bold">@Translations.DETAILS</p>
+				<hr class="mb-2"/>
+				<p class="text-xl">@Book.Title</p>
+				@if (Book.Series != null)
+				{
+					<p>@Book.Series.Name</p>
+				}
+				<p>@Book.Author?.Name</p>
+				@if (Book.IsStartedReading())
+				{
+					<hr class="mt-4"/>
+					<p class="my-1 font-bold">@Translations.STATS</p>
+					<hr class="mb-2"/>
+					var progress = Book.Progresses.First();
+					<div class="grid gap-1 grid-cols-2">
+						<span>@Translations.START_DATE</span>
+						<span>@progress.StartDate?.ToString("d")</span>
+						<span>@Translations.END_DATE</span>
+						<span>@progress.EndDate?.ToString("d")</span>
+						<span>@Translations.PROGRESS</span>
+						<span>@progress.Progress.ToString("0.#")%</span>
+						<span>@Translations.READ_TIME</span>
+						<span>@progress.ElapsedTimeFormatted</span>
+					</div>
+				}
+			</div>
+			@if (!string.IsNullOrEmpty(Book.Description))
+			{
+				
+				<div class="col-span-2">
+					<hr/>
+					<p class="text-xs mt-2">@Book.Description</p>
+				</div>
+			}
+			
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter] public Book? Book { get; set; }
+	[Parameter] public EventCallback<Book?> BookChanged { get; set; }
+}
