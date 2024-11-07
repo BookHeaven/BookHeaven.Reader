@@ -1,31 +1,28 @@
 ﻿@using BookHeaven.Reader.Extensions
-@typeparam TOptions where TOptions : Enum
+@typeparam TOption where TOption : Enum
 
 <div class="flex w-fit overflow-hidden rounded border border-black @(Class)">
     @foreach (var option in _options)
     {
-        <button class="px-4 py-2 @((_options.IndexOf(option) > 0).Then("border-l border-black")) @(_selectedOption?.Equals(option).Then("bg-black text-white"))" @onclick="() => Select(option)">@(option.StringValue())</button>
+        <button class="px-4 py-2 @((_options.IndexOf(option) > 0).Then("border-l border-black")) @(SelectedOption.Equals(option).Then("bg-black text-white"))" @onclick="() => Select(option)">@(option.StringValue())</button>
     }
 </div>
 
 @code {
     [Parameter] public string? Class { get; set; }
+    [Parameter] public required TOption SelectedOption { get; set; }
+    [Parameter] public EventCallback<TOption> SelectedOptionChanged { get; set; }
 
-    [Parameter] public EventCallback<TOptions> OnChange { get; set; }
-
-    private List<TOptions> _options = null!;
+    private List<TOption> _options = null!;
 
     protected override void OnInitialized()
     {
-        _options = Enum.GetValues(typeof(TOptions)).Cast<TOptions>().ToList();
+        _options = Enum.GetValues(typeof(TOption)).Cast<TOption>().ToList();
     }
 
-    private TOptions? _selectedOption;
-
-    private void Select(TOptions option)
+    private void Select(TOption option)
     {
-        _selectedOption = option;
-        OnChange.InvokeAsync(option);
+        SelectedOptionChanged.InvokeAsync(option);
     }
 
 }

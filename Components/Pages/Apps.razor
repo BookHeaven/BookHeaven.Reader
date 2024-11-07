@@ -3,7 +3,7 @@
 @inject IAppsService AppsService
 
 <SectionContent SectionName="Header">
-    <RadioButtonGroup Class="m-3" TOptions="@Sorting" OnChange="Sort"/>
+    <RadioButtonGroup Class="m-3" TOption="@Sorting" OnChange="Sort"/>
 </SectionContent>
 
 @if (_apps.Count > 0)
