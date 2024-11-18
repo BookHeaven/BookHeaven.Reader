@@ -24,12 +24,9 @@ public partial class Remote
     private List<Book>? _currentPageBooks;
     private Guid? _selectedAuthor;
     private Filters _selectedFilter = Filters.All;
-    private string? _serverUrl;
 
     protected override async Task OnInitializedAsync()
     {
-        _serverUrl = AppStateService.ServerUrl;
-
         await GetData();
     }
 

@@ -4,7 +4,7 @@
 
 @if (!_canConnect)
 {
-    <Message Content="@Translations.Connection_failed" ExtraInfo="@_serverUrl" ButtonText="@Translations.RETRY" OnButtonClick="@OnButtonClick"/>
+    <Message Content="@Translations.Connection_failed" ExtraInfo="@AppStateService.ServerUrl" ButtonText="@Translations.RETRY" OnButtonClick="@OnButtonClick"/>
     return;
 }
 <div class="flex flex-col h-full bg-[lightgray]">
