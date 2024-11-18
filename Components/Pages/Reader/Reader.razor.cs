@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.IO.Enumeration;
 using System.Text.Json;
 using EpubManager;
 using EpubManager.Entities;
@@ -179,14 +178,22 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadFromCache()
     {
-        _styles = await LoadFromCache<IReadOnlyList<string>>("styles");
-        var chapters = await LoadFromCache<List<EpubChapter?>>("progress");
-        if (chapters != null)
+        try
         {
-            _epubChapter = chapters[0]!;
-            _epubChapterPrev = chapters[1];
-            _epubChapterNext = chapters[2];
+            _styles = await LoadFromCache<IReadOnlyList<Style>>("styles");
+            var chapters = await LoadFromCache<List<EpubChapter?>>("progress");
+            if (chapters != null)
+            {
+                _epubChapter = chapters[0]!;
+                _epubChapterPrev = chapters[1];
+                _epubChapterNext = chapters[2];
+            }
         }
+        catch (Exception e)
+        {
+            await Toast.Make("Error loading cache").Show();
+        }
+        
     }
 
     private async Task UpdateChapterCache()
