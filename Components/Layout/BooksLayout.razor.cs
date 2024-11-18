@@ -8,28 +8,12 @@ namespace BookHeaven.Reader.Components.Layout;
 
 public partial class BooksLayout
 {
-    private bool _buttonPressed;
-
-    private bool _showDropdownMenu;
-    
-    [Inject] AppStateService AppStateService { get; set; } = null!;
+    [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private IServerService ServerService { get; set; } = null!;
-
-    private void ToggleDropdownMenu()
-    {
-        _buttonPressed = true;
-        _showDropdownMenu = !_showDropdownMenu;
-    }
-
-    private void CloseDropdownMenu()
-    {
-        if (_buttonPressed) _showDropdownMenu = false;
-        _buttonPressed = false;
-    }
 
     private async Task SyncProgress()
     {
-        if (!await ServerService.CanConnect(AppStateService.ServerUrl))
+        if (!await ServerService.CanConnect())
         {
             await Toast.Make(Translations.Connection_failed, ToastDuration.Long).Show();
             return;

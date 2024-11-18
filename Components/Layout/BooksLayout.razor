@@ -1,7 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @layout MainLayout
 @inject NavigationManager NavigationManager
-
 <SectionContent SectionName="Header">
     <Header>
         <nav class="flex h-full flex-row items-stretch justify-center">
@@ -13,14 +12,16 @@
             </NavLink>
         </nav>
         <div class="ms-auto flex">
-            <div class="relative inline-block" @onfocusout="@CloseDropdownMenu">
-                <Button OnClick="@ToggleDropdownMenu">
-                    <i class="bi bi-three-dots-vertical"></i>
-                </Button>
-                <div class="@(_showDropdownMenu ? "block" : "hidden") fs-6 border-2 absolute right-0 flex flex-col bg-white">
-                    <Button OnMouseDown="@(() => NavigationManager.NavigateTo("/settings"))">@Translations.SETTINGS</Button>
-                    <Button Class="text-nowrap" OnMouseDown="@SyncProgress">@Translations.SYNC_PROGRESS</Button>
-                </div>
+            <div class="relative inline-block">
+                <ContextMenuTrigger MenuId="ThreeDotsMenu" MouseButtonTrigger="MouseButtonTrigger.Left">
+                    <Button>
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </Button>
+                </ContextMenuTrigger>
+                <ContextMenu Id="ThreeDotsMenu" OverrideDefaultCssClass="absolute border bg-white !inset-y-auto !left-auto !right-0">
+                    <Item OnClick="@(() => NavigationManager.NavigateTo("/settings"))">@Translations.SETTINGS</Item>
+                    <Item OnClick="@SyncProgress">@Translations.SYNC_PROGRESS</Item>
+                </ContextMenu>
             </div>
         </div>
     </Header>
