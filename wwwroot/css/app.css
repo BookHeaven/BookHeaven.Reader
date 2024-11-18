@@ -203,7 +203,6 @@ h1:focus {
     }
 }
 
-a {
-    text-decoration: none;
-    color: #000000;
+.blazor-context-menu__list  {
+    padding: 0 !important;
 }
