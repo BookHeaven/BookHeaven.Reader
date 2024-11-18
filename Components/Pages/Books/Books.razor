@@ -1,5 +1,4 @@
 ﻿@page "/books"
-@using BookHeaven.Reader.Extensions
 @using BookHeaven.Reader.Components.Pages.Books.Components
 @layout BooksLayout
 
@@ -15,7 +14,6 @@
     @{
         var book = (Book)context.Data;
     }
-    <Item OverrideDefaultCssClass="p-2">@book.Title</Item>
     <Item OnClick="@(() => _selectedBook = book)"><i class="bi bi-info-circle me-5"></i>@Translations.INFO</Item>
 </ContextMenu>
 
@@ -31,7 +29,7 @@
         @foreach (var book in _filteredBooks)
         {
             <ContextMenuTrigger MenuId="BookMenu" Data="@book">
-                <a class="flex flex-col items-center" href="/reader/@book.BookId">
+                <a class="flex flex-col" href="/reader/@book.BookId">
                     <div class="cover h-[190px] relative w-full">
                         <img class="h-full w-full" src="@book.CoverUrl" alt=""/>
                         <span class="progress-badge -top-[1px] w-[40%] absolute right-0 font-bold">
@@ -44,8 +42,7 @@
                             {
                                 <span>@Translations.NEW</span>
                             }
-                    </span>
-
+                        </span>
                     </div>
                     <div class="text-xs">@book.Title</div>
                 </a>

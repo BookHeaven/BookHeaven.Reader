@@ -1,4 +1,5 @@
 using BookHeaven.Domain.Entities;
+using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Resources.Localization;
