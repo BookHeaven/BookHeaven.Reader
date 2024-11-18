@@ -93,7 +93,7 @@
         {
             await DatabaseService.AddOrUpdate(profile);
             await DatabaseService.SaveChanges();
-            if (!profile.IsSelected) continue;
+            if (!profile.Name.Equals("Default")) continue;
             AppStateService.ProfileId = profile.ProfileId;
             break;
         }
