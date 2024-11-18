@@ -80,7 +80,7 @@
     {
         _checkState = ConnectionState.Checking;
         StateHasChanged();
-        if (!await ServerService.CanConnect(AppStateService.ServerUrl))
+        if (!await ServerService.CanConnect())
         {
             _checkState = ConnectionState.Error;
             return;
