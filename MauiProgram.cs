@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using BookHeaven.Domain;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Services;
+using DependencyInjection = BookHeaven.Domain.DependencyInjection;
 
 namespace BookHeaven.Reader
 {
@@ -24,7 +25,7 @@ namespace BookHeaven.Reader
 				.UseMauiApp<App>()
 				.UseMauiCommunityToolkit();
 
-			builder.Services.AddDomain(FileSystem.AppDataDirectory);
+			builder.Services.AddDomain(FileSystem.AppDataDirectory, DependencyInjection.DatabaseInjectionType.Service);
 			builder.Services.AddSingleton<AppStateService>();
 			builder.Services.AddEpubManager(true);
 
