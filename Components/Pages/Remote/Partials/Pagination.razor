@@ -1,13 +1,16 @@
 ﻿@implements IAsyncDisposable
+@if (TotalPages < 2)
+{
+	return;
+}
 <div class="flex gap-5 items-center">
-	<button class="py-1 px-3 active:bg-black active:text-white rounded-xl" disabled="@(CurrentPage == 1)" @onclick="() => ChangePage(Direction.Previous)">
+	<Button Disabled="@(CurrentPage == 1)" OnClick="@(() => ChangePage(Direction.Previous))">
 		<i class="bi bi-chevron-left"></i>
-	</button>
-	<p>Page @CurrentPage of @TotalPages</p>
-	<button class="py-1 px-3 active:bg-black active:text-white rounded-xl" disabled="@(CurrentPage == TotalPages)" @onclick="() => ChangePage(Direction.Next)">
+	</Button>
 	<p>@string.Format(Translations.PAGINATION_INFO, CurrentPage, TotalPages)</p>
+	<Button Disabled="@(CurrentPage == TotalPages)" OnClick="@(() => ChangePage(Direction.Next))">
 		<i class="bi bi-chevron-right"></i>
-	</button>
+	</Button>
 </div>
 
 @code {
