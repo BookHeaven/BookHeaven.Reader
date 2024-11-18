@@ -1,4 +1,4 @@
-﻿<button @attributes="@AdditionalAttributes" class="flex items-center justify-center rounded px-4 py-2 active:bg-black active:text-white @((Kind == ButtonType.Secondary).Then("bg-gray-600 text-white")) @(Class) @(Disabled.Then("bg-gray-300"))" @onclick="@(() => OnClick.InvokeAsync())" @onmousedown="@(() => OnMouseDown.InvokeAsync())" disabled="@Disabled">
+﻿<button @attributes="@AdditionalAttributes" class="flex items-center justify-center rounded px-2 py-1 active:bg-gray-700 active:text-white @((Kind == ButtonType.Secondary).Then("bg-gray-600 text-white")) @(Class)" @onclick="@(() => OnClick.InvokeAsync())" @onmousedown="@(() => OnMouseDown.InvokeAsync())" disabled="@Disabled">
     @ChildContent
 </button>
 
