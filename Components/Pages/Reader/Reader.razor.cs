@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO.Enumeration;
 using System.Text.Json;
 using EpubManager;
 using EpubManager.Entities;
@@ -9,6 +10,8 @@ using BookHeaven.Reader.ViewModels;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Enums;
+using CommunityToolkit.Maui.Alerts;
+using Style = EpubManager.Entities.Style;
 #if ANDROID
 using Android.Views;
 #endif
@@ -42,7 +45,7 @@ public partial class Reader : IAsyncDisposable
     private EpubBook? _epubBook;
     private EpubChapter? _epubChapter, _epubChapterPrev, _epubChapterNext;
     private bool _refreshTotalPages;
-    private IReadOnlyList<string>? _styles;
+    private IReadOnlyList<Style>? _styles;
 
     private int? _totalPagesPrev, _totalPagesNext;
     private int _totalWords;
@@ -223,9 +226,11 @@ public partial class Reader : IAsyncDisposable
                 if (_epubChapter == null)
                 {
                     _epubChapter = _epubBook!.Content.ReadingOrder[_readerViewModel.CurrentChapter];
-                    _epubChapter.Content =
-                        await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
-                            _epubChapter.Path!);
+                    var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
+                        _epubChapter.Path!);
+                    _epubChapter.Content = getContent.content;
+                    _epubChapter.Styles = getContent.styles;
+
                 }
 
                 if (_epubChapterPrev == null)
@@ -234,8 +239,12 @@ public partial class Reader : IAsyncDisposable
                         ? _epubBook.Content.ReadingOrder[_readerViewModel.CurrentChapter - 1]
                         : null;
                     if (_epubChapterPrev != null)
-                        _epubChapterPrev.Content = await EpubReader.GetChapterContentAsync(_epubBook.FilePath,
-                            _epubBook.RootFolder, _epubChapterPrev.Path!);
+                    {
+                        var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
+                            _epubChapterPrev.Path!);
+                        _epubChapterPrev.Content = getContent.content;
+                        _epubChapterPrev.Styles = getContent.styles;
+                    }
                 }
 
                 if (_epubChapterNext == null)
@@ -244,8 +253,12 @@ public partial class Reader : IAsyncDisposable
                         ? _epubBook.Content.ReadingOrder[_readerViewModel.CurrentChapter + 1]
                         : null;
                     if (_epubChapterNext != null)
-                        _epubChapterNext.Content = await EpubReader.GetChapterContentAsync(_epubBook.FilePath,
-                            _epubBook.RootFolder, _epubChapterNext.Path!);
+                    {
+                        var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
+                            _epubChapterNext.Path!);
+                        _epubChapterNext.Content = getContent.content;
+                        _epubChapterNext.Styles = getContent.styles;
+                    }
                 }
 
                 _refreshTotalPages = true;
@@ -255,7 +268,7 @@ public partial class Reader : IAsyncDisposable
 
                 break;
             case nameof(ReaderViewModel.CurrentPage):
-                if (_readerViewModel.CurrentPage == null || _readerViewModel.CurrentPage == -1) return;
+                if (_readerViewModel.CurrentPage is null or -1) return;
                 StateHasChanged();
                 break;
         }
