@@ -34,7 +34,7 @@ public partial class Reader : IAsyncDisposable
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference _module = null!;
-    private ProfileSettings? _profileSettings;
+    private ProfileSettings _profileSettings = new();
     private DateTime _suspendStartTime;
     private TimeSpan _totalSuspendedTime;
 
@@ -65,11 +65,8 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Paused -= OnPaused;
         LifeCycleService.Destroyed -= OnDestroy;
         await SaveState();
-        if(_module is not null)
-        {
-            await _module.InvokeVoidAsync("Dispose");
-            await _module.DisposeAsync();
-        }
+        await _module.InvokeVoidAsync("Dispose");
+        await _module.DisposeAsync();
         _dotNetReference.Dispose();
 #if ANDROID
         var activity = Platform.CurrentActivity!;
