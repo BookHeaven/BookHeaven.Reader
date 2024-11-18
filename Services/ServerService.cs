@@ -2,12 +2,14 @@
 using Microsoft.Extensions.Logging;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Services;
+using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
 
 namespace BookHeaven.Reader.Services
 {
 	public interface IServerService
 	{
-		Task<bool> CanConnect(string? url);
+		Task<bool> CanConnect();
 		Task<List<Book>?> GetAllBooks();
 		Task<List<Author>?> GetAllAuthors();
 		Task<List<Profile>> GetAllProfiles();
@@ -16,23 +18,28 @@ namespace BookHeaven.Reader.Services
 		Task UpdateBookProgress(BookProgress progress);
 		Task UpdateProgressByProfile(Guid profileId);
 	}
-	public class ServerService(IDatabaseService databaseService, ILogger<ServerService> logger) : IServerService
+	public class ServerService(
+		IDatabaseService databaseService, 
+		AppStateService appStateService, 
+		ILogger<ServerService> logger) : IServerService
 	{
 		private HttpClient _httpClient = new();
 
-		public async Task<bool> CanConnect(string? url)
+		public async Task<bool> CanConnect()
 		{
 			if(Connectivity.Current.NetworkAccess == NetworkAccess.None)
 			{
 				return false;
 			}
+			
+			var url = appStateService.ServerUrl;
 
 			if (string.IsNullOrEmpty(url) || !url.StartsWith("https://"))
 			{
 				return false;
 			}
 			
-			if (_httpClient.BaseAddress == null)
+			if(_httpClient.BaseAddress == null)
 			{
 				_httpClient = new HttpClient
 				{
@@ -164,7 +171,7 @@ namespace BookHeaven.Reader.Services
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to download book from server", ex);
+				await Toast.Make(ex.Message, ToastDuration.Long).Show();
 			}
 		}
 
