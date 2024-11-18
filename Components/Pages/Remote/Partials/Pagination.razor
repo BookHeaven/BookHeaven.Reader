@@ -5,6 +5,7 @@
 	</button>
 	<p>Page @CurrentPage of @TotalPages</p>
 	<button class="py-1 px-3 active:bg-black active:text-white rounded-xl" disabled="@(CurrentPage == TotalPages)" @onclick="() => ChangePage(Direction.Next)">
+	<p>@string.Format(Translations.PAGINATION_INFO, CurrentPage, TotalPages)</p>
 		<i class="bi bi-chevron-right"></i>
 	</button>
 </div>

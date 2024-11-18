@@ -141,4 +141,7 @@
     <data name="STATS" xml:space="preserve">
         <value>Stats</value>
     </data>
+    <data name="PAGINATION_INFO" xml:space="preserve">
+        <value>Page {0} of {1}</value>
+    </data>
 </root>
