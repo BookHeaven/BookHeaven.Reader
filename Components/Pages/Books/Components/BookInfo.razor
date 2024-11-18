@@ -1,5 +1,4 @@
-﻿@using BookHeaven.Reader.Extensions
-@if (Book == null)
+﻿@if (Book == null)
 {
 	return;
 }
@@ -14,7 +13,7 @@
 			<div class="grid gap-2">
 				<img src="@Book.CoverUrl" class="block w-full" alt=""/>
 				<span class="bg-gray-600 text-white px-2 py-1 text-xs text-center">
-					@if (Book.IsStartedReading())
+					@if (Book.IsStartedReading() && !Book.IsFinishedReading())
 					{
 						@Translations.IN_PROGRESS
 					}
@@ -52,7 +51,7 @@
 						<span>@Translations.PROGRESS</span>
 						<span>@progress.Progress.ToString("0.#")%</span>
 						<span>@Translations.READ_TIME</span>
-						<span>@progress.ElapsedTimeFormatted</span>
+						<span>@progress.ElapsedTimeFormatted()</span>
 					</div>
 				}
 			</div>
