@@ -47,6 +47,8 @@ public partial class Remote
 
     private async Task FilterChanged()
     {
+        if(_selectedFilter == Filters.Author && _selectedAuthor == null)
+            return;
         await FilterBooks();
     }
 
@@ -69,6 +71,8 @@ public partial class Remote
                     .ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
                 break;
             }
+            default:
+                throw new ArgumentOutOfRangeException();
         }
         _currentPage = 1;
         UpdateCurrentPageBooks();
