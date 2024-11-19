@@ -42,16 +42,15 @@
 					<hr class="mt-4"/>
 					<p class="my-1 font-bold">@Translations.STATS</p>
 					<hr class="mb-2"/>
-					var progress = Book.Progresses.First();
 					<div class="grid gap-1 grid-cols-2">
 						<span>@Translations.START_DATE</span>
-						<span>@progress.StartDate?.ToString("d")</span>
+						<span>@Book.Progress()!.StartDate?.ToString("d")</span>
 						<span>@Translations.END_DATE</span>
-						<span>@progress.EndDate?.ToString("d")</span>
+						<span>@Book.Progress()!.EndDate?.ToString("d")</span>
 						<span>@Translations.PROGRESS</span>
-						<span>@progress.Progress.ToString("0.#")%</span>
+						<span>@Book.Progress()!.Progress.ToString("0.#")%</span>
 						<span>@Translations.READ_TIME</span>
-						<span>@progress.ElapsedTimeFormatted()</span>
+						<span>@Book.Progress()!.ElapsedTimeFormatted()</span>
 					</div>
 				}
 			</div>
