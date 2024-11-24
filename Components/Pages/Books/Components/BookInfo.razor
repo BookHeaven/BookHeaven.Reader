@@ -1,4 +1,5 @@
-﻿@if (Book == null)
+﻿@using BookHeaven.Domain.Enums
+@if (Book == null)
 {
 	return;
 }
@@ -13,17 +14,17 @@
 			<div class="grid gap-2">
 				<img src="@Book.CoverUrl" class="block w-full" alt=""/>
 				<span class="bg-gray-600 text-white px-2 py-1 text-xs text-center">
-					@if (Book.IsStartedReading() && !Book.IsFinishedReading())
+					@switch (Book.ReadingStatus())
 					{
-						@Translations.IN_PROGRESS
-					}
-					else if (Book.IsFinishedReading())
-					{
-						@Translations.FINISHED
-					}
-					else
-					{
-						@Translations.NEW
+						case BookStatus.New:
+							<span>@Translations.NEW</span>
+							break;
+						case BookStatus.Reading:
+							<span>@Translations.IN_PROGRESS</span>
+							break;
+						case BookStatus.Finished:
+							<span>@Translations.FINISHED</span>
+							break;
 					}
 				</span>
 			</div>
@@ -37,7 +38,7 @@
 					<p>@Book.Series.Name</p>
 				}
 				<p>@Book.Author?.Name</p>
-				@if (Book.IsStartedReading())
+				@if (Book.ReadingStatus() != BookStatus.New)
 				{
 					<hr class="mt-4"/>
 					<p class="my-1 font-bold">@Translations.STATS</p>

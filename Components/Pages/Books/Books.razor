@@ -1,4 +1,5 @@
 ﻿@page "/books"
+@using BookHeaven.Domain.Enums
 @using BookHeaven.Reader.Components.Pages.Books.Components
 @layout BooksLayout
 
@@ -34,9 +35,9 @@
                         <img class="h-full w-full" src="@book.CoverUrl" alt=""/>
                         <span class="progress-badge -top-[1px] w-[40%] absolute right-0 font-bold">
                         <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
-                            @if (book.IsStartedReading())
+                            @if (book.ReadingStatus() != BookStatus.New)
                             {
-                                <span>@book.Progresses.First().Progress.ToString("0.##")%</span>
+                                <span>@book.Progress()!.Progress.ToString("0.##")%</span>
                             }
                             else
                             {
