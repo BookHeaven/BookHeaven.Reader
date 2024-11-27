@@ -186,7 +186,7 @@ public partial class Reader : IAsyncDisposable
                 _epubChapterNext = chapters[2];
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await Toast.Make("Error loading cache").Show();
         }
