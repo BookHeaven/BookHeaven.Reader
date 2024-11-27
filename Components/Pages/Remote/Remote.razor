@@ -41,7 +41,7 @@
         }
         else
         {
-            <div class="grid grid-cols-2 grid-rows-3 gap-2 p-2 h-full">
+            <div class="grid grid-cols-2 grid-rows-3 gap-2 px-2 h-full">
                 @foreach (var book in _currentPageBooks ?? [])
                 {
                     <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="FilterBooks"/>
@@ -51,7 +51,7 @@
     </div>
     @if (_filteredBooks != null)
     {
-        <div class="flex justify-center py-1">
+        <div class="flex justify-center">
             <Pagination
                 ItemCount="@_filteredBooks?.Count"
                 ItemsPerPage="ItemsPerPage"
