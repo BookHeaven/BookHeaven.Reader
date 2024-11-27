@@ -1,7 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Components;
-using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
-using BookHeaven.Reader.Interfaces;
+﻿using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
 using BookHeaven.Reader.Services;
 using Application = Microsoft.Maui.Controls.Application;
 
@@ -16,13 +13,12 @@ namespace BookHeaven.Reader
 			InitializeComponent();
 			_lifeCycleService = lifeCycleService;
 
-			MainPage = new MainPage();
 			Current!.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
 		}
 
 		protected override Window CreateWindow(IActivationState? activationState)
 		{
-			var window = base.CreateWindow(activationState);
+			var window = new Window(new MainPage() { Title = "BookHeaven"});
 #if WINDOWS
 			window.Width = 562;
 			window.Height = 750;

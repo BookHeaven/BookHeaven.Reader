@@ -3,6 +3,6 @@
     "buildcss": "npx tailwindcss -i wwwroot/css/app.css -o wwwroot/css/app.min.css --minify"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.15"
   }
 }
