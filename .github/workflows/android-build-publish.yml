@@ -17,22 +17,24 @@ jobs:
         dotnet-version: 9.0.x
 
     - name: Move to BookHeaven directory
+      shell: pwsh
       run: |
-        mkdir -p BookHeaven/BookHeaven.Reader
-        shopt -s extglob
-        mv !(BookHeaven) BookHeaven/BookHeaven.Reader/
+        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Reader -Force
+        Get-ChildItem -Path . -Exclude BookHeaven | Move-Item -Destination BookHeaven\BookHeaven.Reader -Force
         
     - name: Clone EpubManager
+      shell: pwsh
       run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/EpubManager.git temp/EpubManager
-        mkdir -p BookHeaven/EpubManager
-        mv temp/EpubManager/* BookHeaven/EpubManager/
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/EpubManager.git temp\EpubManager
+        New-Item -ItemType Directory -Path BookHeaven\EpubManager -Force
+        Get-ChildItem -Path temp\EpubManager | Move-Item -Destination BookHeaven\EpubManager -Force
         
     - name: Clone BookHeaven.Domain
+      shell: pwsh
       run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/BookHeaven.Domain.git temp/BookHeaven.Domain
-        mkdir -p BookHeaven/BookHeaven.Domain
-        mv temp/BookHeaven.Domain/* BookHeaven/BookHeaven.Domain/
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/BookHeaven.Domain.git temp\BookHeaven.Domain
+        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
+        Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
 
     - name: Install .NET Maui
       run: dotnet workload install maui
