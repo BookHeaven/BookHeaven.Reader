@@ -1,0 +1,53 @@
+name: Build and publish Android app
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Move to BookHeaven directory
+      run: |
+        mkdir -p BookHeaven/BookHeaven.Reader
+        shopt -s extglob
+        mv !(BookHeaven) BookHeaven/BookHeaven.Reader/
+        
+    - name: Clone EpubManager
+      run: |
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/EpubManager.git temp/EpubManager
+        mkdir -p BookHeaven/EpubManager
+        mv temp/EpubManager/* BookHeaven/EpubManager/
+        
+    - name: Clone BookHeaven.Domain
+      run: |
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/BookHeaven.Domain.git temp/BookHeaven.Domain
+        mkdir -p BookHeaven/BookHeaven.Domain
+        mv temp/BookHeaven.Domain/* BookHeaven/BookHeaven.Domain/
+
+    - name: Install .NET Maui
+      run: dotnet workload install maui
+      
+    - name: Restore dependencies
+      working-directory: ./BookHeaven/BookHeaven.Reader
+      run: dotnet restore
+      
+    - name: Build
+      working-directory: ./BookHeaven/BookHeaven.Reader
+      run: dotnet build BookHeaven.Reader.csproj -c Release -f net9.0-android --no-restore
+      
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.4.3
+      with:
+        path: |
+          ./**/*.aab
+          ./**/*.apk
