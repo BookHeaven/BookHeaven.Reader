@@ -23,10 +23,8 @@ public partial class Overlay
     [Parameter] public string? BookTitle { get; set; }
 
     [Parameter] public string? ChapterTitle { get; set; }
-
-    [Parameter] public int? CurrentChapter { get; set; }
-
-    [Parameter] public int? TotalChapters { get; set; }
+    
+    [Parameter] public decimal Progress { get; set; }
 
     [Parameter] public EventCallback SettingsChanged { get; set; }
 

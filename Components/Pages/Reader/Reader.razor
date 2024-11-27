@@ -70,8 +70,7 @@
     <Overlay
         @bind-ShowOverlay="@_readerViewModel.ShowOverlay"
         @bind-ShowSpine="@_readerViewModel.ShowSpine"
-        CurrentChapter="_readerViewModel.CurrentChapter"
-        TotalChapters="_epubBook?.Content.ReadingOrder.Count"
+        Progress="@Progress"
         ProfileSettings="@_profileSettings"
         BookTitle="@_book?.Title"
         ChapterTitle="@_epubChapter?.Title"

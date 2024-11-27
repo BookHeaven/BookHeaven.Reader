@@ -21,7 +21,7 @@
             <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Previous))">
                 <i class="bi bi-chevron-double-left text-xl"></i>
             </Button>
-            <Progress Value="@(Math.Round((double)(CurrentChapter ?? 1) / (TotalChapters ?? 1) * 100))"/>
+            <Progress Value="@((double)Progress)"/>
             <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Next))">
                 <i class="bi bi-chevron-double-right text-xl"></i>
             </Button>
