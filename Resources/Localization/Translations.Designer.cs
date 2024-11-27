@@ -204,6 +204,24 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Font Size.
+        /// </summary>
+        public static string FONT_SIZE {
+            get {
+                return ResourceManager.GetString("FONT_SIZE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Horizontal Margin.
+        /// </summary>
+        public static string HORIZONTAL_MARGIN {
+            get {
+                return ResourceManager.GetString("HORIZONTAL_MARGIN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only HTTPS protocol is supported.
         /// </summary>
         public static string HTTPS_ONLY {
@@ -254,6 +272,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string LANG_ES {
             get {
                 return ResourceManager.GetString("LANG_ES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Line Height.
+        /// </summary>
+        public static string LINE_HEIGHT {
+            get {
+                return ResourceManager.GetString("LINE_HEIGHT", resourceCulture);
             }
         }
         
@@ -321,6 +348,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Paragraph Spacing.
+        /// </summary>
+        public static string PARAGRAPH_SPACING {
+            get {
+                return ResourceManager.GetString("PARAGRAPH_SPACING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Progress.
         /// </summary>
         public static string PROGRESS {
@@ -362,6 +398,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string RETRY {
             get {
                 return ResourceManager.GetString("RETRY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server URL.
+        /// </summary>
+        public static string SERVER_URL {
+            get {
+                return ResourceManager.GetString("SERVER_URL", resourceCulture);
             }
         }
         
@@ -420,11 +465,29 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Text Indent.
+        /// </summary>
+        public static string TEXT_INDENT {
+            get {
+                return ResourceManager.GetString("TEXT_INDENT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Uninstall.
         /// </summary>
         public static string UNINSTALL {
             get {
                 return ResourceManager.GetString("UNINSTALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vertical Margin.
+        /// </summary>
+        public static string VERTICAL_MARGIN {
+            get {
+                return ResourceManager.GetString("VERTICAL_MARGIN", resourceCulture);
             }
         }
         

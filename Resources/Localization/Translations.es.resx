@@ -137,4 +137,25 @@
     <data name="PAGINATION_INFO" xml:space="preserve">
         <value>Página {0} de {1}</value>
     </data>
+    <data name="FONT_SIZE" xml:space="preserve">
+        <value>Tamaño de letra</value>
+    </data>
+    <data name="LINE_HEIGHT" xml:space="preserve">
+        <value>Altura de línea</value>
+    </data>
+    <data name="TEXT_INDENT" xml:space="preserve">
+        <value>Sangría</value>
+    </data>
+    <data name="PARAGRAPH_SPACING" xml:space="preserve">
+        <value>Espacio entre párrafos</value>
+    </data>
+    <data name="HORIZONTAL_MARGIN" xml:space="preserve">
+        <value>Margen horizontal</value>
+    </data>
+    <data name="VERTICAL_MARGIN" xml:space="preserve">
+        <value>Margen Vertical</value>
+    </data>
+    <data name="SERVER_URL" xml:space="preserve">
+        <value>URL del servidor</value>
+    </data>
 </root>

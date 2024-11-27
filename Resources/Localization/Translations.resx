@@ -144,4 +144,25 @@
     <data name="PAGINATION_INFO" xml:space="preserve">
         <value>Page {0} of {1}</value>
     </data>
+    <data name="FONT_SIZE" xml:space="preserve">
+        <value>Font Size</value>
+    </data>
+    <data name="LINE_HEIGHT" xml:space="preserve">
+        <value>Line Height</value>
+    </data>
+    <data name="TEXT_INDENT" xml:space="preserve">
+        <value>Text Indent</value>
+    </data>
+    <data name="PARAGRAPH_SPACING" xml:space="preserve">
+        <value>Paragraph Spacing</value>
+    </data>
+    <data name="VERTICAL_MARGIN" xml:space="preserve">
+        <value>Vertical Margin</value>
+    </data>
+    <data name="HORIZONTAL_MARGIN" xml:space="preserve">
+        <value>Horizontal Margin</value>
+    </data>
+    <data name="SERVER_URL" xml:space="preserve">
+        <value>Server URL</value>
+    </data>
 </root>
