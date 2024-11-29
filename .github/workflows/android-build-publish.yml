@@ -70,15 +70,15 @@ jobs:
         echo "version=$($version)" >> $env:GITHUB_OUTPUT
     
     - name: Create Tag
-      uses: actions/github-script@v5
+      uses: actions/github-script@v7
       with: 
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           github.rest.git.createRef({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            ref: 'refs/tags/v${{ steps.extract_version.outputs.version }}',
-            sha: context.sha
+            sha: context.sha,
+            ref: 'refs/tags/v${{ steps.extract_version.outputs.version }}'
           })
       
     - name: Create Release
