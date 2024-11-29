@@ -3,8 +3,8 @@
 </p>
 
 # BookHeaven Reader
-BookHeaven Reader is part of the BookHeaven "ecosystem", which aims to provide a very convenient way to manage and read your ebook library.
-It connects to the Server to download whatever books you want to read, it also includes a basic app drawer and can be set as the home launcher.
+BookHeaven Reader is part of the BookHeaven "ecosystem", which aims to provide a very convenient way to manage and read your ebook library.</br>
+It connects to the Server to download whatever books you want to read, it also can be set as the home launcher since it includes a basic app drawer for extra convenience.
 
 ## Disclaimer
 - This app is only for Android devices and optimized for e-ink displays
@@ -37,10 +37,10 @@ It connects to the Server to download whatever books you want to read, it also i
 The app is web based and it uses technologies that might bee too modern for the included WebView implementation of your Android device.
 Luckily, it's very likely that you'll be able to replace it with an updated one from the Play Store.
 Steps might vary for your device, but overall this is what you need to do:
-- Go to the Play Store and search for "Android System Webview" and install it
+- Go to the Play Store, search for "Android System Webview" and install it
 > [!NOTE]
 > Many versions will be listed. Ideally you want the one that's just called "Android System Webview", but for me only "Dev", "Canary" and "Beta" show up.</br>
-> If you want the actual stable release, which I recommend but might not show up, you'll need to go to the Play Store from your pc and install it to your device from there.<br/>
+> If you want the actual stable release, which I recommend but might not show up, you can go to the Play Store from your pc and install it to your device from there.<br/>
 > Here's the link: [https://play.google.com/store/apps/details?id=com.google.android.webview](https://play.google.com/store/apps/details?id=com.google.android.webview)
 - Enable the developer settings if you haven't already
 - Look for WebView Implementation, and change it to the one you just downloaded
