@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
 
@@ -15,7 +18,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-
+    
     - name: Move to BookHeaven directory
       shell: pwsh
       run: |
@@ -40,12 +43,39 @@ jobs:
       working-directory: ./BookHeaven/BookHeaven.Reader
       run: dotnet restore
       
-    - name: Build
-      working-directory: ./BookHeaven/BookHeaven.Reader
-      run: dotnet build BookHeaven.Reader.csproj -c Release -f net9.0-android --no-restore
+    - name: Setup Keystore file
+      run: |
+        echo "${{ secrets.KEYSTORE_FILE }}" > bookheaven.keystore.asc
+        gpg -d -passphrase "${{ secrets.KEYSTORE_PASSWORD_GPG }}" --batch bookheaven.keystore.asc > .\BookHeaven\bookheaven.keystore
       
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4.4.3
+    - name: Build
+      working-directory: ./BookHeaven
+      run: dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidSigningKeyStore=.\bookheaven.keystore /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningKeyStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
+      
+    - name: Extract version
+      id: extract_version
+      shell: pwsh
+      run: |
+        $xml = [Xml] (Get-Content .\BookHeaven\BookHeaven.Reader\BookHeaven.Reader.csproj)
+        [string] $version = $xml.Project.PropertyGroup.ApplicationDisplayVersion
+        echo "version=$($version)" >> $env:GITHUB_OUTPUT
+    
+    - name: Create Tag
+      uses: actions/github-script@v5
+      with: 
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: 'refs/tags/v${{ steps.extract_version.outputs.version }}',
+            sha: context.sha
+          })
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      working-directory: ./BookHeaven/BookHeaven.Reader
       with:
-        path: |
-          ./**/*-Signed.apk
+        tag_name: v${{ steps.extract_version.outputs.version }}
+        files: |
+            ./bin/Release/net9.0-android/publish/dev.ggarrido.bookheaven-Signed.apk
