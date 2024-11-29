@@ -4,8 +4,7 @@
 
 # BookHeaven Reader
 BookHeaven Reader is part of the BookHeaven "ecosystem", which aims to provide a very convenient way to manage and read your ebook library.
-
-The main idea is for you to be able to ditch whatever reader app comes with your device and just use this instead.
+It connects to the Server to download whatever books you want to read, it also includes a basic app drawer and can be set as the home launcher.
 
 ## Disclaimer
 - This app is only for Android devices and optimized for e-ink displays
