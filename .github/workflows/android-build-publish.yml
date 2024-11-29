@@ -40,7 +40,7 @@ jobs:
         Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
       
     - name: Restore dependencies
-      working-directory: ./BookHeaven/BookHeaven.Reader
+      working-directory: .\BookHeaven\BookHeaven.Reader
       run: dotnet restore
       
     - name: Setup Keystore file
@@ -49,7 +49,7 @@ jobs:
         gpg -d -passphrase "${{ secrets.KEYSTORE_PASSWORD_GPG }}" --batch bookheaven.keystore.asc > .\BookHeaven\bookheaven.keystore
       
     - name: Build
-      working-directory: ./BookHeaven
+      working-directory: .\BookHeaven
       run: dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidSigningKeyStore=.\bookheaven.keystore /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningKeyStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
       
     - name: Extract version
@@ -74,8 +74,7 @@ jobs:
       
     - name: Create Release
       uses: softprops/action-gh-release@v2
-      working-directory: ./BookHeaven/BookHeaven.Reader
       with:
         tag_name: v${{ steps.extract_version.outputs.version }}
         files: |
-            ./bin/Release/net9.0-android/publish/dev.ggarrido.bookheaven-Signed.apk
+            ./BookHeaven/BookHeaven.Reader/bin/Release/net9.0-android/publish/dev.ggarrido.bookheaven-Signed.apk
