@@ -46,3 +46,41 @@ Steps might vary for your device, but overall this is what you need to do:
   > If it doesn't show up, or doesn't allow you to change it, try restarting, or try going to Apps > Show System apps and disable the included WebView, then restart and check again.
 4. Restart your device to apply the change
 5. Profit
+
+## Screenshots
+<p>The screenshots have been taken from a computer screen. Obviously, don't expect to see colors on your e-ink device, unless it's super fancy.</p>
+<table>
+  <tr>
+    <td>
+      <img src="screenshots/local_reading.png" alt="" />
+    </td>
+    <td>
+      <img src="screenshots/local_all.png" alt="" />
+    </td>
+    <td>
+      <img src="screenshots/remote.png" alt="" />
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="screenshots/app_drawer.png" alt="" />
+    </td>
+    <td>
+      <img src="screenshots/reader.png" alt="" />
+    </td>
+    <td>
+      <img src="screenshots/overlay.png" alt="" />
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="screenshots/overlay_index.png" alt="" />
+    </td>
+    <td>
+      <img src="screenshots/overlay_text_settings.png" alt="" />
+    </td>
+    <td>
+      <img src="screenshots/overlay_page_settings.png" alt="" />
+    </td>
+  </tr>
+</table>
