@@ -6,7 +6,7 @@
     }
     @if (ButtonText != null)
     {
-        <button class="btn btn-primary" @onclick="@(() => OnButtonClick.InvokeAsync())">@ButtonText</button>
+        <Button Kind="Button.ButtonType.Secondary" OnClick="@(() => OnButtonClick.InvokeAsync())">@ButtonText</Button>
     }
 </div>
 
