@@ -52,7 +52,6 @@
       <ApplicationTitle>BookHeaven</ApplicationTitle>
       <RunAOTCompilation>False</RunAOTCompilation>
       <PublishTrimmed>False</PublishTrimmed>
-		<RuntimeIdentifiers>android-arm;android-arm64</RuntimeIdentifiers>
     </PropertyGroup>
 
     <ItemGroup>
@@ -77,7 +76,6 @@
     <ItemGroup>
       <None Remove="progress-badge.ai" />
       <None Remove="Resources\Splash\mysplashscreen.svg" />
-      <None Remove="screenshots\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -101,11 +99,9 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Translations.resx</DependentUpon>
       </Compile>
-      <Compile Remove="screenshots\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include=".github\" />
       <Folder Include="Resources\Fonts\" />
       <Folder Include="wwwroot\css\bootstrap-icons\" />
     </ItemGroup>
@@ -123,19 +119,6 @@
       <EmbeddedResource Update="Resources\Localization\Translations.es.resx">
         <Generator>PublicResXFileCodeGenerator</Generator>
       </EmbeddedResource>
-      <EmbeddedResource Remove="screenshots\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <MauiXaml Remove="screenshots\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Remove="screenshots\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <AndroidAarLibrary Remove="screenshots\**" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
