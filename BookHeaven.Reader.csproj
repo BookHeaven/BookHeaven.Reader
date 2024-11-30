@@ -22,7 +22,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>BookHeaven</ApplicationTitle>
+		<ApplicationTitle>BookHeaven Reader</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
@@ -42,14 +42,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
-		<ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
-		<ApplicationTitle>BookHeaven</ApplicationTitle>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
-		<ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
-		<ApplicationTitle>BookHeaven</ApplicationTitle>
 		<RunAOTCompilation>False</RunAOTCompilation>
 		<PublishTrimmed>False</PublishTrimmed>
 	</PropertyGroup>
