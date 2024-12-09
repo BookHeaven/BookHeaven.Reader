@@ -48,8 +48,6 @@ public partial class Reader : IAsyncDisposable
 
     private int? _totalPagesPrev, _totalPagesNext;
     private int _totalWords;
-
-    private string? _paragraphClass;
     
 
     private decimal Progress => _epubBook != null && _epubChapter != null && _totalWords != 0
@@ -232,7 +230,7 @@ public partial class Reader : IAsyncDisposable
                     _epubChapter = _epubBook!.Content.ReadingOrder[_readerViewModel.CurrentChapter];
                     var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
                         _epubChapter.Path!);
-                    _paragraphClass ??= getContent.mostFrequentClassName;
+                    _epubChapter.ParagraphClassName = getContent.mostFrequentClassName;
                     _epubChapter.Content = getContent.content;
                     _epubChapter.Styles = getContent.styles;
 
@@ -245,9 +243,8 @@ public partial class Reader : IAsyncDisposable
                         : null;
                     if (_epubChapterPrev != null)
                     {
-                        var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
-                            _epubChapterPrev.Path!);
-                        _paragraphClass ??= getContent.mostFrequentClassName;
+                        var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,_epubChapterPrev.Path!);
+                        _epubChapterPrev.ParagraphClassName = getContent.mostFrequentClassName;
                         _epubChapterPrev.Content = getContent.content;
                         _epubChapterPrev.Styles = getContent.styles;
                     }
@@ -262,7 +259,7 @@ public partial class Reader : IAsyncDisposable
                     {
                         var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
                             _epubChapterNext.Path!);
-                        _paragraphClass ??= getContent.mostFrequentClassName;
+                        _epubChapterNext.ParagraphClassName = getContent.mostFrequentClassName;
                         _epubChapterNext.Content = getContent.content;
                         _epubChapterNext.Styles = getContent.styles;
                     }

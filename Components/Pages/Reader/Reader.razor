@@ -36,11 +36,11 @@
 		padding: 0 2px;
 	}
 	
-	#viewer > .chapter p:not([class]) @(!string.IsNullOrEmpty(_paragraphClass) ? $",#viewer > .chapter .{_paragraphClass}" : "") {
-		margin: calc(var(--paragraph-spacing) * 1pt) 0;
+	@($"#viewer > .chapter p:not([class]){(!string.IsNullOrEmpty(_epubChapter?.ParagraphClassName) ? $",#viewer > .chapter.current .{_epubChapter.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(_epubChapterPrev?.ParagraphClassName) ? $",#viewer > .chapter.prev .{_epubChapterPrev.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(_epubChapterNext?.ParagraphClassName) ? $",#viewer > .chapter.next .{_epubChapterNext.ParagraphClassName}" : "")}") {
+		margin: calc(var(--paragraph-spacing) * 1pt) 0!important;
 		word-break: auto-phrase;
 	}
-
+	
 	#viewer > .chapter.current {
 		transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
 	}
