@@ -36,7 +36,7 @@
 		padding: 0 2px;
 	}
 	
-	#viewer > .chapter p:not([class]) {
+	#viewer > .chapter p:not([class]) @(!string.IsNullOrEmpty(_paragraphClass) ? $",#viewer > .chapter .{_paragraphClass}" : "") {
 		margin: calc(var(--paragraph-spacing) * 1pt) 0;
 		word-break: auto-phrase;
 	}
@@ -55,7 +55,7 @@
 </style>
 @if (_styles?.Count > 0 && _epubChapter?.Styles?.Count > 0)
 {
-    @foreach (var style in _styles.Where(style => _epubChapter.Styles.Any(s => s.Contains(style.Name))))
+    foreach (var style in _styles.Where(style => _epubChapter.Styles.Any(s => s.Contains(style.Name))))
     {
 	    <style>@style.Content</style>
     }
