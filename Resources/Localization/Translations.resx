@@ -63,7 +63,7 @@
     <data name="RETRY" xml:space="preserve">
         <value>Retry</value>
     </data>
-    <data name="Connection_failed" xml:space="preserve">
+    <data name="CONNECTION_FAILED" xml:space="preserve">
         <value>Connection failed</value>
     </data>
     <data name="CHECK_THE_URL" xml:space="preserve">

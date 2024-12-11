@@ -56,7 +56,7 @@
     <data name="RETRY" xml:space="preserve">
         <value>Reintentar</value>
     </data>
-    <data name="Connection_failed" xml:space="preserve">
+    <data name="CONNECTION_FAILED" xml:space="preserve">
         <value>Conexión fallida</value>
     </data>
     <data name="CHECK_THE_URL" xml:space="preserve">

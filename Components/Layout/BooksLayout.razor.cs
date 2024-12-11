@@ -15,7 +15,7 @@ public partial class BooksLayout
     {
         if (!await ServerService.CanConnect())
         {
-            await Toast.Make(Translations.Connection_failed, ToastDuration.Long).Show();
+            await Toast.Make(Translations.CONNECTION_FAILED, ToastDuration.Long).Show();
             return;
         }
 

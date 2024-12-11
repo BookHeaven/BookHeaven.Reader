@@ -134,9 +134,9 @@ namespace BookHeaven.Reader.Resources.Localization {
         /// <summary>
         ///   Looks up a localized string similar to Connection failed.
         /// </summary>
-        public static string Connection_failed {
+        public static string CONNECTION_FAILED {
             get {
-                return ResourceManager.GetString("Connection_failed", resourceCulture);
+                return ResourceManager.GetString("CONNECTION_FAILED", resourceCulture);
             }
         }
         
