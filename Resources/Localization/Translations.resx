@@ -165,4 +165,7 @@
     <data name="SERVER_URL" xml:space="preserve">
         <value>Server URL</value>
     </data>
+    <data name="DOWNLOAD_SUCCESS" xml:space="preserve">
+        <value>Book has been downloaded</value>
+    </data>
 </root>

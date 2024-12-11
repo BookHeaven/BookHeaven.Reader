@@ -168,6 +168,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Book has been downloaded.
+        /// </summary>
+        public static string DOWNLOAD_SUCCESS {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_SUCCESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading....
         /// </summary>
         public static string DOWNLOADING {

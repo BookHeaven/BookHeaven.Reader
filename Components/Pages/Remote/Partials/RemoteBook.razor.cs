@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using BookHeaven.Reader.Services;
 using BookHeaven.Domain.Entities;
+using BookHeaven.Reader.Resources.Localization;
+using CommunityToolkit.Maui.Alerts;
 
 namespace BookHeaven.Reader.Components.Pages.Remote.Partials;
 
@@ -23,8 +25,11 @@ public partial class RemoteBook
     private async Task Download(Book book)
     {
         Downloading = true;
+        StateHasChanged();
         await ServerService.Download(book, AppStateService.ProfileId);
         Downloading = false;
+        StateHasChanged();
+        await Toast.Make(Translations.DOWNLOAD_SUCCESS).Show();
         await OnBookDownloaded.InvokeAsync();
     }
 }
