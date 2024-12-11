@@ -22,7 +22,12 @@ public partial class Books
     }
     
     private List<Book> _books = [];
-    private List<Book> _filteredBooks = [];
+
+    private List<Book> FilteredBooks => _selectedFilter switch
+    {
+        Filter.Reading => _books.GetReadingBooks(),
+        Filter.All => _books.ToList()
+    };
     private Filter _selectedFilter;
     
     private Book? _selectedBook;
@@ -35,16 +40,5 @@ public partial class Books
                 b => b.Progresses.Where(p => p.ProfileId == AppStateService.ProfileId)))
             ?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList()!;
         _selectedFilter = _books.AnyReading() ? Filter.Reading : Filter.All;
-        FilterBooks();
-    }
-
-    private void FilterBooks()
-    {
-        _filteredBooks = _selectedFilter switch
-        {
-            Filter.Reading => _books.GetReadingBooks(),
-            Filter.All => _books.ToList(),
-            _ => _filteredBooks
-        };
     }
 }

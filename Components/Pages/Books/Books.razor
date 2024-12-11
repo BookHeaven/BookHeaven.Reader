@@ -18,16 +18,16 @@
     <Item OnClick="@(() => _selectedBook = book)"><i class="bi bi-info-circle me-5"></i>@Translations.INFO</Item>
 </ContextMenu>
 
-<RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" @bind-SelectedOption:after="FilterBooks" />
+<RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />
 
 <div class="p-3 grid grid-cols-[repeat(auto-fill,120px)] gap-2 justify-evenly">
-    @if (_filteredBooks.Count == 0)
+    @if (FilteredBooks.Count == 0)
     {
         <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
     }
     else
     {
-        @foreach (var book in _filteredBooks)
+        @foreach (var book in FilteredBooks)
         {
             <ContextMenuTrigger MenuId="BookMenu" Data="@book">
                 <a class="flex flex-col" href="/reader/@book.BookId">
