@@ -1,11 +1,26 @@
 ﻿@using BookHeaven.Domain.Enums
+@using BookHeaven.Reader.Extensions
+@using CommunityToolkit.Maui.Alerts
 @if (Book == null)
 {
 	return;
 }
 <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
 	<div class="w-[90%] h-[95%] overflow-hidden bg-white border-2 border-gray-700 p-5">
-		<div class="flex mb-2 items-center">
+		<div class="flex mb-2 gap-2 items-center">
+			<Button Kind="Button.ButtonType.Secondary" Class="text-xs" OnClick="@(() => DeleteBook())">
+				<i class="bi bi-trash"></i> Delete
+			</Button>
+			<Button Kind="Button.ButtonType.Secondary" Class="text-xs" OnClick="@(() => ClearCache())">
+				<i class="bi bi-recycle"></i> Clear cache
+			</Button>
+			@if (Book.ReadingStatus() != BookStatus.New)
+			{
+				<Button Kind="Button.ButtonType.Secondary" Class="text-xs" OnClick="@ResetProgress">
+					<i class="bi bi-radioactive"></i> Reset progress
+				</Button>
+			}
+
 			<button class="ms-auto" @onclick="(() => BookChanged.InvokeAsync(null))">
 				<i class="bi bi-x-lg text-2xl"></i>
 			</button>
@@ -45,13 +60,13 @@
 					<hr class="mb-2"/>
 					<div class="grid gap-1 grid-cols-2">
 						<span>@Translations.START_DATE</span>
-						<span>@Book.Progress()!.StartDate?.ToString("d")</span>
+						<span>@Book.Progress().StartDate?.ToString("d")</span>
 						<span>@Translations.END_DATE</span>
-						<span>@Book.Progress()!.EndDate?.ToString("d")</span>
+						<span>@Book.Progress().EndDate?.ToString("d")</span>
 						<span>@Translations.PROGRESS</span>
-						<span>@Book.Progress()!.Progress.ToString("0.#")%</span>
+						<span>@Book.Progress().Progress.ToString("0.#")%</span>
 						<span>@Translations.READ_TIME</span>
-						<span>@Book.Progress()!.ElapsedTimeFormatted()</span>
+						<span>@Book.Progress().ElapsedTimeFormatted()</span>
 					</div>
 				}
 			</div>
@@ -69,6 +84,59 @@
 </div>
 
 @code {
+	[Inject] private IDatabaseService DatabaseService { get; set; } = null!;
+	[Inject] private AlertService Alert { get; set; } = null!;
+	
 	[Parameter] public Book? Book { get; set; }
 	[Parameter] public EventCallback<Book?> BookChanged { get; set; }
+
+	private async Task DeleteBook()
+	{
+		var result = await Alert.ShowConfirmationAsync("Delete book", $"Are you sure you want to delete this book?{Environment.NewLine}{Environment.NewLine}This will remove the book from your device along with any progress you have.{Environment.NewLine}Whatever you have on your server will remain intact.");
+		if (result)
+		{
+			await ClearCache();
+			await DatabaseService.Delete<Book>(Book!);
+			Book = null;
+			await BookChanged.InvokeAsync(Book);
+		}
+	}
+	
+	private async Task ClearCache(bool showToast = true)
+	{
+		var progress = Book!.GetCachePath(CacheKey.Progress);
+		var styles = Book!.GetCachePath(CacheKey.Styles);
+		
+		if (File.Exists(progress))
+		{
+			File.Delete(progress);
+		}
+		
+		if (File.Exists(styles))
+		{
+			File.Delete(styles);
+		}
+		if(showToast) await Toast.Make("Cache cleared").Show();
+	}
+
+	private async Task ResetProgress()
+	{
+		var result = await Alert.ShowConfirmationAsync("Reset Progress", $"Are you sure you want to clear the progress?{Environment.NewLine}{Environment.NewLine}This action cannot be undone, but it can be recovered from the server (as long as you have synced it already) if you just delete the book and download it again.");
+		if (result)
+		{
+			var progress = new BookProgress()
+			{
+				BookProgressId = Book!.Progress().BookProgressId,
+				ProfileId = Book!.Progress().ProfileId,
+				BookId = Book!.BookId,
+			};
+			await DatabaseService.AddOrUpdate(progress);
+			await DatabaseService.SaveChanges();
+
+			await ClearCache(false);
+			await Toast.Make("Progress has been reset").Show();
+			await BookChanged.InvokeAsync(Book);
+		}
+		
+	}
 }
