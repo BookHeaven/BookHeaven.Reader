@@ -32,6 +32,7 @@ namespace BookHeaven.Reader
 			builder.Services.AddScoped<IAppsService, AppsService>();
 			builder.Services.AddTransient<IServerService, ServerService>();
 			builder.Services.AddSingleton<LifeCycleService>();
+			builder.Services.AddTransient<AlertService>();
 
 			builder.Services.AddBlazorContextMenu();
 			builder.Services.AddMauiBlazorWebView();
