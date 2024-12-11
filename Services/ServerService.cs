@@ -61,11 +61,11 @@ namespace BookHeaven.Reader.Services
 
 		public async Task<List<Book>?> GetAllBooks()
 		{
-			string endpoint = "api/books";
+			var endpoint = "api/books";
 
 			try
 			{
-				List<Book>? response = await _httpClient.GetFromJsonAsync<List<Book>?>(endpoint);
+				var response = await _httpClient.GetFromJsonAsync<List<Book>?>(endpoint);
 
 				return response;
 			}
@@ -77,7 +77,7 @@ namespace BookHeaven.Reader.Services
 
 		public async Task<List<Author>?> GetAllAuthors()
 		{
-			string endpoint = "api/authors";
+			var endpoint = "api/authors";
 
 			try
 			{
@@ -93,7 +93,7 @@ namespace BookHeaven.Reader.Services
 
 		public async Task<List<Profile>> GetAllProfiles()
 		{
-			string endpoint = "api/profiles";
+			var endpoint = "api/profiles";
 
 			try
 			{
@@ -109,7 +109,7 @@ namespace BookHeaven.Reader.Services
 
 		public async Task<BookProgress?> GetBookProgress(Guid profileId, Guid bookId)
 		{
-			string endpoint = $"api/profiles/{profileId}/{bookId}";
+			var endpoint = $"api/profiles/{profileId}/{bookId}";
 			try
 			{
 				var response = await _httpClient.GetFromJsonAsync<BookProgress>(endpoint);
@@ -138,7 +138,7 @@ namespace BookHeaven.Reader.Services
 				 * exist before downloading it.
 				 * This way we can remove the relations without affecting the UI and use the generic Save method instead of having a specific one just for the book.
 				 */
-				Book localBook = book.Clone();
+				var localBook = book.Clone();
 				if (localBook.Author != null)
 				{
 					await databaseService.AddOrUpdate(localBook.Author, true);
@@ -177,14 +177,14 @@ namespace BookHeaven.Reader.Services
 
 		public async Task UpdateBookProgress(BookProgress progress)
 		{
-			string endpoint = "api/progress/update";
+			var endpoint = "api/progress/update";
 
 			try
 			{
-				HttpResponseMessage response = await _httpClient.PostAsJsonAsync(endpoint, progress);
+				var response = await _httpClient.PostAsJsonAsync(endpoint, progress);
 				if(!response.IsSuccessStatusCode)
 				{
-					string errorResponse = await response.Content.ReadAsStringAsync();
+					var errorResponse = await response.Content.ReadAsStringAsync();
 					throw new Exception($"Server responded with {response.StatusCode}: {errorResponse}");
 				}
 			}
