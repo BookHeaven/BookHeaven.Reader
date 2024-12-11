@@ -9,6 +9,7 @@ using BookHeaven.Reader.ViewModels;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Enums;
+using BookHeaven.Reader.Extensions;
 using CommunityToolkit.Maui.Alerts;
 using Style = EpubManager.Entities.Style;
 #if ANDROID
@@ -160,12 +161,12 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        _epubBook = await EpubReader.ReadAsync(Path.Combine(MauiProgram.BooksPath, $"{Id}.epub"), false);
+        _epubBook = await EpubReader.ReadAsync(_book!.GetEpubPath(), false);
         if (_totalWords == 0) _totalWords = _epubBook.Content.GetWordCount();
         if (_styles == null)
         {
             _styles = _epubBook.Content.Styles;
-            _ = WriteToCache("styles", _styles);
+            _ = WriteToCache(CacheKey.Styles, _styles);
         }
 
         StateHasChanged();
@@ -175,8 +176,8 @@ public partial class Reader : IAsyncDisposable
     {
         try
         {
-            _styles = await LoadFromCache<IReadOnlyList<Style>>("styles");
-            var chapters = await LoadFromCache<List<EpubChapter?>>("progress");
+            _styles = await LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles);
+            var chapters = await LoadFromCache<List<EpubChapter?>>(CacheKey.Progress);
             if (chapters != null)
             {
                 _epubChapter = chapters[0]!;
@@ -195,14 +196,14 @@ public partial class Reader : IAsyncDisposable
     {
         if (_epubChapter == null) return;
         List<EpubChapter?> chapters = [_epubChapter, _epubChapterPrev, _epubChapterNext];
-        await WriteToCache("progress", chapters);
+        await WriteToCache(CacheKey.Progress, chapters);
     }
 
-    private async Task<T?> LoadFromCache<T>(string name)
+    private async Task<T?> LoadFromCache<T>(CacheKey key)
     {
         try
         {
-            var json = await File.ReadAllTextAsync(Path.Combine(MauiProgram.CachePath, $"{Id}-{name}.cache"));
+            var json = await File.ReadAllTextAsync(_book!.GetCachePath(key));
             return JsonSerializer.Deserialize<T>(json)!;
         }
         catch (FileNotFoundException)
@@ -211,10 +212,10 @@ public partial class Reader : IAsyncDisposable
         }
     }
 
-    private async Task WriteToCache<T>(string name, T item)
+    private async Task WriteToCache<T>(CacheKey key, T item)
     {
         var json = JsonSerializer.Serialize(item);
-        await File.WriteAllTextAsync(Path.Combine(MauiProgram.CachePath, $"{Id}-{name}.cache"), json);
+        await File.WriteAllTextAsync(_book!.GetCachePath(key), json);
     }
 
 
