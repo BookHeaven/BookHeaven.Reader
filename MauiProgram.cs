@@ -29,6 +29,7 @@ namespace BookHeaven.Reader
 			builder.Services.AddSingleton<AppStateService>();
 			builder.Services.AddEpubManager(true);
 
+			builder.Services.AddScoped<BookManager>();
 			builder.Services.AddScoped<IAppsService, AppsService>();
 			builder.Services.AddTransient<IServerService, ServerService>();
 			builder.Services.AddSingleton<LifeCycleService>();

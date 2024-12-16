@@ -12,6 +12,7 @@ public partial class Books
 {
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private IDatabaseService DatabaseService { get; set; } = null!;
+    [Inject] private BookManager BookManager { get; set; } = null!;
 
     private enum Filter
     {
@@ -20,13 +21,11 @@ public partial class Books
         [StringValue(nameof(Translations.ALL_M))]
         All
     }
-    
-    private List<Book> _books = [];
 
     private List<Book> FilteredBooks => _selectedFilter switch
     {
-        Filter.Reading => _books.GetReadingBooks(),
-        Filter.All => _books.ToList()
+        Filter.Reading => BookManager.Books.GetReadingBooks(),
+        Filter.All => BookManager.Books.ToList()
     };
     private Filter _selectedFilter;
     
@@ -36,9 +35,9 @@ public partial class Books
     protected override async Task OnInitializedAsync()
     {
         if (AppStateService.ProfileId == Guid.Empty) return;
-        _books = (await DatabaseService.GetAllIncluding<Book>(b => b.Author, b => b.Series,
+        BookManager.Books = (await DatabaseService.GetAllIncluding<Book>(b => b.Author, b => b.Series,
                 b => b.Progresses.Where(p => p.ProfileId == AppStateService.ProfileId)))
             ?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList()!;
-        _selectedFilter = _books.AnyReading() ? Filter.Reading : Filter.All;
+        _selectedFilter = BookManager.Books.AnyReading() ? Filter.Reading : Filter.All;
     }
 }

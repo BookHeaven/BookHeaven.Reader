@@ -3,7 +3,7 @@
 @using BookHeaven.Reader.Components.Pages.Books.Components
 @layout BooksLayout
 
-@if (_books.Count == 0)
+@if (BookManager.Books.Count == 0)
 {
     <Message Content="@Translations.NO_BOOKS_FOUND"/>
     return;
@@ -20,7 +20,7 @@
 
 <RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />
 
-<div class="p-3 grid grid-cols-[repeat(auto-fill,120px)] gap-2 justify-evenly">
+<div class="grid-cols-[repeat(auto-fill,120px)] grid justify-evenly gap-2 p-3">
     @if (FilteredBooks.Count == 0)
     {
         <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
@@ -31,9 +31,9 @@
         {
             <ContextMenuTrigger MenuId="BookMenu" Data="@book">
                 <a class="flex flex-col" href="/reader/@book.BookId">
-                    <div class="cover h-[190px] relative w-full">
-                        <img class="h-full w-full" src="@book.CoverUrl" alt=""/>
-                        <span class="progress-badge -top-[1px] w-[40%] absolute right-0 font-bold">
+                    <div class="cover relative h-[190px] w-full">
+                        <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" alt=""/>
+                        <span class="progress-badge absolute -top-[1px] right-0 w-[40%] font-bold">
                         <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
                             @if (book.ReadingStatus() != BookStatus.New)
                             {
