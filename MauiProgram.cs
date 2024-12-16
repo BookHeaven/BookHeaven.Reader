@@ -26,13 +26,16 @@ namespace BookHeaven.Reader
 				.UseMauiCommunityToolkit();
 
 			builder.Services.AddDomain(FileSystem.AppDataDirectory, DependencyInjection.DatabaseInjectionType.Service);
-			builder.Services.AddSingleton<AppStateService>();
 			builder.Services.AddEpubManager(true);
+			
+			
+			builder.Services.AddSingleton<AppStateService>();
+			builder.Services.AddSingleton<LifeCycleService>();
 
 			builder.Services.AddScoped<BookManager>();
 			builder.Services.AddScoped<IAppsService, AppsService>();
+			
 			builder.Services.AddTransient<IServerService, ServerService>();
-			builder.Services.AddSingleton<LifeCycleService>();
 			builder.Services.AddTransient<AlertService>();
 
 			builder.Services.AddBlazorContextMenu();
