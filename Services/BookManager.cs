@@ -32,9 +32,9 @@ public class BookManager(IDatabaseService databaseService)
     {
         var progress = new BookProgress()
         {
-            BookProgressId = book!.Progress().BookProgressId,
-            ProfileId = book!.Progress().ProfileId,
-            BookId = book!.BookId,
+            BookProgressId = book.Progress().BookProgressId,
+            ProfileId = book.Progress().ProfileId,
+            BookId = book.BookId,
         };
         await databaseService.AddOrUpdate(progress);
         await databaseService.SaveChanges();
@@ -45,8 +45,8 @@ public class BookManager(IDatabaseService databaseService)
     
     public async Task DeleteBook(Book book)
     {
-        var epubPath = book!.GetEpubPath();
-        var coverPath = book!.GetCoverPath();
+        var epubPath = book.EpubPath(MauiProgram.BooksPath);
+        var coverPath = book.CoverPath(MauiProgram.CoversPath);
         
         if (File.Exists(epubPath))
         {
@@ -58,6 +58,7 @@ public class BookManager(IDatabaseService databaseService)
         }
         await ClearCache(book, false);
         await databaseService.Delete<Book>(book.BookId);
+        await databaseService.SaveChanges();
         Books.Remove(book);
         await Toast.Make("Book has been deleted").Show();
     }

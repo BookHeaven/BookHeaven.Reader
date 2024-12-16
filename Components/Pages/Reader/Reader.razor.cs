@@ -7,6 +7,7 @@ using Microsoft.JSInterop;
 using BookHeaven.Reader.Services;
 using BookHeaven.Reader.ViewModels;
 using BookHeaven.Domain.Entities;
+using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Extensions;
@@ -166,7 +167,7 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        _epubBook = await EpubReader.ReadAsync(_book!.GetEpubPath(), false);
+        _epubBook = await EpubReader.ReadAsync(_book!.EpubPath(MauiProgram.BooksPath), false);
         if (_totalWords == 0) _totalWords = _epubBook.Content.GetWordCount();
         if (_styles.Count == 0)
         {

@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using BookHeaven.Domain.Entities;
+using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Services;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
@@ -154,8 +155,8 @@ namespace BookHeaven.Reader.Services
 				await databaseService.AddOrUpdate(localBook);
 				await databaseService.SaveChanges();
 
-				await DownloadFile(localBook.EpubUrl, localBook.BookId);
-				await DownloadFile(localBook.CoverUrl, localBook.BookId);
+				await DownloadFile(localBook.EpubUrl(), localBook.BookId);
+				await DownloadFile(localBook.CoverUrl(), localBook.BookId);
 
 				var localProgress = await databaseService.GetBy<BookProgress>(p => p.ProfileId == profileId && p.BookId == localBook.BookId);
 				var progress = await GetBookProgress(profileId, localBook.BookId);
