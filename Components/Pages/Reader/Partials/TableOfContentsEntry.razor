@@ -19,7 +19,7 @@
             @foreach (var chapter in EpubChapter.Chapters)
             {
                 <li>
-                    <SpineItem EpubChapter="chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" DoScroll="@DoScroll"/>
+                    <TableOfContentsEntry EpubChapter="chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" DoScroll="@DoScroll"/>
                 </li>
             }
         </ul>

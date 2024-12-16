@@ -8,43 +8,20 @@ namespace BookHeaven.Reader.ViewModels
 		[ObservableProperty]
 		private int currentChapter = -1;
 		[ObservableProperty]
-		private int? currentPage = null;
+		private int? currentPage;
 		[ObservableProperty]
-		private int? totalPages = null;
+		private int? totalPages;
 		[ObservableProperty]
-		private int? totalPagesPrev, totalPagesNext = null;
+		private int? totalPagesPrev, totalPagesNext;
 		[ObservableProperty]
-		private int? wordsPerPage = null;
-		//[ObservableProperty]
-		//private int wordsReadSoFar = -1;
+		private int? wordsPerPage;
 
 		[ObservableProperty]
-		private bool showOverlay = false;
+		private bool showOverlay;
 		[ObservableProperty]
-		private bool showSpine = false;
-		//[ObservableProperty]
-		//private bool showFontSettings = false;
-		//[ObservableProperty]
-		//private bool showPageSettings = false;
+		private bool showToc;
 
-		//[ObservableProperty]
-		//private double fontSize = 16;
-		//[ObservableProperty]
-		//private double lineHeight = 0;
-		//[ObservableProperty]
-		//private double letterSpacing = 0;
-		//[ObservableProperty]
-		//private double wordSpacing = 0.25;
-		//[ObservableProperty]
-		//private double paragraphSpacing = 10;
-		//[ObservableProperty]
-		//private double textIndent = 1;
-		//[ObservableProperty]
-		//private double horizontalMargin = 3;
-		//[ObservableProperty]
-		//private double verticalMargin = 1;
-
-		partial void OnShowSpineChanged(bool value)
+		partial void OnShowTocChanged(bool value)
 		{
 			if(value) ShowOverlay = false;
 		}

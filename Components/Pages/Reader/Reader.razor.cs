@@ -44,7 +44,7 @@ public partial class Reader : IAsyncDisposable
     private BookProgress _bookProgress = null!;
     private EpubBook? _epubBook;
     private bool _refreshTotalPages;
-    private IReadOnlyList<Style>? _styles;
+    private IReadOnlyList<Style> _styles = [];
 
     private int? _totalPagesPrev, _totalPagesNext;
     private int _totalWords;
@@ -168,7 +168,7 @@ public partial class Reader : IAsyncDisposable
     {
         _epubBook = await EpubReader.ReadAsync(_book!.GetEpubPath(), false);
         if (_totalWords == 0) _totalWords = _epubBook.Content.GetWordCount();
-        if (_styles == null)
+        if (_styles.Count == 0)
         {
             _styles = _epubBook.Content.Styles;
             _ = WriteToCache(CacheKey.Styles, _styles);
@@ -201,7 +201,7 @@ public partial class Reader : IAsyncDisposable
     {
         try
         {
-            _styles = await LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles);
+            _styles = await LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles) ?? [];
             var chapters = await LoadFromCache<List<SpineItem?>>(CacheKey.Progress);
             if (chapters != null)
             {

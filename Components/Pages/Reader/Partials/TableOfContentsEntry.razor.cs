@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Reader.Partials;
 
-public partial class SpineItem
+public partial class TableOfContentsEntry
 {
     private bool _collapsed = true;
     private bool _isSelected = false;

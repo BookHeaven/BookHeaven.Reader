@@ -1,14 +1,14 @@
 ﻿@using EpubManager.Entities
 @implements IAsyncDisposable
 
-<div @onclick="@(() => ShowSpineChanged.InvokeAsync(false))" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
+<div @onclick="@(() => ShowTocChanged.InvokeAsync(false))" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
     <div id="spine" @onclick:stopPropagation="true" @onclick:preventDefault="true" class="w-[70%] border-solid border-r-2 z-[1001] h-full overflow-y-auto border-black bg-white">
         <div class="ms-2 text-center font-bold">Index</div>
         @if (_jsModule != null)
         {
-            foreach (var chapter in Index!)
+            foreach (var chapter in Chapters)
             {
-                <SpineItem EpubChapter="@chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" DoScroll="DoScroll"/>
+                <TableOfContentsEntry EpubChapter="@chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" DoScroll="DoScroll"/>
             }
             
         }
@@ -18,9 +18,9 @@
 @code {
     [Inject] IJSRuntime JsRuntime { get; set; } = null!;
 
-    [Parameter] public bool ShowSpine { get; set; }
-    [Parameter] public EventCallback<bool> ShowSpineChanged { get; set; }
-    [Parameter] public IReadOnlyList<EpubChapter>? Index { get; set; }
+    [Parameter] public bool ShowToc { get; set; }
+    [Parameter] public EventCallback<bool> ShowTocChanged { get; set; }
+    [Parameter] public IReadOnlyList<EpubChapter> Chapters { get; set; } = [];
     [Parameter] public string? CurrentChapterId { get; set; }
     [Parameter] public EventCallback<string> OnChapterSelected { get; set; }
 
@@ -30,7 +30,7 @@
     {
         if (firstRender)
         {
-            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/Spine.razor.js");
+            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TableOfContents.razor.js");
             StateHasChanged();
         }
     }
