@@ -8,12 +8,12 @@ public partial class SpineItem
     private bool _collapsed = true;
     private bool _isSelected = false;
 
-    private string? _lastSelectedChapterPath = null;
+    private string? _lastSelectedChapterId = null;
     private bool _shouldScroll = false;
 
     [Parameter] [EditorRequired] public EpubChapter EpubChapter { get; set; } = null!;
 
-    [Parameter] [EditorRequired] public string? CurrentChapterPath { get; set; }
+    [Parameter] [EditorRequired] public string? CurrentChapterId { get; set; }
 
     [Parameter] public EventCallback<string> OnChapterSelected { get; set; }
 
@@ -26,23 +26,23 @@ public partial class SpineItem
 
     protected override void OnInitialized()
     {
-        if (EpubChapter.Chapters?.Count > 0) _collapsed = !EpubChapter.ContainsChapter(CurrentChapterPath!);
+        if (EpubChapter.Chapters.Count > 0) _collapsed = !EpubChapter.ContainsChapter(CurrentChapterId!);
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender && _shouldScroll) DoScroll.InvokeAsync(EpubChapter.Path);
+        if (firstRender && _shouldScroll) DoScroll.InvokeAsync(EpubChapter.ItemId);
     }
 
     protected override void OnParametersSet()
     {
         _shouldScroll = false;
-        if (EpubChapter.Path != null) _isSelected = CurrentChapterPath == EpubChapter.Path;
+        if (EpubChapter.ItemId != null) _isSelected = CurrentChapterId == EpubChapter.ItemId;
 
-        if (_isSelected && _lastSelectedChapterPath != EpubChapter.Path)
+        if (_isSelected && _lastSelectedChapterId != EpubChapter.ItemId)
         {
             _shouldScroll = true;
-            _lastSelectedChapterPath = EpubChapter.Path;
+            _lastSelectedChapterId = EpubChapter.ItemId;
         }
     }
 }

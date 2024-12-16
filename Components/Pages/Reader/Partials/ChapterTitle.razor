@@ -19,9 +19,9 @@
 </div>
 
 @code {
-    [Parameter] public string? Title { get; set; }
+    [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public int? CurrentPage { get; set; }
     [Parameter] public int? TotalPages { get; set; }
 
-    public int MaxCharacters { get; set; } = 40;
+    private int MaxCharacters { get; set; } = 40;
 }

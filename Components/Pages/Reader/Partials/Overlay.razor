@@ -2,7 +2,7 @@
 @inject NavigationManager NavigationManager
 
 <div class="z-[1000] absolute bottom-0 left-0 right-0 top-0 flex flex-col" @onclick="@(() => ShowOverlayChanged.InvokeAsync(false))">
-    <div class="border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white pr-2" @onclick:stopPropagation="true">
+    <div class="border-solid border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white pr-2" @onclick:stopPropagation="true">
         <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
             <i class="bi bi-arrow-left text-xl"></i>
         </Button>
@@ -16,7 +16,7 @@
     {
         <PageSettings ProfileSettings="ProfileSettings"/>
     }
-    <div id="bottombar" class="border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
+    <div id="bottombar" class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
         <div class="flex items-center gap-3 px-2">
             <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Previous))">
                 <i class="bi bi-chevron-double-left text-xl"></i>

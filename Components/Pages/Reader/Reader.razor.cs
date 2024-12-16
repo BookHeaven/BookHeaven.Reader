@@ -43,17 +43,22 @@ public partial class Reader : IAsyncDisposable
     private bool _bookLoading = true;
     private BookProgress _bookProgress = null!;
     private EpubBook? _epubBook;
-    private EpubChapter? _epubChapter, _epubChapterPrev, _epubChapterNext;
     private bool _refreshTotalPages;
     private IReadOnlyList<Style>? _styles;
 
     private int? _totalPagesPrev, _totalPagesNext;
     private int _totalWords;
-    
 
-    private decimal Progress => _epubBook != null && _epubChapter != null && _totalWords != 0
+    private SpineItem? _current, _previous, _next;
+    private SpineItem? Current => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter) ?? _current;
+	private SpineItem? Next => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter + 1) ?? _next;
+	private SpineItem? Previous => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter - 1) ?? _previous;
+    private EpubChapter? CurrentChapter => _epubBook?.Content.GetChapterFromTableOfContents(Current?.Id);
+    private string ChapterTitle => CurrentChapter?.Title ?? Current?.Title ?? string.Empty;
+    
+	private decimal Progress => _epubBook != null && Current != null && _totalWords != 0
         ? (_epubBook.Content.GetWordCount(_readerViewModel.CurrentChapter) +
-           _epubChapter.GetWordsPerPage((_readerViewModel.TotalPages ?? 0) + 1) *
+           Current.GetWordsPerPage((_readerViewModel.TotalPages ?? 0) + 1) *
            (_readerViewModel.CurrentPage + 1 ?? 0)) / (decimal)_totalWords * 100
         : 0;
 
@@ -109,7 +114,7 @@ public partial class Reader : IAsyncDisposable
 
 
         await LoadFromCache();
-        if (_epubChapter == null)
+        if (Current == null)
             await LoadEpubBook();
         else
             _ = LoadEpubBook();
@@ -123,7 +128,7 @@ public partial class Reader : IAsyncDisposable
             _readerViewModel.TotalPages = _bookProgress.PageCount;
             _totalPagesPrev = _bookProgress.PageCountPrev;
             _totalPagesNext = _bookProgress.PageCountNext;
-            NavigateToChapter(_bookProgress.Page, _bookProgress.Chapter, false, false);
+            NavigateToChapter(_bookProgress.Page, _bookProgress.Chapter, false);
             _refreshTotalPages = true;
         }
         else
@@ -169,7 +174,27 @@ public partial class Reader : IAsyncDisposable
             _ = WriteToCache(CacheKey.Styles, _styles);
         }
 
-        StateHasChanged();
+        if(_current != null && _current.Id == Current?.Id)
+        {
+            Current!.TextContent = _current.TextContent;
+			Current.IsContentProcessed = _current.IsContentProcessed;
+            _current = null;
+		}
+
+		if (_previous != null && _previous.Id == Previous?.Id)
+		{
+			Previous!.TextContent = _previous.TextContent;
+			Previous.IsContentProcessed = _previous.IsContentProcessed;
+            _previous = null;
+		}
+
+		if (_next != null && _next.Id == Next?.Id)
+		{
+			Next!.TextContent = _next.TextContent;
+			Next.IsContentProcessed = _next.IsContentProcessed;
+            _next = null;
+		}
+		StateHasChanged();
     }
 
     private async Task LoadFromCache()
@@ -177,13 +202,14 @@ public partial class Reader : IAsyncDisposable
         try
         {
             _styles = await LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles);
-            var chapters = await LoadFromCache<List<EpubChapter?>>(CacheKey.Progress);
+            var chapters = await LoadFromCache<List<SpineItem?>>(CacheKey.Progress);
             if (chapters != null)
             {
-                _epubChapter = chapters[0]!;
-                _epubChapterPrev = chapters[1];
-                _epubChapterNext = chapters[2];
+                _current = chapters[0]!;
+                _previous = chapters[1];
+                _next = chapters[2];
             }
+            StateHasChanged();
         }
         catch (Exception)
         {
@@ -194,8 +220,8 @@ public partial class Reader : IAsyncDisposable
 
     private async Task UpdateChapterCache()
     {
-        if (_epubChapter == null) return;
-        List<EpubChapter?> chapters = [_epubChapter, _epubChapterPrev, _epubChapterNext];
+        if (Current == null) return;
+        List<SpineItem?> chapters = [Current, Previous, Next];
         await WriteToCache(CacheKey.Progress, chapters);
     }
 
@@ -225,45 +251,21 @@ public partial class Reader : IAsyncDisposable
         {
             case nameof(ReaderViewModel.CurrentChapter):
                 if (_epubBook == null || _readerViewModel.CurrentChapter == -1) return;
-
-                if (_epubChapter == null)
+                
+                if (Current is { IsContentProcessed: false })
                 {
-                    _epubChapter = _epubBook!.Content.ReadingOrder[_readerViewModel.CurrentChapter];
-                    var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
-                        _epubChapter.Path!);
-                    _epubChapter.ParagraphClassName = getContent.mostFrequentClassName;
-                    _epubChapter.Content = getContent.content;
-                    _epubChapter.Styles = getContent.styles;
-
+                    Current.TextContent = await EpubReader.ApplyTextContentProcessing(Current.TextContent);
+                    Current.IsContentProcessed = true;
                 }
-
-                if (_epubChapterPrev == null)
+                if (Previous is { IsContentProcessed: false })
                 {
-                    _epubChapterPrev = _readerViewModel.CurrentChapter > 0
-                        ? _epubBook.Content.ReadingOrder[_readerViewModel.CurrentChapter - 1]
-                        : null;
-                    if (_epubChapterPrev != null)
-                    {
-                        var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,_epubChapterPrev.Path!);
-                        _epubChapterPrev.ParagraphClassName = getContent.mostFrequentClassName;
-                        _epubChapterPrev.Content = getContent.content;
-                        _epubChapterPrev.Styles = getContent.styles;
-                    }
+                    Previous.TextContent = await EpubReader.ApplyTextContentProcessing(Previous.TextContent);
+                    Previous.IsContentProcessed = true;
                 }
-
-                if (_epubChapterNext == null)
+                if (Next is { IsContentProcessed: false })
                 {
-                    _epubChapterNext = _readerViewModel.CurrentChapter < _epubBook.Content.ReadingOrder.Count - 1
-                        ? _epubBook.Content.ReadingOrder[_readerViewModel.CurrentChapter + 1]
-                        : null;
-                    if (_epubChapterNext != null)
-                    {
-                        var getContent = await EpubReader.GetChapterContentAsync(_epubBook.FilePath, _epubBook.RootFolder,
-                            _epubChapterNext.Path!);
-                        _epubChapterNext.ParagraphClassName = getContent.mostFrequentClassName;
-                        _epubChapterNext.Content = getContent.content;
-                        _epubChapterNext.Styles = getContent.styles;
-                    }
+                    Next.TextContent = await EpubReader.ApplyTextContentProcessing(Next.TextContent);
+                    Next.IsContentProcessed = true;
                 }
 
                 _refreshTotalPages = true;
@@ -279,9 +281,9 @@ public partial class Reader : IAsyncDisposable
         }
     }
 
-    private void OnChapterSelected(string path)
+    private void OnChapterSelected(string itemId)
     {
-        NavigateToChapter(0, _epubBook!.Content.ReadingOrder.First(x => x.Value.Path == path).Key);
+        NavigateToChapter(0, _epubBook!.Content.Spine.FindIndex(x => x.Id == itemId));
     }
 
     private void OnSettingsChanged()
@@ -291,61 +293,55 @@ public partial class Reader : IAsyncDisposable
 
     private void OnGoToChapter(NavigationButton button)
     {
-        if (button == NavigationButton.Next)
+        switch (button)
         {
-            if (_readerViewModel.CurrentChapter < _epubBook!.Content.ReadingOrder.Count - 1)
+            case NavigationButton.Next:
             {
-                if (_totalPagesNext != null)
+                if (_readerViewModel.CurrentChapter < _epubBook!.Content.Spine.Count - 1)
                 {
-                    _totalPagesPrev = _readerViewModel.TotalPages;
-                    _readerViewModel.TotalPages = _totalPagesNext;
-                    _totalPagesNext = null;
-                    _epubChapterPrev = _epubChapter;
-                    _epubChapter = _epubChapterNext;
-                    _epubChapterNext = null;
+                    if (_totalPagesNext != null)
+                    {
+                        _totalPagesPrev = _readerViewModel.TotalPages;
+                        _readerViewModel.TotalPages = _totalPagesNext;
+                        _totalPagesNext = null;
+                    }
+
+                    _readerViewModel.CurrentPage = 0;
+                    _readerViewModel.CurrentChapter++;
                 }
 
-                _readerViewModel.CurrentPage = 0;
-                _readerViewModel.CurrentChapter++;
+                break;
             }
-        }
-        else if(button == NavigationButton.Previous)
-        {
-            if (_readerViewModel.CurrentChapter > 0)
+            case NavigationButton.Previous:
             {
-                if (_totalPagesPrev != null)
+                if (_readerViewModel.CurrentChapter > 0)
                 {
-                    _readerViewModel.CurrentPage = _totalPagesPrev;
-                    _totalPagesNext = _readerViewModel.TotalPages;
-                    _readerViewModel.TotalPages = _totalPagesPrev;
-                    _totalPagesPrev = null;
-                    _epubChapterNext = _epubChapter;
-                    _epubChapter = _epubChapterPrev;
-                    _epubChapterPrev = null;
+                    if (_totalPagesPrev != null)
+                    {
+                        _readerViewModel.CurrentPage = _totalPagesPrev;
+                        _totalPagesNext = _readerViewModel.TotalPages;
+                        _readerViewModel.TotalPages = _totalPagesPrev;
+                        _totalPagesPrev = null;
+                    }
+
+                    _readerViewModel.CurrentPage = 0;
+                    _readerViewModel.CurrentChapter--;
                 }
 
-                _readerViewModel.CurrentPage = 0;
-                _readerViewModel.CurrentChapter--;
+                break;
             }
         }
 
         _ = UpdateChapterCache();
     }
 
-    private void NavigateToChapter(int page, int chapter, bool resetTotalPages = true, bool resetChapters = true)
+    private void NavigateToChapter(int page, int chapter, bool resetTotalPages = true)
     {
         if (resetTotalPages)
         {
             _readerViewModel.TotalPages = null;
             _totalPagesPrev = null;
             _totalPagesNext = null;
-        }
-
-        if (resetChapters)
-        {
-            _epubChapter = null;
-            _epubChapterPrev = null;
-            _epubChapterNext = null;
         }
 
         _readerViewModel.CurrentPage = null;
@@ -390,9 +386,6 @@ public partial class Reader : IAsyncDisposable
                 _totalPagesPrev = _readerViewModel.TotalPages;
                 _readerViewModel.TotalPages = _totalPagesNext;
                 _totalPagesNext = null;
-                _epubChapterPrev = _epubChapter;
-                _epubChapter = _epubChapterNext;
-                _epubChapterNext = null;
             }
 
             _readerViewModel.CurrentPage = 0;
@@ -414,9 +407,6 @@ public partial class Reader : IAsyncDisposable
                 _totalPagesNext = _readerViewModel.TotalPages;
                 _readerViewModel.TotalPages = _totalPagesPrev;
                 _totalPagesPrev = null;
-                _epubChapterNext = _epubChapter;
-                _epubChapter = _epubChapterPrev;
-                _epubChapterPrev = null;
                 _readerViewModel.CurrentPage = _readerViewModel.TotalPages;
             }
             else
@@ -433,7 +423,7 @@ public partial class Reader : IAsyncDisposable
         return button switch
         {
             NavigationButton.Next => _readerViewModel.CurrentPage < _readerViewModel.TotalPages ||
-                                        _readerViewModel.CurrentChapter < _epubBook!.Content.ReadingOrder.Count - 1,
+                                        _readerViewModel.CurrentChapter < _epubBook!.Content.Spine.Count - 1,
             NavigationButton.Previous => _readerViewModel.CurrentPage > 0 || _readerViewModel.CurrentChapter > 0,
             _ => false
         };
@@ -458,9 +448,9 @@ public partial class Reader : IAsyncDisposable
         _refreshTotalPages = false;
         var pagesArray = await _module.InvokeAsync<int?[]>("GetPageCount");
 
-        _totalPagesPrev = pagesArray[0] != null ? pagesArray[0] - 1 : null;
+        _totalPagesPrev = pagesArray[0] - 1;
         _readerViewModel.TotalPages = pagesArray[1] - 1;
-        _totalPagesNext = pagesArray[2] != null ? pagesArray[2] - 1 : null;
+        _totalPagesNext = pagesArray[2] - 1;
         if (_readerViewModel.CurrentPage > _readerViewModel.TotalPages)
             _readerViewModel.CurrentPage = _readerViewModel.TotalPages;
 
@@ -486,14 +476,14 @@ public partial class Reader : IAsyncDisposable
         var elapsedTime = _exitTime - _entryTime - _totalSuspendedTime;
         _bookProgress.ElapsedTime += elapsedTime;
         _bookProgress.LastRead = DateTimeOffset.Now;
-        if (_readerViewModel.CurrentChapter == _epubBook!.Content.ReadingOrder.Count - 1 &&
+        if (_readerViewModel.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
             _readerViewModel.CurrentPage == _readerViewModel.TotalPages) _bookProgress.EndDate = DateTimeOffset.Now;
     }
 
     private async Task SaveState()
     {
         _exitTime = DateTime.Now;
-        if (_profileSettings != null) await DatabaseService.AddOrUpdate(_profileSettings!);
+        await DatabaseService.AddOrUpdate(_profileSettings);
         UpdateProgress();
         SaveElapsedTime();
         await DatabaseService.AddOrUpdate(_bookProgress);

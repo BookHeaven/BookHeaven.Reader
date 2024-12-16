@@ -2,11 +2,15 @@
 @implements IAsyncDisposable
 
 <div @onclick="@(() => ShowSpineChanged.InvokeAsync(false))" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
-    <div id="spine" @onclick:stopPropagation="true" @onclick:preventDefault="true" class="w-[70%] border-r-2 z-[1001] h-full overflow-y-auto border-black bg-white">
+    <div id="spine" @onclick:stopPropagation="true" @onclick:preventDefault="true" class="w-[70%] border-solid border-r-2 z-[1001] h-full overflow-y-auto border-black bg-white">
         <div class="ms-2 text-center font-bold">Index</div>
         @if (_jsModule != null)
         {
-            <SpineItem EpubChapter="@Index!.First()" CurrentChapterPath="@ChapterPath" OnChapterSelected="@OnChapterSelected" DoScroll="DoScroll"/>
+            foreach (var chapter in Index!)
+            {
+                <SpineItem EpubChapter="@chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" DoScroll="DoScroll"/>
+            }
+            
         }
     </div>
 </div>
@@ -17,7 +21,7 @@
     [Parameter] public bool ShowSpine { get; set; }
     [Parameter] public EventCallback<bool> ShowSpineChanged { get; set; }
     [Parameter] public IReadOnlyList<EpubChapter>? Index { get; set; }
-    [Parameter] public string? ChapterPath { get; set; }
+    [Parameter] public string? CurrentChapterId { get; set; }
     [Parameter] public EventCallback<string> OnChapterSelected { get; set; }
 
     private IJSObjectReference? _jsModule;
@@ -31,9 +35,9 @@
         }
     }
 
-    private async Task DoScroll(string path)
+    private async Task DoScroll(string itemId)
     {
-        await _jsModule!.InvokeVoidAsync("ScrollToChapterInIndex", path);
+        await _jsModule!.InvokeVoidAsync("ScrollToChapterInIndex", itemId);
     }
 
     public async ValueTask DisposeAsync()
