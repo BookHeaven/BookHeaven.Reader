@@ -43,6 +43,12 @@
 		widows: 2;
 	}
 
+	#viewer > .chapter > p > span:first-child {
+		font-size: calc(var(--font-size) * 2px) !important;
+		margin-top: 0;
+		line-height: 1;
+	}
+
 	#viewer > .chapter.current {
 		transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
 	}
