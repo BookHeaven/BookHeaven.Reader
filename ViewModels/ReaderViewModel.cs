@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using EpubManager.Entities;
 
 namespace BookHeaven.Reader.ViewModels
 {
