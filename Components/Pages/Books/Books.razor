@@ -34,7 +34,7 @@
                     <div class="cover relative h-[190px] w-full">
                         <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" alt=""/>
                         <span class="progress-badge absolute -top-[1px] right-0 w-[40%] font-bold">
-                        <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
+                            <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
                             @if (book.ReadingStatus() != BookStatus.New)
                             {
                                 <span>@book.Progress()!.Progress.ToString("0.##")%</span>
@@ -50,5 +50,4 @@
             </ContextMenuTrigger>
         }
     }
-
 </div>
