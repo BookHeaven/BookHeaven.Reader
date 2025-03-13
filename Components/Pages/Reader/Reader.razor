@@ -37,16 +37,15 @@
 
 	@($"#viewer > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",#viewer > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",#viewer > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",#viewer > .chapter.next .{Next.ParagraphClassName}" : "")}") {
 		margin: calc(var(--paragraph-spacing) * 1pt) 0!important;
-		line-height: calc(1.5 + var(--line-height)) !important;
+		/* line-height: calc(1.5 + var(--line-height)) !important; */
 		word-break: auto-phrase;
 		orphans: 1;
 		widows: 2;
 	}
 
 	#viewer > .chapter > p > span:first-child {
-		font-size: calc(var(--font-size) * 2px) !important;
-		margin-top: 0;
-		line-height: 1;
+		line-height: inherit !important;
+		height: auto !important;
 	}
 
 	#viewer > .chapter.current {
