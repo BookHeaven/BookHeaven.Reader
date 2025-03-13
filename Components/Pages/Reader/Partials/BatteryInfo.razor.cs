@@ -5,12 +5,6 @@ public partial class BatteryInfo : IDisposable
     private string _batteryIcon = "battery-empty";
     private int _batteryLevel = 100;
 
-    public void Dispose()
-    {
-        Battery.Default.BatteryInfoChanged -= OnBatteryInfoChanged;
-        GC.SuppressFinalize(this);
-    }
-
     protected override void OnInitialized()
     {
         RefreshBatteryInfo(Battery.Default.ChargeLevel, Battery.Default.State);
@@ -47,5 +41,11 @@ public partial class BatteryInfo : IDisposable
         }
 
         InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Battery.Default.BatteryInfoChanged -= OnBatteryInfoChanged;
+        GC.SuppressFinalize(this);
     }
 }
