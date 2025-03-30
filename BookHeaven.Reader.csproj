@@ -133,8 +133,4 @@
 		<AndroidAarLibrary Remove="screenshots\**" />
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="npm run buildcss" />
-	</Target>
-
 </Project>

@@ -7,6 +7,8 @@ namespace BookHeaven.Reader
 	public partial class App : Application
 	{
 		private readonly LifeCycleService _lifeCycleService;
+		
+		private Window? _window;
 
 		public App(LifeCycleService lifeCycleService)
 		{
@@ -18,17 +20,21 @@ namespace BookHeaven.Reader
 
 		protected override Window CreateWindow(IActivationState? activationState)
 		{
-			var window = new Window(new MainPage() { Title = "BookHeaven"});
+			if (_window is null)
+			{
+				_window = new Window(new MainPage() { Title = "BookHeaven"});
 #if WINDOWS
-			window.Width = 562;
-			window.Height = 750;
+				_window.Width = 562;
+				_window.Height = 750;
 #endif
-			window.Activated += (sender, args) => _lifeCycleService.OnResume();
-			window.Deactivated += (sender, args) => _lifeCycleService.OnPause();
-			window.Stopped += (sender, args) => _lifeCycleService.OnStop();
-			window.Destroying += (sender, args) => _lifeCycleService.OnDestroy();
+				_window.Activated += (sender, args) => _lifeCycleService.OnResume();
+				_window.Deactivated += (sender, args) => _lifeCycleService.OnPause();
+				_window.Stopped += (sender, args) => _lifeCycleService.OnStop();
+				_window.Destroying += (sender, args) => _lifeCycleService.OnDestroy();
+			}
+			
 
-			return window;
+			return _window;
 		}
 
 	}
