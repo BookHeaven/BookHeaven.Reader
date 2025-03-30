@@ -60,13 +60,6 @@
 		max-height: var(--page-height);
 	}
 </style>
-@if (_styles.Count > 0 && Current?.Styles.Count > 0)
-{
-	foreach (var style in _styles.Where(style => Current?.Styles.Any(s => s.Contains(style.Name)) == true))
-    {
-	    <style>@style.Content</style>
-    }
-}
 
 @if (_bookLoading)
 {
@@ -94,28 +87,39 @@
 <Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="_profileSettings"/>
 <div class="flex h-screen flex-col">
 
-    <div id="viewer" class="flex-1 overflow-hidden">
-	    <div class="chapter current">
-		    @if (Current?.IsContentProcessed == true)
-		    {
-			    @((MarkupString)Current.TextContent)
-		    }
-	    </div>
-	    <div class="chapter prev invisible">
-		    @if(Previous?.IsContentProcessed == true)
-		    {
-			    @((MarkupString)Previous.TextContent)
-		    }
-	    </div>
-	    <div class="chapter next invisible">
-		    @if(Next?.IsContentProcessed == true)
-		    {
-			    @((MarkupString)Next.TextContent)
-		    }
-	    </div>
-    </div>
+	<div id="viewer" class="flex-1 overflow-hidden">
+		@if (_styles.Count > 0 && Current?.Styles.Count > 0)
+		{
+			foreach (var style in _styles.Where(style => Current?.Styles.Any(s => s.Contains(style.Name)) == true))
+			{
+				<style>
+					@@scope {
+						@style.Content
+					}
+				</style>
+			}
+		}
+		<div class="chapter current">
+			@if (Current?.IsContentProcessed == true)
+			{
+				@((MarkupString)Current.TextContent)
+			}
+		</div>
+		<div class="chapter prev invisible">
+			@if (Previous?.IsContentProcessed == true)
+			{
+				@((MarkupString)Previous.TextContent)
+			}
+		</div>
+		<div class="chapter next invisible">
+			@if (Next?.IsContentProcessed == true)
+			{
+				@((MarkupString)Next.TextContent)
+			}
+		</div>
+	</div>
 
-    <div class="relative mt-auto flex h-[24px] gap-2 px-2">
+    <div class="relative mt-auto flex h-[24px] gap-2 mx-2">
         @if (!_bookLoading)
         {
             <Clock/>
