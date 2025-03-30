@@ -23,6 +23,11 @@ public class OverlayService
     public void ToggleOverlay()
     {
         IsOverlayVisible = !IsOverlayVisible;
+        if (IsOverlayVisible)
+        {
+            CurrentPanel = Panel.None;
+            IsTocVisible = false;
+        }  
         OnOverlayChanged?.Invoke();
     }
     
