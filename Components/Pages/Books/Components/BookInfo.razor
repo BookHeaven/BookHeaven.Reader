@@ -28,7 +28,7 @@
 		<div class="grid-cols-[150px_1fr] grid items-start gap-5">
 			<div class="grid gap-2">
 				<img src="@Book.GetCoverAsBase64(MauiProgram.CoversPath)" class="block w-full" alt=""/>
-				<span class="bg-gray-600 px-2 py-1 text-center text-xs text-white">
+				<span class="bg-neutral-600 px-2 py-1 text-center text-xs text-white">
 					@switch (Book.ReadingStatus())
 					{
 						case BookStatus.New:

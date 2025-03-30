@@ -19,12 +19,8 @@
             <h1 class="mt-10 text-xl">@string.Format(Translations.WELCOME, "BookHeaven")</h1>
             <p class="mt-2">@Translations.SET_UP</p>
             <p class="mt-10">@Translations.ENTER_SERVER_URL</p>
-            <input type="text" class="border-2 mt-2 w-full rounded border-gray-400 p-2.5 focus:ring-black-500" placeholder="https://yourbookheaven.com" @bind="AppStateService.ServerUrl"/>
+            <input type="text" class="border-2 mt-2 w-full rounded border-neutral-400 p-2.5 focus:ring-black-500" placeholder="https://yourbookheaven.com" @bind="AppStateService.ServerUrl"/>
             <small>@Translations.HTTPS_ONLY</small>
-            @*<select class="border-2 mt-2 rounded border-gray-400 p-2.5 focus:ring-black-500">
-                <option>@Translations.LANG_EN</option>
-                <option>@Translations.LANG_ES</option>
-            </select>*@
             @switch (_checkState)
             {
                 case ConnectionState.Unchecked:
