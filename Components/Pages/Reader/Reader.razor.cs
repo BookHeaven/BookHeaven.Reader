@@ -23,6 +23,7 @@ public partial class Reader : IAsyncDisposable
 {
     [Parameter] public Guid Id { get; set; }
     [Inject] private AppStateService AppStateService { get; set; } = null!;
+    [Inject] private OverlayService OverlayService { get; set; } = null!;
     [Inject] private IDatabaseService DatabaseService { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
@@ -65,6 +66,7 @@ public partial class Reader : IAsyncDisposable
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        OverlayService.OnOverlayChanged -= StateHasChanged;
         _readerViewModel.PropertyChanged -= ViewModel_PropertyChanged;
         LifeCycleService.Resumed -= OnResumed;
         LifeCycleService.Paused -= OnPaused;
@@ -82,6 +84,8 @@ public partial class Reader : IAsyncDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        OverlayService.Init();
+        OverlayService.OnOverlayChanged += StateHasChanged;
 #if ANDROID
             var activity = Platform.CurrentActivity!;
             activity.Window?.AddFlags(WindowManagerFlags.Fullscreen);
@@ -287,11 +291,6 @@ public partial class Reader : IAsyncDisposable
         NavigateToChapter(0, _epubBook!.Content.Spine.FindIndex(x => x.Id == itemId));
     }
 
-    private void OnSettingsChanged()
-    {
-        _refreshTotalPages = true;
-    }
-
     private void OnGoToChapter(NavigationButton button)
     {
         switch (button)
@@ -357,7 +356,7 @@ public partial class Reader : IAsyncDisposable
     {
         if (button == NavigationButton.Overlay)
         {
-            _readerViewModel.ShowOverlay = !_readerViewModel.ShowOverlay;
+            OverlayService.ToggleOverlay();
             return;
         }
         if (!CanGoDirection(button)) return;

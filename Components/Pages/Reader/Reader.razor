@@ -72,26 +72,23 @@
 {
     <Message Content="@(Translations.LOADING_BOOK)"/>
 }
-@if (_readerViewModel.ShowOverlay)
+@if (OverlayService.IsOverlayVisible)
 {
     <Overlay
-        @bind-ShowOverlay="@_readerViewModel.ShowOverlay"
-        @bind-ShowSpine="@_readerViewModel.ShowToc"
         Progress="@Progress"
         ProfileSettings="@_profileSettings"
         BookTitle="@_book?.Title"
         ChapterTitle="@ChapterTitle"
-        SettingsChanged="@OnSettingsChanged"
+        SettingsChanged="() => _refreshTotalPages = true"
         GoToChapter="@OnGoToChapter"/>
 }
 
-@if (_readerViewModel.ShowToc)
+@if (OverlayService.IsTocVisible)
 {
-    <TableOfContents
-        @bind-ShowToc="@_readerViewModel.ShowToc"
-        Chapters="@_epubBook?.Content.TableOfContents"
-        CurrentChapterId="@Current?.Id"
-        OnChapterSelected="@OnChapterSelected"/>
+	<TableOfContents
+		Chapters="@_epubBook?.Content.TableOfContents"
+		CurrentChapterId="@Current?.Id"
+		OnChapterSelected="@OnChapterSelected"/>
 }
 
 <Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="_profileSettings"/>

@@ -15,14 +15,14 @@ namespace BookHeaven.Reader.ViewModels
 		[ObservableProperty]
 		private int? wordsPerPage;
 
-		[ObservableProperty]
+		/*[ObservableProperty]
 		private bool showOverlay;
 		[ObservableProperty]
-		private bool showToc;
+		private bool showToc;*/
 
-		partial void OnShowTocChanged(bool value)
+		/*partial void OnShowTocChanged(bool value)
 		{
 			if(value) ShowOverlay = false;
-		}
+		}*/
 	}
 }

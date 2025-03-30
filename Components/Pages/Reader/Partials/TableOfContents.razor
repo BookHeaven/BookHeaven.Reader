@@ -1,7 +1,7 @@
 ﻿@using EpubManager.Entities
 @implements IAsyncDisposable
 
-<div @onclick="@(() => ShowTocChanged.InvokeAsync(false))" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
+<div @onclick="OverlayService.ToggleToc" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
     <div id="spine" @onclick:stopPropagation="true" @onclick:preventDefault="true" class="w-[70%] border-solid border-r-2 z-[1001] h-full overflow-y-auto border-black bg-white">
         <div class="ms-2 text-center font-bold">Index</div>
         @if (_jsModule != null)
@@ -17,9 +17,8 @@
 
 @code {
     [Inject] IJSRuntime JsRuntime { get; set; } = null!;
-
-    [Parameter] public bool ShowToc { get; set; }
-    [Parameter] public EventCallback<bool> ShowTocChanged { get; set; }
+    [Inject] OverlayService OverlayService { get; set; } = null!;
+    
     [Parameter] public IReadOnlyList<EpubChapter> Chapters { get; set; } = [];
     [Parameter] public string? CurrentChapterId { get; set; }
     [Parameter] public EventCallback<string> OnChapterSelected { get; set; }

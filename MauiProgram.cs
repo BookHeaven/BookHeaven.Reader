@@ -34,6 +34,7 @@ namespace BookHeaven.Reader
 
 			builder.Services.AddScoped<BookManager>();
 			builder.Services.AddScoped<IAppsService, AppsService>();
+			builder.Services.AddScoped<OverlayService>();
 			
 			builder.Services.AddTransient<IServerService, ServerService>();
 			builder.Services.AddTransient<AlertService>();

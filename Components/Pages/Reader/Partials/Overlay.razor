@@ -1,42 +1,45 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
 
-<div class="z-[1000] absolute bottom-0 left-0 right-0 top-0 flex flex-col" @onclick="@(() => ShowOverlayChanged.InvokeAsync(false))">
-    <div class="border-solid border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white pr-2" @onclick:stopPropagation="true">
+<div class="z-[1000] absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
+    <div class="border-solid border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white" @onclick:stopPropagation="true">
         <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
             <i class="bi bi-arrow-left text-xl"></i>
         </Button>
-        <span class="ms-auto">@BookTitle</span>
+        <span class="ms-auto me-2">@BookTitle</span>
     </div>
-    @if (_overlayViewModel.ShowFontSettings)
-    {
-        <TextSettings ProfileSettings="ProfileSettings"/>
-    }
-    @if (_overlayViewModel.ShowPageSettings)
-    {
-        <PageSettings ProfileSettings="ProfileSettings"/>
-    }
-    <div id="bottombar" class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
-        <div class="flex items-center gap-3 px-2">
-            <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Previous))">
-                <i class="bi bi-chevron-double-left text-xl"></i>
-            </Button>
-            <Progress Value="@((double)Progress)"/>
-            <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Next))">
-                <i class="bi bi-chevron-double-right text-xl"></i>
-            </Button>
-        </div>
-        <div class="flex items-center gap-3 px-2">
-            <Button OnClick="@(() => ShowSpineChanged.InvokeAsync(!ShowSpine))">
-                <i class="bi bi-list-ol text-xl"></i>
-            </Button>
-            <span class="flex-1">@ChapterTitle</span>
-            <Button OnClick="@(() => _overlayViewModel.ShowFontSettings = !_overlayViewModel.ShowFontSettings)">
-                <i class="bi bi-type text-xl"></i>
-            </Button>
-            <Button OnClick="@(() => _overlayViewModel.ShowPageSettings = !_overlayViewModel.ShowPageSettings)">
-                <i class="bi bi-gear text-xl"></i>
-            </Button>
+    
+    <div>
+        @if (OverlayService.CurrentPanel == OverlayService.Panel.FontSettings)
+        {
+            <TextSettings ProfileSettings="ProfileSettings"/>
+        }
+        @if (OverlayService.CurrentPanel == OverlayService.Panel.PageSettings)
+        {
+            <PageSettings ProfileSettings="ProfileSettings"/>
+        }
+        <div class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
+            <div class="flex items-center gap-3 px-2">
+                <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Previous))">
+                    <i class="bi bi-chevron-double-left text-xl"></i>
+                </Button>
+                <Progress Value="@((double)Progress)"/>
+                <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Next))">
+                    <i class="bi bi-chevron-double-right text-xl"></i>
+                </Button>
+            </div>
+            <div class="flex items-center gap-3 px-2">
+                <Button OnClick="@OverlayService.ToggleToc">
+                    <i class="bi bi-list-ol text-xl"></i>
+                </Button>
+                <span class="flex-1">@ChapterTitle</span>
+                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.Panel.FontSettings))">
+                    <i class="bi bi-type text-xl"></i>
+                </Button>
+                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.Panel.PageSettings))">
+                    <i class="bi bi-gear text-xl"></i>
+                </Button>
+            </div>
         </div>
     </div>
 </div>
