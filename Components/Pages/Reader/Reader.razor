@@ -33,19 +33,26 @@
 		column-fill: auto;
 		column-gap: var(--column-gap);
 		padding: 0 2px;
+		orphans: 2;
 	}
 
 	@($"#viewer > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",#viewer > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",#viewer > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",#viewer > .chapter.next .{Next.ParagraphClassName}" : "")}") {
 		margin: calc(var(--paragraph-spacing) * 1pt) 0!important;
 		/* line-height: calc(1.5 + var(--line-height)) !important; */
-		word-break: auto-phrase;
-		orphans: 1;
-		widows: 2;
+	}
+
+	#viewer > .chapter > p {
+		word-break: auto-phrase !important;
 	}
 
 	#viewer > .chapter > p > span:first-child {
 		line-height: inherit !important;
 		height: auto !important;
+	}
+
+	#viewer > .chapter > p.drop-cap::first-letter { 
+		initial-letter: 2;
+		margin-inline-end: 0.3em; 
 	}
 
 	#viewer > .chapter.current {
