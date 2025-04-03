@@ -28,8 +28,8 @@
 		<ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.2.2</ApplicationDisplayVersion>
-		<ApplicationVersion>3</ApplicationVersion>
+		<ApplicationDisplayVersion>1.2.3</ApplicationDisplayVersion>
+		<ApplicationVersion>4</ApplicationVersion>
 
 		<WindowsPackageType>None</WindowsPackageType>
 
