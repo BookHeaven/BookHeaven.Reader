@@ -20,18 +20,18 @@
 
 <RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />
 
-<div class="grid-cols-[repeat(auto-fill,120px)] grid justify-evenly gap-2 p-3">
+<div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
     @if (FilteredBooks.Count == 0)
     {
         <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
     }
     else
     {
-        @foreach (var book in FilteredBooks)
+        foreach (var book in FilteredBooks)
         {
             <ContextMenuTrigger MenuId="BookMenu" Data="@book">
-                <a class="flex flex-col" href="/reader/@book.BookId">
-                    <div class="cover relative h-[190px] w-full">
+                <a class="h-full flex flex-col rounded overflow-hidden active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId">
+                    <div class="cover relative h-[190px] w-full rounded overflow-hidden">
                         <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" alt=""/>
                         <span class="progress-badge absolute -top-[1px] right-0 w-[40%] font-bold">
                             <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
@@ -45,7 +45,7 @@
                             }
                         </span>
                     </div>
-                    <div class="text-xs">@book.Title</div>
+                    <div class="text-xs p-1">@book.Title</div>
                 </a>
             </ContextMenuTrigger>
         }
