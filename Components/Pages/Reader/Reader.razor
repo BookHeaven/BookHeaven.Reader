@@ -5,6 +5,11 @@
 
 <!--suppress CssUnresolvedCustomProperty -->
 <style>
+	body {
+		margin: 0 !important;
+		overflow: hidden;
+	}
+	
 	#viewer {
 		--chapter-page: @_readerViewModel.CurrentPage;
 		--font-size: @_profileSettings.FontSize;
@@ -20,51 +25,48 @@
 		--column-gap: 4px;
 		font-family: 'Bookerly', serif;
 		margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
-	}
-	body {
-		margin: 0 !important;
-		overflow: hidden;
-	}
+		
+		& > .chapter {
+			height: var(--page-height);
+			column-width: var(--page-width);
+			font-size: calc(var(--font-size) * 1px) !important;
+			column-fill: auto;
+			column-gap: var(--column-gap);
+			padding: 0 2px;
+			
+			& img, svg, figure {
+				box-sizing: border-box;
+				object-fit: contain;
+				break-inside: avoid;
+				max-width: 100%;
+				max-height: var(--page-height);
+			}
+			
+			&.current {
+				transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
+			}
+			
+			& > p {
+				word-break: auto-phrase !important;
+				
+				&.drop-cap {
+					break-after: avoid-column;
 
-	#viewer > .chapter {
-		height: var(--page-height);
-		column-width: var(--page-width);
-		font-size: calc(var(--font-size) * 1px) !important;
-		column-fill: auto;
-		column-gap: var(--column-gap);
-		padding: 0 2px;
-		orphans: 2;
+					&::first-letter {
+						initial-letter: 2;
+						margin-inline-end: 0.3em;
+					}
+
+					& + p {
+						clear: both;
+					}
+				}
+			}
+		}
 	}
 
 	@($"#viewer > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",#viewer > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",#viewer > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",#viewer > .chapter.next .{Next.ParagraphClassName}" : "")}") {
 		margin: calc(var(--paragraph-spacing) * 1pt) 0!important;
-		/* line-height: calc(1.5 + var(--line-height)) !important; */
-	}
-
-	#viewer > .chapter > p {
-		word-break: auto-phrase !important;
-	}
-
-	#viewer > .chapter > p > span:first-child {
-		line-height: inherit !important;
-		height: auto !important;
-	}
-
-	#viewer > .chapter > p.drop-cap::first-letter { 
-		initial-letter: 2;
-		margin-inline-end: 0.3em; 
-	}
-
-	#viewer > .chapter.current {
-		transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
-	}
-
-	#viewer > .chapter img, svg, figure {
-		box-sizing: border-box;
-		object-fit: contain;
-		break-inside: avoid;
-		max-width: 100%;
-		max-height: var(--page-height);
 	}
 </style>
 
