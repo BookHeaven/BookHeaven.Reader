@@ -1,10 +1,16 @@
 ﻿@using BookHeaven.Reader.Extensions
 @typeparam TOption where TOption : Enum
 
-<div class="flex w-fit overflow-hidden rounded border border-neutral-700 @(Class)">
+@*<div class="flex w-fit overflow-hidden rounded border border-neutral-700 @(Class)">
     @foreach (var option in _options)
     {
         <button class="px-4 py-2 @((_options.IndexOf(option) > 0).Then("border-l border-neutral-700")) @(SelectedOption.Equals(option).Then("bg-neutral-700 text-white"))" @onclick="() => Select(option)">@(option.StringValue())</button>
+    }
+</div>*@
+<div class="flex w-fit overflow-hidden gap-2 @(Class)">
+    @foreach (var option in _options)
+    {
+        <button class="px-4 py-2 rounded-full @(SelectedOption.Equals(option) ? "bg-neutral-700 text-white" : "bg-neutral-200")" @onclick="() => Select(option)">@(option.StringValue())</button>
     }
 </div>
 

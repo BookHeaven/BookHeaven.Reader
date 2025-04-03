@@ -203,3 +203,7 @@ h1:focus {
 .blazor-context-menu__list  {
     padding: 0 !important;
 }
+
+.blazor-context-menu__item--default {
+    @apply !p-3;
+}
