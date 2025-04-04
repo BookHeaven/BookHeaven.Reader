@@ -75,6 +75,7 @@
 {
     <Message Content="@(Translations.LOADING_BOOK)"/>
 }
+<ImageViewer />
 @if (OverlayService.IsOverlayVisible)
 {
     <Overlay
@@ -128,15 +129,17 @@
 		</div>
 	</div>
 
-    <div class="relative mt-auto flex h-[24px] gap-2 mx-2">
-        @if (!_bookLoading)
-        {
-            <Clock/>
-            <BatteryInfo/>
-            <ChapterTitle Title="@ChapterTitle" CurrentPage="_readerViewModel.CurrentPage" TotalPages="_readerViewModel.TotalPages"/>
-            <div class="ms-auto text-end">
-                @(Progress.ToString("0.00"))%
-            </div>
-        }
-    </div>
+	<div class="relative mt-auto flex h-[24px] gap-2 mx-2">
+		@if (!_bookLoading)
+		{
+			<Clock/>
+			<BatteryInfo/>
+			<ChapterTitle Title="@ChapterTitle" CurrentPage="_readerViewModel.CurrentPage" TotalPages="_readerViewModel.TotalPages"/>
+			<div class="ms-auto text-end">
+				@(Progress.ToString("0.00"))%
+			</div>
+		}
+	</div>
 </div>
+<script src="_content/BlazorPanzoom/panzoom.min.js"></script>
+<script src="_content/BlazorPanzoom/blazorpanzoom.js"></script>

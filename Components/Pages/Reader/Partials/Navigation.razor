@@ -1,21 +1,29 @@
 @using BookHeaven.Reader.Functions
-<div class="absolute w-screen h-screen z-[999] grid grid-cols-3">
+@implements IAsyncDisposable
+<div class="absolute w-screen h-screen z-[999] grid grid-cols-3" @onpointerdown="@PointerDown" @onpointerup="@PointerUp">
     @foreach(var button in _buttons)
     {
-        <span @onclick="@(() => OnNavigationButtonClicked.InvokeAsync(button))"></span>
+        <span @onclick="@(() => HandleNavigation(button))"></span>
     }
 </div>
 
 @code {
+    [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
+    [Inject] private ImageViewerService ImageViewerService { get; set; } = null!;
+    
     [Parameter]
     public EventCallback<NavigationButton> OnNavigationButtonClicked { get; set; }
     
     [Parameter]
     public ProfileSettings? ProfileSettings { get; set; }
     
-    private NavigationLayoutType SelectedLayout { get; set; }
+    private IJSObjectReference _module = null!;
     
+    private NavigationLayoutType SelectedLayout { get; set; }
     private List<NavigationButton> _buttons = [];
+
+    private bool _cancelNavigation;
+    private DateTime _pointerDownTime;
     
     protected override void OnParametersSet()
     {
@@ -23,4 +31,44 @@
 
         _buttons = ReaderNavigation.GetLayoutForType(SelectedLayout);
     }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/Navigation.razor.js");
+        }
+    }
+
+    private async Task HandleNavigation(NavigationButton button)
+    {
+        if(!_cancelNavigation) await OnNavigationButtonClicked.InvokeAsync(button);
+        _cancelNavigation = false;
+    }
+
+    private void PointerDown()
+    {
+        _pointerDownTime = DateTime.UtcNow;
+    }
+    
+    private async Task PointerUp(MouseEventArgs e)
+    {
+        var downTime = (DateTime.UtcNow.Ticks - _pointerDownTime.Ticks) / TimeSpan.TicksPerMillisecond;
+        _cancelNavigation = false;
+        if (downTime > 400)
+        {
+            _cancelNavigation = true;
+            var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
+            if (!string.IsNullOrEmpty(data))
+            {
+                ImageViewerService.OnOpenImage.Invoke(data);
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _module.DisposeAsync();
+    }
+
 }

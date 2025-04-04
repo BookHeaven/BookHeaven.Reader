@@ -1,0 +1,35 @@
+﻿@using BlazorPanzoom
+@implements IDisposable
+@if (!string.IsNullOrEmpty(_base64))
+{
+	<div class="absolute inset-0 bg-white z-[2000] flex items-center justify-center">
+		<button class="absolute z-[2000] top-5 end-5 bg-neutral-500 text-white rounded-full flex items-center justify-center size-10" @onclick="() => _base64 = string.Empty">
+			<i class="bi bi-x before:!leading-normal text-2xl"></i>
+		</button>
+		<Panzoom WheelMode="WheelMode.ZoomWithWheel">
+			<img @ref="@context.ElementReference" src="@_base64" alt=""/>
+		</Panzoom>
+	</div>
+}
+@code {
+	[Inject] ImageViewerService ImageViewerService { get; set; } = null!;
+	
+	private string _base64 = string.Empty;
+
+	protected override void OnInitialized()
+	{
+		ImageViewerService.OnOpenImage += OpenImage;
+	}
+
+	private void OpenImage(string data)
+	{
+		_base64 = data;
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		ImageViewerService.OnOpenImage -= OpenImage;
+	}
+
+}

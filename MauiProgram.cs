@@ -1,4 +1,5 @@
-﻿using BookHeaven.Domain;
+﻿using BlazorPanzoom;
+using BookHeaven.Domain;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui;
@@ -34,6 +35,7 @@ namespace BookHeaven.Reader
 
 			builder.Services.AddScoped<BookManager>();
 			builder.Services.AddScoped<IAppsService, AppsService>();
+			builder.Services.AddScoped<ImageViewerService>();
 			builder.Services.AddScoped<OverlayService>();
 			
 			builder.Services.AddTransient<IServerService, ServerService>();
@@ -41,6 +43,7 @@ namespace BookHeaven.Reader
 
 			builder.Services.AddBlazorContextMenu();
 			builder.Services.AddMauiBlazorWebView();
+			builder.Services.AddBlazorPanzoomServices();
 
 #if DEBUG
 			builder.Services.AddBlazorWebViewDeveloperTools();
