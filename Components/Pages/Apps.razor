@@ -21,13 +21,13 @@
         }
     </ContextMenu>
 
-    <div id="drawer">
+    <div class="grid grid-cols-6 auto-rows-fr gap-4 p-4 pt-1">
         @foreach (var app in _filteredApps)
         {
             <ContextMenuTrigger MenuId="AppMenu" Data="@app">
-                <div class="app rounded active:ring active:ring-black" @onclick="@(() => AppsService.OpenApp(app.PackageName!))">
-                    <img src="data:image/png;base64,@app.IconBase64" alt="App icon"/>
-                    <div>@app.Name</div>
+                <div class="grid p-1 gap-0.5 h-full rounded active:bg-neutral-200 active:outline-4 active:outline-neutral-200" @onclick="@(() => AppsService.OpenApp(app.PackageName!))">
+                    <img src="data:image/png;base64,@app.IconBase64" class="mx-auto w-16" alt="App icon"/>
+                    <span class="text-sm line-clamp-2 text-center p-1">@app.Name</span>
                 </div>
             </ContextMenuTrigger>
         }
