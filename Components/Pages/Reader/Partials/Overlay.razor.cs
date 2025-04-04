@@ -1,9 +1,8 @@
 using System.ComponentModel;
-using Microsoft.AspNetCore.Components;
-using BookHeaven.Reader.ViewModels;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Services;
+using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Reader.Partials;
 

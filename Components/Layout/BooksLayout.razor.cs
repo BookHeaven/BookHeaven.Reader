@@ -1,8 +1,8 @@
+using BookHeaven.Reader.Resources.Localization;
+using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using Microsoft.AspNetCore.Components;
-using BookHeaven.Reader.Resources.Localization;
-using BookHeaven.Reader.Services;
 
 namespace BookHeaven.Reader.Components.Layout;
 

@@ -1,24 +1,23 @@
-﻿<div>
-    @clock
+﻿@using System.Timers
+@implements IDisposable
+<div>
+    @_clock
 </div>
 
-@using System.Timers
-@implements IDisposable
-
 @code {
-    string clock = DateTime.Now.ToString("HH:mm");
-    Timer clockTimer = new() { Interval = 1000 };
+    string _clock = DateTime.Now.ToString("HH:mm");
+    Timer _clockTimer = new() { Interval = 1000 };
 
 
     protected override void OnInitialized()
     {
-        clockTimer.Elapsed += OnTimerTick;
-        clockTimer.Start();
+        _clockTimer.Elapsed += OnTimerTick;
+        _clockTimer.Start();
     }
 
     private async Task UpdateClock()
     {
-        clock = DateTime.Now.ToString("HH:mm");
+        _clock = DateTime.Now.ToString("HH:mm");
         await InvokeAsync(StateHasChanged);
     }
 
@@ -29,8 +28,8 @@
 
     public void Dispose()
     {
-        clockTimer.Stop();
-        clockTimer.Dispose();
+        _clockTimer.Stop();
+        _clockTimer.Dispose();
         GC.SuppressFinalize(this);
     }
 }

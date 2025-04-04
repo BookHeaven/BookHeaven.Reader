@@ -4,9 +4,6 @@
     {
         <span @onclick="@(() => OnNavigationButtonClicked.InvokeAsync(button))"></span>
     }
-    @*<span @onclick="@(() => ChangePage(NavigationButtons.Previous))"></span>
-    <span @onclick="@(() => { if (epubBook != null) _readerViewModel.ShowOverlay = !_readerViewModel.ShowOverlay; })"></span>
-    <span @onclick="@(() => ChangePage(NavigationButtons.Next))"></span>*@
 </div>
 
 @code {
@@ -26,5 +23,4 @@
 
         _buttons = ReaderNavigation.GetLayoutForType(SelectedLayout);
     }
-
 }

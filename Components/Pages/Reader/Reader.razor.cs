@@ -1,17 +1,17 @@
 using System.ComponentModel;
 using System.Text.Json;
-using EpubManager;
-using EpubManager.Entities;
-using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-using BookHeaven.Reader.Services;
-using BookHeaven.Reader.ViewModels;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Extensions;
+using BookHeaven.Reader.Services;
+using BookHeaven.Reader.ViewModels;
 using CommunityToolkit.Maui.Alerts;
+using EpubManager;
+using EpubManager.Entities;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using Style = EpubManager.Entities.Style;
 #if ANDROID
 using Android.Views;

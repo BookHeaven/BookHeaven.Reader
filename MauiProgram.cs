@@ -1,9 +1,9 @@
-﻿using CommunityToolkit.Maui;
-using EpubManager;
-using Microsoft.Extensions.Logging;
-using BookHeaven.Domain;
+﻿using BookHeaven.Domain;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Services;
+using CommunityToolkit.Maui;
+using EpubManager;
+using Microsoft.Extensions.Logging;
 using DependencyInjection = BookHeaven.Domain.DependencyInjection;
 
 namespace BookHeaven.Reader
