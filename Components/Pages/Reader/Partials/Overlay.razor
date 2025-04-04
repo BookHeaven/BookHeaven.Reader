@@ -1,7 +1,7 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
 
-<div class="z-[1000] absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
+<div class="z-[1000] absolute inset-0 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
     <div class="border-solid border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white" @onclick:stopPropagation="true">
         <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
             <i class="bi bi-arrow-left text-xl"></i>
@@ -10,11 +10,11 @@
     </div>
     
     <div>
-        @if (OverlayService.CurrentPanel == OverlayService.Panel.FontSettings)
+        @if (OverlayService.CurrentOverlayPanel == OverlayService.OverlayPanel.FontSettings)
         {
             <TextSettings ProfileSettings="ProfileSettings"/>
         }
-        @if (OverlayService.CurrentPanel == OverlayService.Panel.PageSettings)
+        @if (OverlayService.CurrentOverlayPanel == OverlayService.OverlayPanel.PageSettings)
         {
             <PageSettings ProfileSettings="ProfileSettings"/>
         }
@@ -33,10 +33,10 @@
                     <i class="bi bi-list-ol text-xl"></i>
                 </Button>
                 <span class="flex-1">@ChapterTitle</span>
-                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.Panel.FontSettings))">
+                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.FontSettings))">
                     <i class="bi bi-type text-xl"></i>
                 </Button>
-                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.Panel.PageSettings))">
+                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.PageSettings))">
                     <i class="bi bi-gear text-xl"></i>
                 </Button>
             </div>
