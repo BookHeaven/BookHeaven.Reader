@@ -22,7 +22,7 @@ namespace BookHeaven.Reader.Services
 		Task<List<Author>?> GetAllAuthors();
 		Task<List<Profile>> GetAllProfiles();
 		Task<BookProgress?> GetBookProgress(Guid profileId, Guid bookId);
-		Task Download(Book book, Guid profileId);
+		Task DownloadBook(Book book, Guid profileId);
 		Task UpdateBookProgress(BookProgress progress);
 		Task UpdateProgressByProfile(Guid profileId);
 		Task DownloadFonts();
@@ -131,7 +131,7 @@ namespace BookHeaven.Reader.Services
 			}
 		}
 
-		public async Task Download(Book book, Guid profileId)
+		public async Task DownloadBook(Book book, Guid profileId)
 		{
 			try
 			{
@@ -140,19 +140,6 @@ namespace BookHeaven.Reader.Services
 				{
 					//If the book is already downloaded, we remove the local cache
 					Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
-				}
-				
-				if (book.Author != null)
-				{
-					await sender.Send(new AddAuthor.Command(book.Author));
-				}
-				if (book.Series != null)
-				{
-					await sender.Send(new AddSeries.Command(book.Series));
-				}
-
-				if (getBook.IsSuccess)
-				{
 					await sender.Send(new UpdateBookCommand(book));
 				}
 				else
