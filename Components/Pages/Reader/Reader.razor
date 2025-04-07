@@ -10,65 +10,77 @@
 		overflow: hidden;
 	}
 	
-	#viewer {
-		--chapter-page: @_readerViewModel.CurrentPage;
-		--font-size: @_profileSettings.FontSize;
-		--line-height: @_profileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
-		--letter-spacing: @_profileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-		--paragraph-spacing: @_profileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-		--text-indent: @_profileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
-		--word-spacing: @_profileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-		--margin-vertical: @_profileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-		--margin-horizontal: @_profileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-		--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
-		--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
-		--column-gap: 4px;
-		margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
-		
-		& > .chapter {
-			height: var(--page-height);
-			column-width: var(--page-width);
-			font-size: calc(var(--font-size) * 1px) !important;
-			column-fill: auto;
-			column-gap: var(--column-gap);
-			padding: 0 2px;
-			orphans: 1;
-			widows: 1;
-			
-			& img, svg, figure {
-				box-sizing: border-box;
-				object-fit: contain;
-				break-inside: avoid;
-				max-width: 100%;
-				max-height: var(--page-height);
-			}
-			
-			&.current {
-				transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
-			}
-			
-			& > p {
-				word-break: auto-phrase !important;
-				
-				&.drop-cap {
-					min-height: 2em;
-					&::first-letter {
-						initial-letter: 2;
-						margin-inline-end: 0.3em;
-					}
+	@@scope (#viewer) {
+		:scope {
+			--chapter-page: @_readerViewModel.CurrentPage;
+			--font-size: @_profileSettings.FontSize;
+			--line-height: @_profileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
+			--letter-spacing: @_profileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--paragraph-spacing: @_profileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--text-indent: @_profileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
+			--word-spacing: @_profileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-vertical: @_profileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-horizontal: @_profileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
+			--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
+			--column-gap: 4px;
+			margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
 
-					& + p {
-						clear: both;
+			& > .chapter {
+				height: var(--page-height);
+				column-width: var(--page-width);
+				font-size: calc(var(--font-size) * 1px) !important;
+				column-fill: auto;
+				column-gap: var(--column-gap);
+				padding: 0 2px;
+				orphans: 1;
+				widows: 1;
+				text-wrap: pretty;
+
+				&.current {
+					transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
+				}
+
+				& > p {
+					word-break: auto-phrase !important;
+
+					&.drop-cap {
+						min-height: 2em;
+						&::first-letter {
+							initial-letter: 2;
+							margin-inline-end: 0.3em;
+						}
+
+						& + p {
+							clear: both;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	@($"#viewer > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",#viewer > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",#viewer > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",#viewer > .chapter.next .{Next.ParagraphClassName}" : "")}") {
-		margin: calc(var(--paragraph-spacing) * 1pt) 0!important;
+		img, svg, figure {
+			box-sizing: border-box;
+			object-fit: contain !important;
+			break-inside: avoid !important;
+			max-width: 100%;
+			max-height: var(--page-height) !important;
+		}
+
+		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",:scope > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",:scope > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",:scope > .chapter.next .{Next.ParagraphClassName}" : "")}") {
+			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
+		}
+
+		@if (_styles.Count > 0 && Current?.Styles.Count > 0)
+		{
+			foreach (var style in _styles.Where(style => Current?.Styles.Any(s => s.Contains(style.Name)) == true))
+			{
+				@style.Content
+			}
+		}
 	}
 </style>
+
 <FontManager ProfileSettings="@_profileSettings" />
 @if (_bookLoading)
 {
@@ -97,17 +109,6 @@
 <Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="_profileSettings"/>
 <div class="flex h-screen flex-col">
 	<div id="viewer" class="flex-1 overflow-hidden">
-		@if (_styles.Count > 0 && Current?.Styles.Count > 0)
-		{
-			foreach (var style in _styles.Where(style => Current?.Styles.Any(s => s.Contains(style.Name)) == true))
-			{
-				<style>
-					@@scope {
-						@style.Content
-					}
-				</style>
-			}
-		}
 		<div class="chapter current">
 			@if (Current?.IsContentProcessed == true)
 			{

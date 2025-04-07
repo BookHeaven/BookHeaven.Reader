@@ -12,9 +12,11 @@
 	{
 		@font.GetFontFace(MauiProgram.FontsPath)
 	}
-	@($@"#viewer {{ 
-					font-family: '{ProfileSettings.SelectedFont}', serif;
-				}}")
+	@@scope (#viewer) {
+		:scope {
+			font-family: '@ProfileSettings.SelectedFont', serif;
+		}
+	}
 </style>
 @code {
 	[Inject] ISender Sender { get; set; } = null!;
