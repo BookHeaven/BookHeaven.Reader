@@ -36,30 +36,10 @@
     a {
         @apply text-black no-underline;
     }
-}
-
-@font-face {
-    font-family: 'Bookerly';
-    src: url('../fonts/Bookerly/Bookerly.ttf');
-}
-
-@font-face {
-    font-family: 'Bookerly';
-    src: url('../fonts/Bookerly/Bookerly-Bold.ttf');
-    font-weight: bold;
-}
-
-@font-face {
-    font-family: 'Bookerly';
-    src: url('../fonts/Bookerly/Bookerly-Italic.ttf');
-    font-style: italic;
-}
-
-@font-face {
-    font-family: 'Bookerly';
-    src: url('../fonts/Bookerly/Bookerly-BoldItalic.ttf');
-    font-weight: bold;
-    font-style: italic;
+    
+    select {
+        @apply bg-white border border-black rounded px-2 py-1;
+    }
 }
 
 @font-face {
