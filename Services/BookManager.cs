@@ -1,13 +1,15 @@
 ﻿using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
-using BookHeaven.Domain.Services;
+using BookHeaven.Domain.Features.Books;
+using BookHeaven.Domain.Features.BooksProgress;
 using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Extensions;
 using CommunityToolkit.Maui.Alerts;
+using MediatR;
 
 namespace BookHeaven.Reader.Services;
 
-public class BookManager(IDatabaseService databaseService)
+public class BookManager(ISender sender)
 {
     public List<Book> Books { get; set; } = [];
 
@@ -36,8 +38,8 @@ public class BookManager(IDatabaseService databaseService)
             ProfileId = book.Progress().ProfileId,
             BookId = book.BookId,
         };
-        await databaseService.AddOrUpdate(progress);
-        await databaseService.SaveChanges();
+        
+        await sender.Send(new UpdateBookProgress.Command(progress));
 
         await ClearCache(book, false);
         await Toast.Make("Progress has been reset").Show();
@@ -57,8 +59,7 @@ public class BookManager(IDatabaseService databaseService)
             File.Delete(coverPath);
         }
         await ClearCache(book, false);
-        await databaseService.Delete<Book>(book.BookId);
-        await databaseService.SaveChanges();
+        await sender.Send(new DeleteBook.Command(book.BookId));
         Books.Remove(book);
         await Toast.Make("Book has been deleted").Show();
     }

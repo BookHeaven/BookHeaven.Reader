@@ -1,4 +1,6 @@
 ﻿@page "/settings"
+@using BookHeaven.Domain
+@using Microsoft.EntityFrameworkCore
 @layout EmptyLayout
 @inject NavigationManager NavigationManager
 
@@ -23,15 +25,4 @@
 
 @code{
     [Inject] AppStateService AppStateService { get; set; } = null!;
-
-    /*private async Task Save()
-    {
-        if (!string.IsNullOrEmpty(LocalSettings.ServerURL) && !LocalSettings.ServerURL.StartsWith("https://"))
-        {
-            LocalSettings.ServerURL = "https://" + LocalSettings.ServerURL;
-        }
-
-        await DatabaseService.Save(LocalSettings);
-    }*/
-
 }

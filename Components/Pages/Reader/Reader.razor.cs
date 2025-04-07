@@ -2,7 +2,9 @@ using System.ComponentModel;
 using System.Text.Json;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
-using BookHeaven.Domain.Services;
+using BookHeaven.Domain.Features.Books;
+using BookHeaven.Domain.Features.BooksProgress;
+using BookHeaven.Domain.Features.ProfileSettingss;
 using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Services;
@@ -10,6 +12,7 @@ using BookHeaven.Reader.ViewModels;
 using CommunityToolkit.Maui.Alerts;
 using EpubManager;
 using EpubManager.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Style = EpubManager.Entities.Style;
@@ -24,7 +27,7 @@ public partial class Reader : IAsyncDisposable
     [Parameter] public Guid Id { get; set; }
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private OverlayService OverlayService { get; set; } = null!;
-    [Inject] private IDatabaseService DatabaseService { get; set; } = null!;
+    [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
@@ -91,18 +94,36 @@ public partial class Reader : IAsyncDisposable
             activity.Window?.AddFlags(WindowManagerFlags.Fullscreen);
 #endif
 
-        var bookTask = DatabaseService.Get<Book>(Id);
-        var profileSettingsTask =
-            DatabaseService.GetBy<ProfileSettings>(x => x.ProfileId == AppStateService.ProfileId);
-        var bookProgressTask = DatabaseService.GetBy<BookProgress>(x =>
-            x.BookId == Id && x.ProfileId == AppStateService.ProfileId);
+        var bookTask = Sender.Send(new GetBookQuery(Id));
+        var profileSettingsTask = Sender.Send(new GetProfileSettings.Query(AppStateService.ProfileId));
+        var bookProgressTask = Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
 
         await Task.WhenAll(bookTask, profileSettingsTask, bookProgressTask);
 
-        _book = await bookTask;
-        _profileSettings = await profileSettingsTask ?? new ProfileSettings
-            { ProfileId = AppStateService.ProfileId };
-        _bookProgress = (await bookProgressTask)!;
+        var getBook = await bookTask;
+        if (getBook.IsFailure)
+        {
+            await Toast.Make(getBook.Error.Description!).Show();
+            return;
+        }
+        _book = getBook.Value;
+        
+        var getProfileSettings = await profileSettingsTask;
+        _profileSettings = getProfileSettings.IsSuccess ? getProfileSettings.Value : new() { ProfileId = AppStateService.ProfileId };
+        
+        if(_profileSettings.ProfileSettingsId == Guid.Empty)
+        {
+            await Sender.Send(new CreateProfileSettings.Command(_profileSettings));
+        }
+        
+        var getBookProgress = await bookProgressTask;
+        if (getBookProgress.IsFailure)
+        {
+            await Toast.Make(getBookProgress.Error.Description!).Show();
+            return;
+        }
+
+        _bookProgress = getBookProgress.Value;
 
         _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
             "./Components/Pages/Reader/Reader.razor.js");
@@ -458,7 +479,7 @@ public partial class Reader : IAsyncDisposable
     }
 
 
-    private void UpdateProgress()
+    private async Task UpdateProgress()
     {
         if (_readerViewModel.TotalPages == null) return;
 
@@ -469,6 +490,8 @@ public partial class Reader : IAsyncDisposable
         _bookProgress.PageCount = _readerViewModel.TotalPages!.Value;
         _bookProgress.PageCountPrev = _totalPagesPrev;
         _bookProgress.PageCountNext = _totalPagesNext;
+        SaveElapsedTime();
+        await Sender.Send(new UpdateBookProgress.Command(_bookProgress));
     }
 
     private void SaveElapsedTime()
@@ -482,11 +505,7 @@ public partial class Reader : IAsyncDisposable
 
     private async Task SaveState()
     {
-        _exitTime = DateTime.Now;
-        await DatabaseService.AddOrUpdate(_profileSettings);
-        UpdateProgress();
-        SaveElapsedTime();
-        await DatabaseService.AddOrUpdate(_bookProgress);
-        await DatabaseService.SaveChanges();
+        await Sender.Send(new UpdateProfileSettings.Command(_profileSettings));
+        await UpdateProgress();
     }
 }

@@ -1,4 +1,5 @@
 ﻿@using BookHeaven.Domain.Enums
+@using MediatR
 @if (Book == null)
 {
 	return;
@@ -83,7 +84,6 @@
 
 @code {
 	[Inject] private BookManager BookManager { get; set; } = null!;
-	[Inject] private IDatabaseService DatabaseService { get; set; } = null!;
 	[Inject] private AlertService Alert { get; set; } = null!;
 
 	[Parameter] public Book? Book { get; set; }

@@ -1,9 +1,10 @@
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
-using BookHeaven.Domain.Services;
+using BookHeaven.Domain.Features.Books;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Resources.Localization;
 using BookHeaven.Reader.Services;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Books;
@@ -11,7 +12,7 @@ namespace BookHeaven.Reader.Components.Pages.Books;
 public partial class Books
 {
     [Inject] private AppStateService AppStateService { get; set; } = null!;
-    [Inject] private IDatabaseService DatabaseService { get; set; } = null!;
+    [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private BookManager BookManager { get; set; } = null!;
 
     private enum Filter
@@ -35,9 +36,12 @@ public partial class Books
     protected override async Task OnInitializedAsync()
     {
         if (AppStateService.ProfileId == Guid.Empty) return;
-        BookManager.Books = (await DatabaseService.GetAllIncluding<Book>(b => b.Author, b => b.Series,
-                b => b.Progresses.Where(p => p.ProfileId == AppStateService.ProfileId)))
-            ?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList()!;
+        var getBooks = await Sender.Send(new GetAllBooks.Query(AppStateService.ProfileId));
+        if (getBooks.IsSuccess)
+        {
+            BookManager.Books = getBooks.Value;
+        }
+  
         _selectedFilter = BookManager.Books.AnyReading() ? Filter.Reading : Filter.All;
     }
 }

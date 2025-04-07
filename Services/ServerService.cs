@@ -2,9 +2,16 @@
 using Microsoft.Extensions.Logging;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
-using BookHeaven.Domain.Services;
+using BookHeaven.Domain.Features.Authors;
+using BookHeaven.Domain.Features.Books;
+using BookHeaven.Domain.Features.BooksProgress;
+using BookHeaven.Domain.Features.Fonts;
+using BookHeaven.Domain.Features.ProfileSettingss;
+using BookHeaven.Domain.Features.Seriess;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using MediatR;
+using Font = BookHeaven.Domain.Entities.Font;
 
 namespace BookHeaven.Reader.Services
 {
@@ -18,9 +25,10 @@ namespace BookHeaven.Reader.Services
 		Task Download(Book book, Guid profileId);
 		Task UpdateBookProgress(BookProgress progress);
 		Task UpdateProgressByProfile(Guid profileId);
+		Task DownloadFonts();
 	}
 	public class ServerService(
-		IDatabaseService databaseService, 
+		ISender sender,
 		AppStateService appStateService, 
 		ILogger<ServerService> logger) : IServerService
 	{
@@ -127,48 +135,47 @@ namespace BookHeaven.Reader.Services
 		{
 			try
 			{
-
-				if(await databaseService.Get<Book>(book.BookId) != null)
+				var getBook = await sender.Send(new GetBookQuery(book.BookId));
+				if (getBook.IsSuccess)
 				{
 					//If the book is already downloaded, we remove the local cache
 					Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
 				}
-
-				/*
-				 * We make a clone of the book because if we keep the relations, entity framework will try to insert the author and series again and complain if they already
-				 * exist before downloading it.
-				 * This way we can remove the relations without affecting the UI and use the generic Save method instead of having a specific one just for the book.
-				 */
-				var localBook = book.Clone();
-				if (localBook.Author != null)
+				
+				if (book.Author != null)
 				{
-					await databaseService.AddOrUpdate(localBook.Author, true);
+					await sender.Send(new AddAuthor.Command(book.Author));
 				}
-				if (localBook.Series != null)
+				if (book.Series != null)
 				{
-					await databaseService.AddOrUpdate(localBook.Series, true);
+					await sender.Send(new AddSeries.Command(book.Series));
 				}
 
-				localBook.Author = null;
-				localBook.Series = null;
+				if (getBook.IsSuccess)
+				{
+					await sender.Send(new UpdateBookCommand(book));
+				}
+				else
+				{
+					await sender.Send(new AddBook.Command(book));
+				}
 
-				await databaseService.AddOrUpdate(localBook);
-				await databaseService.SaveChanges();
+				await DownloadFile(book.EpubUrl(), book.BookId);
+				await DownloadFile(book.CoverUrl(), book.BookId);
+				
+				var progress = await GetBookProgress(profileId, book.BookId);
+				var getCurrentProgress = await sender.Send(new GetBookProgressByProfile.Query(book.BookId, profileId));
 
-				await DownloadFile(localBook.EpubUrl(), localBook.BookId);
-				await DownloadFile(localBook.CoverUrl(), localBook.BookId);
-
-				var localProgress = await databaseService.GetBy<BookProgress>(p => p.ProfileId == profileId && p.BookId == localBook.BookId);
-				var progress = await GetBookProgress(profileId, localBook.BookId);
-
-				if((localProgress == null && progress != null) || (localProgress != null && progress != null && progress.LastRead >= localProgress.LastRead))
+				if (getCurrentProgress.IsFailure && progress != null)
+				{
+					await sender.Send(new AddBookProgress.Command(progress));
+				}
+				else if (getCurrentProgress.IsSuccess && progress != null &&
+				         progress.LastRead >= getCurrentProgress.Value.LastRead)
 				{
 					progress.BookWordCount = 0;
-					await databaseService.AddOrUpdate(progress);
-					await databaseService.SaveChanges();
+					await sender.Send(new UpdateBookProgress.Command(progress));
 				}
-
-				
 			}
 			catch (Exception ex)
 			{
@@ -207,18 +214,55 @@ namespace BookHeaven.Reader.Services
 
 		public async Task UpdateProgressByProfile(Guid profileId)
 		{
-			var profile = await databaseService.GetIncluding<Profile>(profileId, p => p.BooksProgress);
-
-			if(profile == null || profile.BooksProgress.Count == 0)
+			var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
+			if (getProgresses.IsFailure)
 			{
 				return;
 			}
-
-			foreach (var cleanProgress in profile.BooksProgress.Select(progress => progress.Clone()))
+			
+			foreach (var progress in getProgresses.Value)
 			{
-				cleanProgress.Profile = null;
-				cleanProgress.Book = null;
-				await UpdateBookProgress(cleanProgress);
+				await UpdateBookProgress(progress);
+			}
+		}
+
+		public async Task DownloadFonts()
+		{
+			var endpoint = "api/fonts";
+			try
+			{
+				var response = await _httpClient.GetFromJsonAsync<List<Font>>(endpoint);
+
+				if (response == null)
+				{
+					throw new Exception("Failed to get fonts from server");
+				}
+
+				foreach (var font in response)
+				{
+					var fontPath = font.FilePath(MauiProgram.FontsPath);
+					var folderPath = font.FolderPath(MauiProgram.FontsPath);
+					if (!Directory.Exists(folderPath))
+					{
+						Directory.CreateDirectory(folderPath);
+					}
+					
+					var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + font.Url());
+					await File.WriteAllBytesAsync(fontPath, fileBytes);
+
+					await sender.Send(new AddFont.Command(font));
+				}
+				
+				var getProfileSettings = await sender.Send(new GetProfileSettings.Query(appStateService.ProfileId));
+				if (getProfileSettings.IsSuccess)
+				{
+					getProfileSettings.Value.SelectedFont = response.FirstOrDefault()?.Family ?? string.Empty;
+					await sender.Send(new UpdateProfileSettings.Command(getProfileSettings.Value));
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Failed to download fonts from server", ex);
 			}
 		}
 	}

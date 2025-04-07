@@ -14,19 +14,21 @@ namespace BookHeaven.Reader
 		public static readonly string BooksPath = Path.Combine(FileSystem.AppDataDirectory, "books");
 		public static readonly string CoversPath = Path.Combine(FileSystem.AppDataDirectory, "covers");
 		public static readonly string CachePath = Path.Combine(FileSystem.AppDataDirectory, "cache");
+		public static readonly string FontsPath = Path.Combine(FileSystem.AppDataDirectory, "fonts");
 		
 		public static MauiApp CreateMauiApp()
 		{
             Directory.CreateDirectory(BooksPath);
 			Directory.CreateDirectory(CoversPath);
 			Directory.CreateDirectory(CachePath);
+			Directory.CreateDirectory(FontsPath);
 
 			var builder = MauiApp.CreateBuilder();
 			builder
 				.UseMauiApp<App>()
 				.UseMauiCommunityToolkit();
 
-			builder.Services.AddDomain(FileSystem.AppDataDirectory, DependencyInjection.DatabaseInjectionType.Service);
+			builder.Services.AddDomain(FileSystem.AppDataDirectory);
 			builder.Services.AddEpubManager(true);
 			
 			

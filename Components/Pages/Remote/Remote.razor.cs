@@ -1,6 +1,8 @@
 using BookHeaven.Domain.Entities;
-using BookHeaven.Domain.Services;
+using BookHeaven.Domain.Features.Books;
+using BookHeaven.Domain.Features.Fonts;
 using BookHeaven.Reader.Services;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote;
@@ -9,7 +11,7 @@ public partial class Remote
 {
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private IServerService ServerService { get; set; } = null!;
-    [Inject] private IDatabaseService DatabaseService { get; set; } = null!;
+    [Inject] private ISender Sender { get; set; } = null!;
 
     private const int ItemsPerPage = 6;
     private int _currentPage = 1;
@@ -79,7 +81,11 @@ public partial class Remote
 
     private async Task GetDownloadedBooks()
     {
-        _deviceBooks = (await DatabaseService.GetAll<Book>())?.Select(x => x.BookId).ToList();
+        var getBooks = await Sender.Send(new GetAllBooks.Query(AppStateService.ProfileId));
+        if (getBooks.IsSuccess)
+        {
+            _deviceBooks = getBooks.Value.Select(x => x.BookId).ToList();
+        }
     }
     
     private void UpdateCurrentPageBooks()

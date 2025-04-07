@@ -1,4 +1,6 @@
 ﻿@page "/setup"
+@using BookHeaven.Domain.Features.Profiles
+@using MediatR
 @layout EmptyLayout
 
 @if (!_initialized)
@@ -44,7 +46,7 @@
 
 
 @code {
-    [Inject] IDatabaseService DatabaseService { get; set; } = null!;
+    [Inject] ISender Sender { get; set; } = null!;
     [Inject] AppStateService AppStateService { get; set; } = null!;
     [Inject] NavigationManager NavigationManager { get; set; } = null!;
     [Inject] IServerService ServerService { get; set; } = null!;
@@ -87,8 +89,7 @@
         var serverProfiles = await ServerService.GetAllProfiles();
         foreach (var profile in serverProfiles)
         {
-            await DatabaseService.AddOrUpdate(profile);
-            await DatabaseService.SaveChanges();
+            await Sender.Send(new AddProfile.Command(profile));
             if (!profile.Name.Equals("Default")) continue;
             AppStateService.ProfileId = profile.ProfileId;
             break;
