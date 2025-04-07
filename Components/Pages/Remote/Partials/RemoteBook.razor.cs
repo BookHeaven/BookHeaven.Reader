@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
-using BookHeaven.Reader.Services;
-using BookHeaven.Domain.Entities;
+﻿using BookHeaven.Domain.Entities;
 using BookHeaven.Reader.Resources.Localization;
+using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
+using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote.Partials;
 
