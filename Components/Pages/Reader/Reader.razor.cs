@@ -35,7 +35,6 @@ public partial class Reader : IAsyncDisposable
     private readonly ReaderViewModel _readerViewModel = new();
 
     private DateTime _entryTime;
-    private DateTime _exitTime;
     private bool _isSuspended;
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
@@ -71,9 +70,12 @@ public partial class Reader : IAsyncDisposable
     {
         OverlayService.OnOverlayChanged -= StateHasChanged;
         _readerViewModel.PropertyChanged -= ViewModel_PropertyChanged;
-        LifeCycleService.Resumed -= OnResumed;
-        LifeCycleService.Paused -= OnPaused;
-        LifeCycleService.Destroyed -= OnDestroy;
+        if (_bookProgress.EndDate is null)
+        {
+            LifeCycleService.Resumed -= OnResumed;
+            LifeCycleService.Paused -= OnPaused;
+            LifeCycleService.Destroyed -= OnDestroy;
+        }
         await SaveState();
         await _module.InvokeVoidAsync("Dispose");
         await _module.DisposeAsync();
@@ -132,11 +134,15 @@ public partial class Reader : IAsyncDisposable
 
         _readerViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-        _entryTime = DateTime.Now;
+        if (_bookProgress.EndDate is null)
+        {
+            _entryTime = DateTime.Now;
 
-        LifeCycleService.Resumed += OnResumed;
-        LifeCycleService.Paused += OnPaused;
-        LifeCycleService.Destroyed += OnDestroy;
+            LifeCycleService.Resumed += OnResumed;
+            LifeCycleService.Paused += OnPaused;
+            LifeCycleService.Destroyed += OnDestroy;
+        }
+        
 
 
         await LoadFromCache();
@@ -496,7 +502,8 @@ public partial class Reader : IAsyncDisposable
 
     private void SaveElapsedTime()
     {
-        var elapsedTime = _exitTime - _entryTime - _totalSuspendedTime;
+        if(_bookProgress.EndDate is not null) return;
+        var elapsedTime = DateTime.Now - _entryTime - _totalSuspendedTime;
         _bookProgress.ElapsedTime += elapsedTime;
         _bookProgress.LastRead = DateTimeOffset.Now;
         if (_readerViewModel.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
