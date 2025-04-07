@@ -1,0 +1,59 @@
+﻿@using System.ComponentModel
+@using BookHeaven.Domain.Features.Fonts
+@using MediatR
+
+@implements IDisposable
+@if (_fonts.Count == 0)
+{
+	return;
+}
+<style>
+	@foreach (var font in _fonts)
+	{
+		@font.GetFontFace(MauiProgram.FontsPath)
+	}
+	@($@"#viewer {{ 
+					font-family: '{ProfileSettings.SelectedFont}', serif;
+				}}")
+</style>
+@code {
+	[Inject] ISender Sender { get; set; } = null!;
+	[Inject] AppStateService AppStateService { get; set; } = null!;
+	
+	[Parameter] public required ProfileSettings ProfileSettings { get; set; }
+	
+	List<Font> _fonts = [];
+	string? _fontFamily = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		ProfileSettings.PropertyChanged += OnSelectedFontChanged;
+		await GetFonts();
+	}
+	
+	private async Task GetFonts()
+	{
+		_fontFamily = ProfileSettings.SelectedFont;
+		var getFonts = await Sender.Send(new GetAllFonts.Query(_fontFamily));
+		if (getFonts.IsFailure)
+		{
+			return;
+		}
+
+		_fonts = getFonts.Value;
+	}
+	
+	private async void OnSelectedFontChanged(object? sender, PropertyChangedEventArgs args)
+	{
+		if (args.PropertyName != nameof(ProfileSettings.SelectedFont)) return;
+
+		await GetFonts();
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		ProfileSettings.PropertyChanged -= OnSelectedFontChanged;
+	}
+
+}

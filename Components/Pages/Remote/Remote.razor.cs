@@ -44,6 +44,12 @@ public partial class Remote
             .ThenBy(x => x.SeriesIndex).ToList();
         await FilterBooks();
         _authors = (await ServerService.GetAllAuthors())?.OrderBy(x => x.Name).ToList();
+
+        var getFonts = await Sender.Send(new GetAllFonts.Query());
+        if (getFonts.IsFailure || getFonts.Value.Count == 0)
+        {
+            await ServerService.DownloadFonts();
+        }
     }
 
     private async Task FilterChanged()

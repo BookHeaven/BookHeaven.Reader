@@ -23,7 +23,6 @@
 		--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
 		--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
 		--column-gap: 4px;
-		font-family: 'Bookerly', serif;
 		margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
 		
 		& > .chapter {
@@ -70,7 +69,7 @@
 		margin: calc(var(--paragraph-spacing) * 1pt) 0!important;
 	}
 </style>
-
+<FontManager ProfileSettings="@_profileSettings" />
 @if (_bookLoading)
 {
     <Message Content="@(Translations.LOADING_BOOK)"/>
