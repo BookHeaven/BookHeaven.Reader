@@ -42,7 +42,7 @@
         else
         {
             <div class="grid grid-cols-2 grid-rows-3 gap-2 px-2 h-full">
-                @foreach (var book in _currentPageBooks ?? [])
+                @foreach (var book in CurrentPageBooks)
                 {
                     <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="FilterBooks"/>
                 }
@@ -55,8 +55,7 @@
             <Pagination
                 ItemCount="@_filteredBooks?.Count"
                 ItemsPerPage="ItemsPerPage"
-                @bind-CurrentPage="_currentPage"
-                @bind-CurrentPage:after="UpdateCurrentPageBooks" />
+                @bind-CurrentPage="_currentPage" />
         </div>
         
     }

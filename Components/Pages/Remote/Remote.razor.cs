@@ -22,13 +22,18 @@ public partial class Remote
     private bool _canConnect = true;
     private List<Guid>? _deviceBooks = [];
     private List<Book>? _filteredBooks;
-    private List<Book>? _currentPageBooks;
+    private List<Book> CurrentPageBooks => _filteredBooks?.Skip((_currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList() ?? [];
     private Guid? _selectedAuthor;
     private Filters _selectedFilter = Filters.All;
 
     protected override async Task OnInitializedAsync()
     {
         await GetData();
+        var getFonts = await Sender.Send(new GetAllFonts.Query());
+        if (getFonts.IsFailure || getFonts.Value.Count == 0)
+        {
+            _ = ServerService.DownloadFonts();
+        }
     }
 
     private async Task OnButtonClick()
@@ -44,12 +49,6 @@ public partial class Remote
             .ThenBy(x => x.SeriesIndex).ToList();
         await FilterBooks();
         _authors = (await ServerService.GetAllAuthors())?.OrderBy(x => x.Name).ToList();
-
-        var getFonts = await Sender.Send(new GetAllFonts.Query());
-        if (getFonts.IsFailure || getFonts.Value.Count == 0)
-        {
-            await ServerService.DownloadFonts();
-        }
     }
 
     private async Task FilterChanged()
@@ -82,7 +81,6 @@ public partial class Remote
                 throw new ArgumentOutOfRangeException();
         }
         _currentPage = 1;
-        UpdateCurrentPageBooks();
     }
 
     private async Task GetDownloadedBooks()
@@ -92,12 +90,6 @@ public partial class Remote
         {
             _deviceBooks = getBooks.Value.Select(x => x.BookId).ToList();
         }
-    }
-    
-    private void UpdateCurrentPageBooks()
-    {
-        if (_filteredBooks == null) return;
-        _currentPageBooks = _filteredBooks.Skip((_currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList();
     }
 
     private enum Filters
