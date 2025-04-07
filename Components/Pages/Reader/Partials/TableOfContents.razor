@@ -3,7 +3,7 @@
 
 <div @onclick="OverlayService.ToggleToc" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
     <div id="spine" @onclick:stopPropagation="true" @onclick:preventDefault="true" class="w-[70%] border-solid border-r-2 z-[1001] h-full overflow-y-auto border-black bg-white">
-        <div class="ms-2 text-center font-bold">Index</div>
+        <div class="ms-2 text-center font-bold">@Translations.INDEX</div>
         @if (_jsModule != null)
         {
             foreach (var chapter in Chapters)

@@ -168,4 +168,13 @@
     <data name="DOWNLOAD_SUCCESS" xml:space="preserve">
         <value>Book has been downloaded</value>
     </data>
+    <data name="INDEX" xml:space="preserve">
+        <value>Index</value>
+    </data>
+    <data name="DEFAULT" xml:space="preserve">
+        <value>Default</value>
+    </data>
+    <data name="FONT" xml:space="preserve">
+        <value>Font</value>
+    </data>
 </root>

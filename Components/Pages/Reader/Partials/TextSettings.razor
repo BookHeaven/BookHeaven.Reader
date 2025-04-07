@@ -1,9 +1,9 @@
 ﻿@using BookHeaven.Domain.Features.Fonts
 @using MediatR
 <div class="settings border-solid border-t-2 border-black bg-white" @onclick:stopPropagation="true">
-    <label class="ms-3 text-nowrap my-auto">Font</label>
+    <label class="ms-3 text-nowrap my-auto">@Translations.FONT</label>
     <select @bind="ProfileSettings.SelectedFont" class="my-2 mx-4">
-        <option value="">Default</option>
+        <option value="">@Translations.DEFAULT</option>
         @foreach (var font in _fonts)
         {
             <option value="@font.Family">@font.Family</option>

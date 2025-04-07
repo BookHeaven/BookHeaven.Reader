@@ -150,6 +150,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default.
+        /// </summary>
+        public static string DEFAULT {
+            get {
+                return ResourceManager.GetString("DEFAULT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Details.
         /// </summary>
         public static string DETAILS {
@@ -213,6 +222,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Font.
+        /// </summary>
+        public static string FONT {
+            get {
+                return ResourceManager.GetString("FONT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Font Size.
         /// </summary>
         public static string FONT_SIZE {
@@ -245,6 +263,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string IN_PROGRESS {
             get {
                 return ResourceManager.GetString("IN_PROGRESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Index.
+        /// </summary>
+        public static string INDEX {
+            get {
+                return ResourceManager.GetString("INDEX", resourceCulture);
             }
         }
         

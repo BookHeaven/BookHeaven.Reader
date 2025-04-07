@@ -161,4 +161,13 @@
     <data name="DOWNLOAD_SUCCESS" xml:space="preserve">
         <value>Se ha descargado el libro</value>
     </data>
+    <data name="INDEX" xml:space="preserve">
+        <value>Índice</value>
+    </data>
+    <data name="DEFAULT" xml:space="preserve">
+        <value>Por defecto</value>
+    </data>
+    <data name="FONT" xml:space="preserve">
+        <value>Fuente</value>
+    </data>
 </root>
