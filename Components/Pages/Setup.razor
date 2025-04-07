@@ -45,6 +45,7 @@
 
 
 @code {
+    [Inject] UdpBroadcastClient UdpBroadcastClient { get; set; } = null!;
     [Inject] ISender Sender { get; set; } = null!;
     [Inject] AppStateService AppStateService { get; set; } = null!;
     [Inject] NavigationManager NavigationManager { get; set; } = null!;
@@ -62,13 +63,15 @@
     private ConnectionState _checkState = ConnectionState.Unchecked;
     // LocalSettings? _settings;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if(AppStateService.ProfileId != Guid.Empty)
         {
             NavigationManager.NavigateTo("/books");
             return;
         }
+
+        var test = await UdpBroadcastClient.StartAsync();
         AppStateService.ServerUrl = "https://bookheaven.ggarrido.dev";
         _initialized = true;
     }

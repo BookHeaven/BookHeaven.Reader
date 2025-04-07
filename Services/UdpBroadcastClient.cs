@@ -7,40 +7,45 @@ namespace BookHeaven.Reader.Services;
 
 public class UdpBroadcastClient(AppStateService appStateService)
 {
-    public async Task StartAsync()
+    public async Task<string> StartAsync()
     {
         using var udpClient = new UdpClient
         {
             EnableBroadcast = true
         };
+        udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, Broadcast.BROADCAST_PORT));
 
         var broadcastAddress = new IPEndPoint(IPAddress.Broadcast, Broadcast.BROADCAST_PORT);
         var discoverMessage = Encoding.UTF8.GetBytes(Broadcast.DISCOVER_MESSAGE);
-
         await udpClient.SendAsync(discoverMessage, discoverMessage.Length, broadcastAddress);
 
-        using var listener = new UdpClient(Broadcast.BROADCAST_PORT);
-
-        while (true)
+        try
         {
-            var result = await listener.ReceiveAsync();
-            var responseMessage = Encoding.UTF8.GetString(result.Buffer);
-
-            if (!responseMessage.StartsWith(Broadcast.SERVER_URL_MESSAGE_PREFIX))
+            while (true)
             {
-                await Task.Delay(2000);
-                continue;
-            }
-            
-            var parts = responseMessage.Split(':');
-            
-            var serverUrl = parts[1];
+                var result = await udpClient.ReceiveAsync();
+                var responseMessage = Encoding.UTF8.GetString(result.Buffer);
 
-            // Enviar ACK al servidor
-            var ackMessage = Encoding.UTF8.GetBytes(Broadcast.ACK_MESSAGE);
-            await udpClient.SendAsync(ackMessage, ackMessage.Length, result.RemoteEndPoint);
-            return;
+                if (!responseMessage.StartsWith(Broadcast.SERVER_URL_MESSAGE_PREFIX))
+                {
+                    continue;
+                }
+
+                var parts = responseMessage.Split(':');
+
+                var serverUrl = parts[1];
+
+                // Enviar ACK al servidor
+                var ackMessage = Encoding.UTF8.GetBytes(Broadcast.ACK_MESSAGE);
+                await udpClient.SendAsync(ackMessage, ackMessage.Length, broadcastAddress);
+                return serverUrl;
+            }
         }
+        catch (Exception ex)
+        {
+            return string.Empty;
+        }
+        
         
     }
 }
