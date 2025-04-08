@@ -187,3 +187,7 @@ h1:focus {
 .blazor-context-menu__item--default {
     @apply !p-3;
 }
+
+.blazor-context-menu__item--default:active {
+    @apply !bg-neutral-700 text-white;
+}
