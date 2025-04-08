@@ -43,7 +43,7 @@ namespace BookHeaven.Reader.Services
 			
 			var url = appStateService.ServerUrl;
 
-			if (string.IsNullOrEmpty(url) || !url.StartsWith("https://"))
+			if (string.IsNullOrEmpty(url))
 			{
 				return false;
 			}
