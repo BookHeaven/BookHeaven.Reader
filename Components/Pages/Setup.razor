@@ -71,8 +71,7 @@
             return;
         }
 
-        var test = await UdpBroadcastClient.StartAsync();
-        AppStateService.ServerUrl = "https://bookheaven.ggarrido.dev";
+        AppStateService.ServerUrl = await UdpBroadcastClient.StartAsync();
         _initialized = true;
     }
 
