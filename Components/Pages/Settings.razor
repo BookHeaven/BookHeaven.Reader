@@ -18,6 +18,10 @@
     <div class="mb-3 flex flex-col">
         <label for="server-url" class="form-label">@Translations.SERVER_URL:</label>
         <input type="text" class="border-2 w-full rounded border-neutral-400 p-2.5 focus:ring-black-500" id="server-url" @bind-value="AppStateService.ServerUrl">
+        <span class="p-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Change this only if the new url points to the exact same server instance.
+        </span>
     </div>
 </main>
 
