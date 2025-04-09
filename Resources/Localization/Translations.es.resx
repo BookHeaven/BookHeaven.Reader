@@ -14,8 +14,8 @@
     <data name="LOCAL" xml:space="preserve">
         <value>Local</value>
     </data>
-    <data name="REMOTE" xml:space="preserve">
-        <value>Remoto</value>
+    <data name="SERVER" xml:space="preserve">
+        <value>Servidor</value>
     </data>
     <data name="SETTINGS" xml:space="preserve">
         <value>Ajustes</value>
@@ -45,7 +45,7 @@
         <value>Vamos a prepararlo todo</value>
     </data>
     <data name="ENTER_SERVER_URL" xml:space="preserve">
-        <value>Por favor, introduce la URL de tu servidor</value>
+        <value>Introduce la URL de tu servidor</value>
     </data>
     <data name="HTTPS_ONLY" xml:space="preserve">
         <value>Solo se permite el protocolo HTTPS</value>
@@ -57,7 +57,7 @@
         <value>Reintentar</value>
     </data>
     <data name="CONNECTION_FAILED" xml:space="preserve">
-        <value>Conexión fallida</value>
+        <value>No se ha podido conectar con el servidor</value>
     </data>
     <data name="CHECK_THE_URL" xml:space="preserve">
         <value>Por favor comprueba la URL y vuelve a intentarlo</value>
@@ -169,5 +169,20 @@
     </data>
     <data name="FONT" xml:space="preserve">
         <value>Fuente</value>
+    </data>
+    <data name="SEARCHING_SERVERS" xml:space="preserve">
+        <value>Buscando servidores</value>
+    </data>
+    <data name="NO_SERVERS_FOUND" xml:space="preserve">
+        <value>No se han encontrado servidores</value>
+    </data>
+    <data name="MANUAL_CONNECTION" xml:space="preserve">
+        <value>Conexión manual</value>
+    </data>
+    <data name="HTTPS_RECOMMENDED" xml:space="preserve">
+        <value>Se recomienda utilizar HTTPS pero no es obligatorio</value>
+    </data>
+    <data name="HTTPS_RECOMMENDED_INFO" xml:space="preserve">
+        <value>Algunos recursos del servidor (como las portadas de los libros) podrían no cargar al utilizar HTTP</value>
     </data>
 </root>

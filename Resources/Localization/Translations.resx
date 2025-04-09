@@ -21,8 +21,8 @@
     <data name="LOCAL" xml:space="preserve">
         <value>Local</value>
     </data>
-    <data name="REMOTE" xml:space="preserve">
-        <value>Remote</value>
+    <data name="SERVER" xml:space="preserve">
+        <value>Server</value>
     </data>
     <data name="SETTINGS" xml:space="preserve">
         <value>Settings</value>
@@ -52,7 +52,7 @@
         <value>Let's set things up</value>
     </data>
     <data name="ENTER_SERVER_URL" xml:space="preserve">
-        <value>Please, enter your server's URL</value>
+        <value>Enter your server's URL</value>
     </data>
     <data name="HTTPS_ONLY" xml:space="preserve">
         <value>Only HTTPS protocol is supported</value>
@@ -64,7 +64,7 @@
         <value>Retry</value>
     </data>
     <data name="CONNECTION_FAILED" xml:space="preserve">
-        <value>Connection failed</value>
+        <value>Could not connect to the server</value>
     </data>
     <data name="CHECK_THE_URL" xml:space="preserve">
         <value>Please check the URL and try again</value>
@@ -176,5 +176,20 @@
     </data>
     <data name="FONT" xml:space="preserve">
         <value>Font</value>
+    </data>
+    <data name="SEARCHING_SERVERS" xml:space="preserve">
+        <value>Searching for servers</value>
+    </data>
+    <data name="NO_SERVERS_FOUND" xml:space="preserve">
+        <value>No servers found</value>
+    </data>
+    <data name="MANUAL_CONNECTION" xml:space="preserve">
+        <value>Manual connection</value>
+    </data>
+    <data name="HTTPS_RECOMMENDED" xml:space="preserve">
+        <value>HTTPS is recommended although not enforced</value>
+    </data>
+    <data name="HTTPS_RECOMMENDED_INFO" xml:space="preserve">
+        <value>Some assets from the server (mostly book covers) might not load if using plain HTTP</value>
     </data>
 </root>

@@ -132,7 +132,7 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connection failed.
+        ///   Looks up a localized string similar to Could not connect to the server.
         /// </summary>
         public static string CONNECTION_FAILED {
             get {
@@ -204,7 +204,7 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please, enter your server&apos;s URL.
+        ///   Looks up a localized string similar to Enter your server&apos;s URL.
         /// </summary>
         public static string ENTER_SERVER_URL {
             get {
@@ -254,6 +254,24 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string HTTPS_ONLY {
             get {
                 return ResourceManager.GetString("HTTPS_ONLY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to HTTPS is recommended although not enforced.
+        /// </summary>
+        public static string HTTPS_RECOMMENDED {
+            get {
+                return ResourceManager.GetString("HTTPS_RECOMMENDED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Some assets from the server (mostly book covers) might not load if using plain HTTP.
+        /// </summary>
+        public static string HTTPS_RECOMMENDED_INFO {
+            get {
+                return ResourceManager.GetString("HTTPS_RECOMMENDED_INFO", resourceCulture);
             }
         }
         
@@ -348,6 +366,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Manual connection.
+        /// </summary>
+        public static string MANUAL_CONNECTION {
+            get {
+                return ResourceManager.GetString("MANUAL_CONNECTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New.
         /// </summary>
         public static string NEW {
@@ -362,6 +389,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string NO_BOOKS_FOUND {
             get {
                 return ResourceManager.GetString("NO_BOOKS_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No servers found.
+        /// </summary>
+        public static string NO_SERVERS_FOUND {
+            get {
+                return ResourceManager.GetString("NO_SERVERS_FOUND", resourceCulture);
             }
         }
         
@@ -420,20 +456,29 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Remote.
-        /// </summary>
-        public static string REMOTE {
-            get {
-                return ResourceManager.GetString("REMOTE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Retry.
         /// </summary>
         public static string RETRY {
             get {
                 return ResourceManager.GetString("RETRY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searching for servers.
+        /// </summary>
+        public static string SEARCHING_SERVERS {
+            get {
+                return ResourceManager.GetString("SEARCHING_SERVERS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server.
+        /// </summary>
+        public static string SERVER {
+            get {
+                return ResourceManager.GetString("SERVER", resourceCulture);
             }
         }
         
