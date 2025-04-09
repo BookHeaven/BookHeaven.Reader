@@ -11,6 +11,7 @@ namespace BookHeaven.Reader.Components.Pages.Books;
 
 public partial class Books
 {
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private BookManager BookManager { get; set; } = null!;

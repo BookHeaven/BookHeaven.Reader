@@ -5,7 +5,11 @@
 
 @if (BookManager.Books.Count == 0)
 {
-    <Message Content="@Translations.NO_BOOKS_FOUND"/>
+    <Message Content="@Translations.NO_BOOKS_FOUND" OnButtonClick="@(() => NavigationManager.NavigateTo("/books/remote"))">
+        <ButtonContent>
+            <i class="bi bi-download"></i> Download books
+        </ButtonContent>
+    </Message>
     return;
 }
 
