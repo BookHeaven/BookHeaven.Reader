@@ -4,7 +4,11 @@
 
 @if (!_canConnect)
 {
-    <Message Content="@Translations.CONNECTION_FAILED" ExtraInfo="@AppStateService.ServerUrl" ButtonText="@Translations.RETRY" OnButtonClick="@OnButtonClick"/>
+    <Message Content="@Translations.CONNECTION_FAILED" ExtraInfo="@AppStateService.ServerUrl" OnButtonClick="@OnButtonClick">
+        <ButtonContent>
+            <i class="bi bi-arrow-clockwise"></i> @Translations.RETRY
+        </ButtonContent>
+    </Message>
     return;
 }
 <div class="flex flex-col h-full bg-[lightgray]">

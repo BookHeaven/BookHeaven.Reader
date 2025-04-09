@@ -30,7 +30,7 @@ public partial class Remote
     {
         await GetData();
         var getFonts = await Sender.Send(new GetAllFonts.Query());
-        if (getFonts.IsFailure || getFonts.Value.Count == 0)
+        if (getFonts is { IsSuccess: true, Value.Count: 0 })
         {
             _ = ServerService.DownloadFonts();
         }
