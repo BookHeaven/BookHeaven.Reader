@@ -1,5 +1,5 @@
 ﻿<button @attributes="@AdditionalAttributes" 
-        class="flex items-center justify-center gap-2 px-4 py-2 @(Kind == ButtonType.Secondary ? "bg-neutral-600 text-white active:bg-neutral-400 active:text-black" : "active:bg-neutral-700 active:text-white") @(Class)" 
+        class="flex items-center justify-center gap-2 px-4 py-2 @(Kind == ButtonType.Secondary ? "bg-neutral-600 text-white active:bg-neutral-400 active:text-black rounded" : "active:bg-neutral-700 active:text-white") @(Class)" 
         @onclick="@(() => OnClick.InvokeAsync())" 
         @onmousedown="@(() => OnMouseDown.InvokeAsync())" 
         disabled="@Disabled">
