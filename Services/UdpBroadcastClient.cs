@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using BookHeaven.Domain.Constants;
+using BookHeaven.Domain.Shared;
 #if ANDROID31_0_OR_GREATER
 using Android.App;
 using Android.Content;
@@ -17,7 +18,7 @@ namespace BookHeaven.Reader.Services;
 
 public class UdpBroadcastClient(AppStateService appStateService)
 {
-    public async Task<string> StartAsync()
+    public async Task<Result<string>> StartAsync()
     {
         using var udpClient = new UdpClient
         {
@@ -32,11 +33,10 @@ public class UdpBroadcastClient(AppStateService appStateService)
         {
             foreach (var linkAddress in linkProperties.LinkAddresses)
             {
-                if (linkAddress?.Address is Inet4Address)
-                {
-                    ip = IPAddress.Parse(linkAddress.Address.HostAddress!);
-                    break;
-                }
+                if (linkAddress.Address is not Inet4Address) continue;
+                
+                ip = IPAddress.Parse(linkAddress.Address.HostAddress!);
+                break;
             }
         }
 #elif ANDROID
@@ -57,7 +57,15 @@ public class UdpBroadcastClient(AppStateService appStateService)
         {
             while (true)
             {
-                var result = await udpClient.ReceiveAsync();
+                var task = udpClient.ReceiveAsync();
+                
+                var completedTask = await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10)));
+                if (completedTask != task)
+                {
+                    return new Error("BROADCAST_ERROR", "No response from server");
+                }
+                
+                var result = task.Result;
                 var responseMessage = Encoding.UTF8.GetString(result.Buffer);
 
                 if (!responseMessage.StartsWith(Broadcast.SERVER_URL_MESSAGE_PREFIX))
@@ -75,7 +83,7 @@ public class UdpBroadcastClient(AppStateService appStateService)
         }
         catch (Exception ex)
         {
-            return string.Empty;
+            return new Error("BROADCAST_ERROR", "Unknown error while connecting the to server");
         }
         
         
