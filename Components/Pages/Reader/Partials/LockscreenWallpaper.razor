@@ -1,0 +1,36 @@
+﻿@implements IDisposable
+<div class="fixed z-[9000] inset-0 flex items-center justify-center bg-white @(!_screenLocked ? "hidden" : "")">
+	<img fetchpriority="high" decoding="async" class="w-full" src="@ImageSrc" alt="" />
+</div>
+
+@code {
+	[Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
+	
+	[Parameter] public string? ImageSrc { get; set; }
+
+	private bool _screenLocked;
+	
+	protected override void OnInitialized()
+	{
+		LifeCycleService.Paused += Show;
+		LifeCycleService.Resumed += Hide;
+	}
+
+	private void Show(object? sender, EventArgs e)
+	{
+		_screenLocked = true;
+		StateHasChanged();
+	}
+	private void Hide(object? sender, EventArgs e)
+	{
+		_screenLocked = false;
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		LifeCycleService.Paused -= Show;
+		LifeCycleService.Resumed -= Hide;
+	}
+
+}

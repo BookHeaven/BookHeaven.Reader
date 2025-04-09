@@ -79,7 +79,10 @@
 		}
 	}
 </style>
-
+@if (_book is not null)
+{
+	<LockscreenWallpaper ImageSrc="@_book.CoverUrl()" />
+}
 <FontManager ProfileSettings="@_profileSettings" />
 @if (_bookLoading)
 {

@@ -16,9 +16,6 @@ using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Style = EpubManager.Entities.Style;
-#if ANDROID
-using Android.Views;
-#endif
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
@@ -31,6 +28,7 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
+    
 
     private readonly ReaderViewModel _readerViewModel = new();
 
@@ -82,7 +80,7 @@ public partial class Reader : IAsyncDisposable
         _dotNetReference.Dispose();
 #if ANDROID
         var activity = Platform.CurrentActivity!;
-        activity.Window?.ClearFlags(WindowManagerFlags.Fullscreen);
+        activity.Window?.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
 #endif
         GC.SuppressFinalize(this);
     }
@@ -93,7 +91,7 @@ public partial class Reader : IAsyncDisposable
         OverlayService.OnOverlayChanged += StateHasChanged;
 #if ANDROID
             var activity = Platform.CurrentActivity!;
-            activity.Window?.AddFlags(WindowManagerFlags.Fullscreen);
+            activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
 #endif
 
         var bookTask = Sender.Send(new GetBook.Query(Id));
@@ -168,6 +166,10 @@ public partial class Reader : IAsyncDisposable
             _bookProgress.StartDate = DateTimeOffset.Now;
             NavigateToChapter(0, 0);
         }
+/*#if ANDROID
+        await using var imageStream = File.OpenRead(_book!.CoverPath(MauiProgram.CoversPath));
+        LockScreenService.SetLockScreenWallpaper(imageStream);
+#endif*/
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -177,12 +179,11 @@ public partial class Reader : IAsyncDisposable
 
     private void OnResumed(object? sender, EventArgs e)
     {
-        if (_isSuspended)
-        {
-            var resumeTime = DateTime.Now;
-            _totalSuspendedTime += resumeTime - _suspendStartTime;
-            _isSuspended = false;
-        }
+        if (!_isSuspended) return;
+        
+        var resumeTime = DateTime.Now;
+        _totalSuspendedTime += resumeTime - _suspendStartTime;
+        _isSuspended = false;
     }
 
     private void OnPaused(object? sender, EventArgs e)
