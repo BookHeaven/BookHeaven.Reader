@@ -2,7 +2,6 @@
 @using System.Globalization
 @using BookHeaven.Reader.Components.Pages.Reader.Partials
 @layout EmptyLayout
-
 <!--suppress CssUnresolvedCustomProperty -->
 <style>
 	body {
@@ -84,7 +83,7 @@
 <FontManager ProfileSettings="@_profileSettings" />
 @if (_bookLoading)
 {
-    <Message Content="@(Translations.LOADING_BOOK)"/>
+    <Message Content="@Translations.LOADING_BOOK"/>
 }
 <ImageViewer />
 @if (OverlayService.IsOverlayVisible)
@@ -106,7 +105,7 @@
 		OnChapterSelected="@OnChapterSelected"/>
 }
 
-<Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="_profileSettings"/>
+<Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="@_profileSettings"/>
 <div class="flex h-screen flex-col">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current">
@@ -134,7 +133,7 @@
 		{
 			<Clock/>
 			<BatteryInfo/>
-			<ChapterTitle Title="@ChapterTitle" CurrentPage="_readerViewModel.CurrentPage" TotalPages="_readerViewModel.TotalPages"/>
+			<ChapterTitle Title="@ChapterTitle" CurrentPage="@_readerViewModel.CurrentPage" TotalPages="@_readerViewModel.TotalPages"/>
 			<div class="ms-auto text-end">
 				@(Progress.ToString("0.00"))%
 			</div>
