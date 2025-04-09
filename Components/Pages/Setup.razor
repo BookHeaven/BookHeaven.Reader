@@ -122,7 +122,6 @@
         }
         _state = PageState.Success;
         StateHasChanged();
-        await Task.Delay(FakeDelay);
         
         var serverProfiles = await ServerService.GetAllProfiles();
         foreach (var profile in serverProfiles)
