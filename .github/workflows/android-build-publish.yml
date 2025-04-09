@@ -62,11 +62,11 @@ jobs:
     - name: Publish
       working-directory: .\BookHeaven
       run: |
-          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android \
-            /p:AndroidKeyStore=true \
-            /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" \
-            /p:AndroidSigningKeyAlias=bookheaven \
-            /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} \
+          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android ^
+            /p:AndroidKeyStore=true ^
+            /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" ^
+            /p:AndroidSigningKeyAlias=bookheaven ^
+            /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} ^
             /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }}
       
     - name: Extract version
