@@ -1,5 +1,5 @@
 ﻿<div class="flex bg-white">
-    <img src="@(_serverUrl + Book.CoverUrl())" class="w-[120px]" alt=""/>
+    <img decoding="async" src="@(_serverUrl + Book.CoverUrl())" class="w-[120px]" alt=""/>
     <div class="flex w-full flex-col justify-between">
         <div class="flex flex-col gap-1 mt-2 mx-3">
             <p class="text-balance text-sm font-bold leading-4">@Book.Title</p>
