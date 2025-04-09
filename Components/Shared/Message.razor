@@ -1,12 +1,12 @@
 ﻿<div class="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 top-1/2 text-center">
-    <p class="text-nowrap">@(Content != null ? Content : "Loading...")</p>
+    <p class="text-nowrap text-xl">@(Content ?? "Loading...")</p>
     @if (ExtraInfo != null)
     {
-        <p>@ExtraInfo</p>
+        <p class="mt-2">@ExtraInfo</p>
     }
-    @if (ButtonText != null)
+    @if (ButtonContent != null)
     {
-        <Button Kind="Button.ButtonType.Secondary" OnClick="@(() => OnButtonClick.InvokeAsync())">@ButtonText</Button>
+        <Button Class="mx-auto mt-10" Kind="Button.ButtonType.Secondary" OnClick="@(() => OnButtonClick.InvokeAsync())">@ButtonContent</Button>
     }
 </div>
 
@@ -14,7 +14,7 @@
 @code {
     [Parameter] public string? Content { get; set; } = null;
     [Parameter] public string? ExtraInfo { get; set; } = null;
-    [Parameter] public string? ButtonText { get; set; } = null;
+    [Parameter] public RenderFragment? ButtonContent { get; set; }
 
     [Parameter] public EventCallback OnButtonClick { get; set; }
 }
