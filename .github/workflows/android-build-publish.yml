@@ -51,15 +51,23 @@ jobs:
     - name: Restore dependencies
       working-directory: .\BookHeaven\BookHeaven.Reader
       run: dotnet restore
-      
-    - name: Setup Keystore file
-      run: |
-        echo "${{ secrets.KEYSTORE_FILE }}" > bookheaven.keystore.asc
-        gpg -d -passphrase "${{ secrets.KEYSTORE_PASSWORD_GPG }}" --batch bookheaven.keystore.asc > .\BookHeaven\bookheaven.keystore
-      
-    - name: Build
+
+    - name: Setup keystore file
+      id: decode_keystore
+      uses: timheuer/base64-to-file@v1.2.4
+      with:
+        fileName: bookheaven.jks
+        encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+    
+    - name: Publish
       working-directory: .\BookHeaven
-      run: dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidSigningKeyStore=.\bookheaven.keystore /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningKeyStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
+      run: |
+          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android \
+            /p:AndroidKeyStore=true \
+            /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" \
+            /p:AndroidSigningKeyAlias=bookheaven \
+            /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} \
+            /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }}
       
     - name: Extract version
       id: extract_version
