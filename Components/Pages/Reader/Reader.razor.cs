@@ -96,7 +96,7 @@ public partial class Reader : IAsyncDisposable
             activity.Window?.AddFlags(WindowManagerFlags.Fullscreen);
 #endif
 
-        var bookTask = Sender.Send(new GetBookQuery(Id));
+        var bookTask = Sender.Send(new GetBook.Query(Id));
         var profileSettingsTask = Sender.Send(new GetProfileSettings.Query(AppStateService.ProfileId));
         var bookProgressTask = Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
 

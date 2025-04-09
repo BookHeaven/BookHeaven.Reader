@@ -135,12 +135,12 @@ namespace BookHeaven.Reader.Services
 		{
 			try
 			{
-				var getBook = await sender.Send(new GetBookQuery(book.BookId));
+				var getBook = await sender.Send(new GetBook.Query(book.BookId));
 				if (getBook.IsSuccess)
 				{
 					//If the book is already downloaded, we remove the local cache
 					Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
-					await sender.Send(new UpdateBookCommand(book));
+					await sender.Send(new UpdateBook.Command(book));
 				}
 				else
 				{
