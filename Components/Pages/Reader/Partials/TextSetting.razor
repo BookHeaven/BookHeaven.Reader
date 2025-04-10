@@ -1,10 +1,10 @@
 ﻿<span class="my-auto ms-3 text-nowrap">@Label</span>
 <div class="my-auto flex items-center">
     <Button OnClick="@(() => AddAmount(-Increment))">
-        <i class="bi bi-dash text-xl"></i>
+        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-minus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /></svg>
     </Button>
     <Progress Value="@(Math.Round((Value - Min) / (Max - Min) * 100))"/>
     <Button OnClick="@(() => AddAmount(Increment))">
-        <i class="bi bi-plus text-xl"></i>
+        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
     </Button>
 </div>

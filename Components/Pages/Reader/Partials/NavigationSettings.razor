@@ -11,27 +11,35 @@
             {
                 var showIcon = i is 3 or 4 or 5;
                 var color = "";
-                var icon = "";
                 switch (buttons[i])
                 {
                     case NavigationButton.Next:
                         color = "bg-neutral-300";
-                        if (showIcon) icon = "bi-chevron-right";
                         break;
                     case NavigationButton.Previous:
                         color = "bg-neutral-400";
-                        if(showIcon) icon = "bi-chevron-left";
                         break;
                     case NavigationButton.Overlay:
                         color = "bg-neutral-200";
-                        if(showIcon) icon = "bi-list";
                         break;
                 }
                 
                 <span class="flex items-center justify-center @color">
                     @if (showIcon)
                     {
-                        <i class="bi @icon"></i>
+                        switch (buttons[i])
+                        {
+                            case NavigationButton.Next:
+                                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                                break;
+                            case NavigationButton.Previous:
+                                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
+                                break;
+                            case NavigationButton.Overlay:
+                                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-menu-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0" /><path d="M4 12l16 0" /><path d="M4 18l16 0" /></svg>
+                                break;
+                                
+                        }
                     }
                 </span>
             }

@@ -3,8 +3,8 @@
 @if (!string.IsNullOrEmpty(_base64))
 {
 	<div class="absolute inset-0 bg-white z-[2000] flex items-center justify-center">
-		<button class="absolute z-[2000] top-5 end-5 bg-neutral-500 text-white rounded-full flex items-center justify-center size-10" @onclick="() => _base64 = string.Empty">
-			<i class="bi bi-x before:!leading-normal text-2xl"></i>
+		<button class="absolute z-[2000] top-5 end-5 bg-neutral-500 active:bg-neutral-700 text-white rounded-full flex items-center justify-center size-10" @onclick="() => _base64 = string.Empty">
+			<svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-8 icon icon-tabler icons-tabler-outline icon-tabler-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
 		</button>
 		<Panzoom WheelMode="WheelMode.ZoomWithWheel">
 			<img @ref="@context.ElementReference" src="@_base64" alt=""/>

@@ -1,13 +1,20 @@
 ﻿@if (EpubChapter.Title != null)
 {
-    <span id="@EpubChapter.ItemId" class="flex items-center scroll-mt-40">
+    <span id="@EpubChapter.ItemId" class="flex items-center scroll-mt-40 w-full">
         @if (EpubChapter.Chapters.Count > 0)
         {
             <Button OnClick="@ToggleCollapse">
-                <i class="bi @(_collapsed ? "bi-chevron-right" : "bi-chevron-down")"></i>
+                @if (_collapsed)
+                {
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
+                }
+                else
+                {
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 9l6 6l6 -6" /></svg>
+                }
             </Button>
         }
-        <Button Class="@(_isSelected.Then("font-bold") + " text-left")" OnClick="@(() => OnChapterSelected.InvokeAsync(EpubChapter.ItemId))">@EpubChapter.Title</Button>
+        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => OnChapterSelected.InvokeAsync(EpubChapter.ItemId))">@EpubChapter.Title</Button>
     </span>
 }
 

@@ -7,7 +7,8 @@
 {
     <Message Content="@Translations.NO_BOOKS_FOUND" OnButtonClick="@(() => NavigationManager.NavigateTo("/books/remote"))">
         <ButtonContent>
-            <i class="bi bi-download"></i> Download books
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-book-download"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 20h-6a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12v5" /><path d="M13 16h-7a2 2 0 0 0 -2 2" /><path d="M15 19l3 3l3 -3" /><path d="M18 22v-9" /></svg>
+            Download books
         </ButtonContent>
     </Message>
     return;
@@ -20,7 +21,10 @@
     @{
         var book = (Book)context.Data;
     }
-    <Item OnClick="@(() => _selectedBook = book)"><i class="bi bi-info-circle me-5"></i>@Translations.INFO</Item>
+    <Item OnClick="@(() => _selectedBook = book)">
+        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+        @Translations.INFO
+    </Item>
 </ContextMenu>
 
 <RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />

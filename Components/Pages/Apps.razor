@@ -13,11 +13,20 @@
             var app = (AppInfo)appContext.Data;
         }
         <Item OverrideDefaultCssClass="p-2">@app.Name</Item>
-        <Item OnClick="@(() => AppsService.OpenApp(app.PackageName!))"><i class="bi bi-box-arrow-up-right me-5"></i>@Translations.OPEN</Item>
-        <Item OnClick="@(() => AppsService.OpenInfo(app.PackageName!))"><i class="bi bi-info-circle me-5"></i>@Translations.INFO</Item>
+        <Item OnClick="@(() => AppsService.OpenApp(app.PackageName!))">
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+            @Translations.OPEN
+        </Item>
+        <Item OnClick="@(() => AppsService.OpenInfo(app.PackageName!))">
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+            @Translations.INFO
+        </Item>
         @if (AppsService.CanBeUninstalled(app.PackageName!))
         {
-            <Item OnClick="@(() => AppsService.UninstallApp(app.PackageName!))"><i class="bi bi-trash me-5"></i>@Translations.UNINSTALL</Item>
+            <Item OnClick="@(() => AppsService.UninstallApp(app.PackageName!))">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-trash-x"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7h16" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /><path d="M10 12l4 4m0 -4l-4 4" /></svg>
+                @Translations.UNINSTALL
+            </Item>
         }
     </ContextMenu>
 
