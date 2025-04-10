@@ -15,7 +15,8 @@
 
 <BookInfo @bind-Book="_selectedBook"></BookInfo>
 
-<ContextMenu Id="BookMenu" Context="context" Animation="Animation.Grow" OverrideDefaultCssClass="absolute border bg-white">
+
+<ContextMenu Id="BookMenu" Context="context" OverrideDefaultCssClass="absolute rounded border bg-white">
     @{
         var book = (Book)context.Data;
     }

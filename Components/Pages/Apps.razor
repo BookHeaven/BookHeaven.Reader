@@ -8,7 +8,7 @@
 
 @if (_apps.Count > 0)
 {
-    <ContextMenu Id="AppMenu" Context="appContext" Animation="Animation.Grow" OverrideDefaultCssClass="absolute border bg-white">
+    <ContextMenu Id="AppMenu" Context="appContext" OverrideDefaultCssClass="absolute rounded border bg-white">
         @{
             var app = (AppInfo)appContext.Data;
         }
