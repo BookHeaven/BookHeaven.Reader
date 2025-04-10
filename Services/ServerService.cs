@@ -25,6 +25,7 @@ namespace BookHeaven.Reader.Services
 		Task DownloadBook(Book book, Guid profileId);
 		Task UpdateBookProgress(BookProgress progress);
 		Task UpdateProgressByProfile(Guid profileId);
+		Task UpdateProfileSettings(ProfileSettings settings);
 		Task DownloadFonts();
 	}
 	public class ServerService(
@@ -210,6 +211,25 @@ namespace BookHeaven.Reader.Services
 			foreach (var progress in getProgresses.Value)
 			{
 				await UpdateBookProgress(progress);
+			}
+		}
+		
+		public async Task UpdateProfileSettings(ProfileSettings settings)
+		{
+			var endpoint = "api/profile/settings/update";
+
+			try
+			{
+				var response = await _httpClient.PostAsJsonAsync(endpoint, settings);
+				if(!response.IsSuccessStatusCode)
+				{
+					var errorResponse = await response.Content.ReadAsStringAsync();
+					throw new Exception($"Server responded with {response.StatusCode}: {errorResponse}");
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Failed to backup profile settings", ex);
 			}
 		}
 

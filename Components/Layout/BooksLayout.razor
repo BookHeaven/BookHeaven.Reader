@@ -20,6 +20,7 @@
                 </ContextMenuTrigger>
                 <ContextMenu Id="ThreeDotsMenu" OverrideDefaultCssClass="absolute border bg-white !inset-y-auto !left-auto !right-0">
                     <Item OnClick="@(() => NavigationManager.NavigateTo("/settings"))">@Translations.SETTINGS</Item>
+                    <Item OnClick="@BackupProfile">Backup profile</Item>
                     <Item OnClick="@SyncProgress">@Translations.SYNC_PROGRESS</Item>
                 </ContextMenu>
             </div>
