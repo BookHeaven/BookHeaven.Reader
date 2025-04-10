@@ -45,7 +45,7 @@
         }
         else
         {
-            <div class="grid grid-cols-2 grid-rows-3 gap-2 px-2 h-full">
+            <div class="grid grid-cols-1 xs:grid-cols-2 grid-rows-6 xs:grid-rows-3 gap-2 px-2 h-full">
                 @foreach (var book in CurrentPageBooks)
                 {
                     <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="FilterBooks"/>

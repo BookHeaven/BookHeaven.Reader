@@ -1,5 +1,9 @@
 ﻿@import "tailwindcss";
 
+@theme {
+    --breakpoint-xs: 33rem;
+}
+
 @layer base {
     h1 {
         @apply text-4xl;
@@ -95,20 +99,6 @@ html, body {
     --bs-btn-disabled-color: #000000;
     --bs-btn-disabled-bg: #FFFFFF;
     --bs-btn-disabled-border-color: #FFFFFF;
-}
-
-.btn-primary:hover {
-    color: var(--btn-hover-color);
-    background-color: var(--btn-hover-bg);
-}
-
-.btn-primary:active {
-    color: var(--btn-active-color);
-    background-color: var(--btn-active-bg);
-}
-.btn-primary:disabled {
-    color: var(--btn-disabled-color);
-    background-color: var(--btn-disabled-bg);
 }
 
 .content {
