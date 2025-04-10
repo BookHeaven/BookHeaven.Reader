@@ -1,6 +1,12 @@
 ﻿@implements IDisposable
-<div class="fixed z-[9000] inset-0 flex items-center justify-center bg-white @(!_screenLocked ? "hidden" : "")">
-	<img fetchpriority="high" decoding="async" class="w-full" src="@ImageSrc" alt="" />
+<div class="fixed z-[9000] inset-0 flex flex-col items-center justify-center bg-white @(!_screenLocked ? "hidden" : "")">
+	@if(!string.IsNullOrEmpty(ImageSrc)) {
+		<img fetchpriority="high" decoding="async" class="w-full" src="@ImageSrc" alt=""/>
+	}
+	else {
+		<img fetchpriority="high" decoding="async" class="w-[200px] mx-auto" src="/logo.svg" alt=""/>
+		<p class="absolute bottom-16 text-2xl text-center text-neutral-500">BookHeaven</p>
+	}
 </div>
 
 @code {
@@ -32,5 +38,4 @@
 		LifeCycleService.Paused -= Show;
 		LifeCycleService.Resumed -= Hide;
 	}
-
 }
