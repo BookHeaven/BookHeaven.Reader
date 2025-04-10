@@ -2,8 +2,8 @@
 
 public partial class BatteryInfo : IDisposable
 {
-    private string _batteryIcon = "battery-empty";
     private int _batteryLevel = 100;
+    private BatteryState _batteryState = BatteryState.Unknown;
 
     protected override void OnInitialized()
     {
@@ -19,26 +19,7 @@ public partial class BatteryInfo : IDisposable
     private void RefreshBatteryInfo(double chargeLevel, BatteryState state)
     {
         _batteryLevel = (int)(chargeLevel * 100);
-
-        switch (state)
-        {
-            case BatteryState.Charging:
-                _batteryIcon = "battery-charging";
-                break;
-            case BatteryState.Discharging:
-            case BatteryState.Full:
-                if (_batteryLevel >= 85)
-                    _batteryIcon = "battery-full";
-                else if (_batteryLevel >= 65)
-                    _batteryIcon = "battery-three-quarters";
-                else if (_batteryLevel >= 35)
-                    _batteryIcon = "battery-half";
-                else if (_batteryLevel >= 10)
-                    _batteryIcon = "battery-quarter";
-                else
-                    _batteryIcon = "battery-empty";
-                break;
-        }
+        _batteryState = state;
 
         InvokeAsync(StateHasChanged);
     }
