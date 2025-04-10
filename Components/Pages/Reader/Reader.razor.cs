@@ -113,7 +113,7 @@ public partial class Reader : IAsyncDisposable
         
         if(_profileSettings.ProfileSettingsId == Guid.Empty)
         {
-            await Sender.Send(new CreateProfileSettings.Command(_profileSettings));
+            await Sender.Send(new AddProfileSettings.Command(_profileSettings));
         }
         
         var getBookProgress = await bookProgressTask;
