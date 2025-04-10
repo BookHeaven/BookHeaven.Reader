@@ -24,6 +24,9 @@
 
 	private void Show(object? sender, EventArgs e)
 	{
+		#if DEBUG
+		return;
+		#endif
 		_screenLocked = true;
 		StateHasChanged();
 	}

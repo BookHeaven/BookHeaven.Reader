@@ -140,8 +140,6 @@ public partial class Reader : IAsyncDisposable
             LifeCycleService.Paused += OnPaused;
             LifeCycleService.Destroyed += OnDestroy;
         }
-        
-
 
         await LoadFromCache();
         if (Current == null)
@@ -166,10 +164,6 @@ public partial class Reader : IAsyncDisposable
             _bookProgress.StartDate = DateTimeOffset.Now;
             NavigateToChapter(0, 0);
         }
-/*#if ANDROID
-        await using var imageStream = File.OpenRead(_book!.CoverPath(MauiProgram.CoversPath));
-        LockScreenService.SetLockScreenWallpaper(imageStream);
-#endif*/
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

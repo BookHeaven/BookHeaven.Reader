@@ -33,7 +33,7 @@ public class UdpBroadcastClient(AppStateService appStateService)
             foreach (var linkAddress in linkProperties.LinkAddresses)
             {
                 if (linkAddress.Address is not Inet4Address) continue;
-                
+
                 ip = IPAddress.Parse(linkAddress.Address.HostAddress!);
                 break;
             }
@@ -43,11 +43,11 @@ public class UdpBroadcastClient(AppStateService appStateService)
         
         ip = new IPAddress(wifiManager.ConnectionInfo.IpAddress);
 #endif
-        
+
         udpClient.Client.Bind(new IPEndPoint(ip, Broadcast.BROADCAST_PORT));
 
         var message = $"{Broadcast.DISCOVER_MESSAGE_PREFIX}{ip}";
-        
+
         var broadcastAddress = new IPEndPoint(IPAddress.Broadcast, Broadcast.BROADCAST_PORT);
         var discoverMessage = Encoding.UTF8.GetBytes(message);
         await udpClient.SendAsync(discoverMessage, discoverMessage.Length, broadcastAddress);
@@ -57,13 +57,13 @@ public class UdpBroadcastClient(AppStateService appStateService)
             while (true)
             {
                 var task = udpClient.ReceiveAsync();
-                
+
                 var completedTask = await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10)));
                 if (completedTask != task)
                 {
                     return new Error("BROADCAST_ERROR", "No response from server");
                 }
-                
+
                 var result = task.Result;
                 var responseMessage = Encoding.UTF8.GetString(result.Buffer);
 
@@ -84,7 +84,5 @@ public class UdpBroadcastClient(AppStateService appStateService)
         {
             return new Error("BROADCAST_ERROR", "Unknown error while connecting the to server");
         }
-        
-        
     }
 }
