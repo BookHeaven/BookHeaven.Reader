@@ -7,7 +7,6 @@ using BookHeaven.Domain.Shared;
 using Android.App;
 using Android.Content;
 using Android.Net;
-using System.Net;
 using Java.Net;
 #elif ANDROID
 using Android.App;

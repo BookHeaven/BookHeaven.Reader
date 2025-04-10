@@ -2,5 +2,5 @@
 
 public class ImageViewerService
 {
-    public Action<string> OnOpenImage { get; set; } = null!;
+    public Action<string>? OnOpenImage { get; set; }
 }
