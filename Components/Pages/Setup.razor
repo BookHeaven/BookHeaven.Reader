@@ -77,18 +77,15 @@
     
     private const int FakeDelay = 2000;
     
-    protected override void OnInitialized()
-    {
-        if(AppStateService.ProfileId != Guid.Empty)
-        {
-            NavigationManager.NavigateTo("/books");
-        }
-    }
-    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            if(AppStateService.ProfileId != Guid.Empty)
+            {
+                NavigationManager.NavigateTo("/books");
+                return;
+            }
             _initialized = true;
             StateHasChanged();
             await Discover();
