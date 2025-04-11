@@ -86,7 +86,7 @@
 <FontManager ProfileSettings="@_profileSettings" />
 @if (_bookLoading)
 {
-    <Message Content="@Translations.LOADING_BOOK"/>
+	<Message Content="@Translations.LOADING_BOOK"/>
 }
 <ImageViewer />
 @if (OverlayService.IsOverlayVisible)
@@ -112,19 +112,19 @@
 <div class="flex h-screen flex-col">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current">
-			@if (Current?.IsContentProcessed == true)
+			@if (!_bookLoading && Current?.IsContentProcessed == true)
 			{
 				@((MarkupString)Current.TextContent)
 			}
 		</div>
 		<div class="chapter prev invisible">
-			@if (Previous?.IsContentProcessed == true)
+			@if (!_bookLoading && Previous?.IsContentProcessed == true)
 			{
 				@((MarkupString)Previous.TextContent)
 			}
 		</div>
 		<div class="chapter next invisible">
-			@if (Next?.IsContentProcessed == true)
+			@if (!_bookLoading && Next?.IsContentProcessed == true)
 			{
 				@((MarkupString)Next.TextContent)
 			}
@@ -132,6 +132,7 @@
 	</div>
 
 	<div class="relative mt-auto flex h-[24px] gap-2 mx-2">
+		
 		@if (!_bookLoading)
 		{
 			<Clock/>

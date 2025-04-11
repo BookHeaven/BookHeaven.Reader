@@ -21,9 +21,15 @@ export function SetDotNetReference(dotnet) {
 export async function GetPageCount() {
     let pageWidth = page.offsetWidth;
 
-    let pagesPrev = (pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : null);
+    /*let pagesPrev = (pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : null);
     let pages = Math.round(parseFloat((page.scrollWidth / pageWidth).toFixed(1)));
-    let pagesNext = (pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : null);
+    let pagesNext = (pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : null);*/
+
+    const [pagesPrev, pages, pagesNext] = await Promise.all([
+        pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : null,
+        Math.round(parseFloat((page.scrollWidth / pageWidth).toFixed(1))),
+        pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : null
+    ]);
 
     return [pagesPrev, pages, pagesNext];
 }

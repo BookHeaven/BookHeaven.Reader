@@ -228,8 +228,12 @@ public partial class Reader : IAsyncDisposable
     {
         try
         {
-            _styles = await LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles) ?? [];
-            var chapters = await LoadFromCache<List<SpineItem?>>(CacheKey.Progress);
+            var getStyles = LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles);
+            var getChapters = LoadFromCache<List<SpineItem?>>(CacheKey.Progress);
+            await Task.WhenAll(getStyles, getChapters);
+            
+            _styles = await getStyles ?? [];
+            var chapters = await getChapters;
             if (chapters != null)
             {
                 _current = chapters[0]!;
@@ -279,21 +283,34 @@ public partial class Reader : IAsyncDisposable
             case nameof(ReaderViewModel.CurrentChapter):
                 if (_epubBook == null || _readerViewModel.CurrentChapter == -1) return;
                 
+                var tasks = new List<Task>();
+                
                 if (Current is { IsContentProcessed: false })
                 {
-                    Current.TextContent = await EpubReader.ApplyTextContentProcessing(Current.TextContent);
-                    Current.IsContentProcessed = true;
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        Current.TextContent = await EpubReader.ApplyTextContentProcessing(Current.TextContent);
+                        Current.IsContentProcessed = true;
+                    }));
                 }
                 if (Previous is { IsContentProcessed: false })
                 {
-                    Previous.TextContent = await EpubReader.ApplyTextContentProcessing(Previous.TextContent);
-                    Previous.IsContentProcessed = true;
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        Previous.TextContent = await EpubReader.ApplyTextContentProcessing(Previous.TextContent);
+                        Previous.IsContentProcessed = true;
+                    }));
                 }
                 if (Next is { IsContentProcessed: false })
                 {
-                    Next.TextContent = await EpubReader.ApplyTextContentProcessing(Next.TextContent);
-                    Next.IsContentProcessed = true;
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        Next.TextContent = await EpubReader.ApplyTextContentProcessing(Next.TextContent);
+                        Next.IsContentProcessed = true;
+                    }));
                 }
+
+                if(tasks.Count > 0) await Task.WhenAll(tasks);
 
                 _refreshTotalPages = true;
 
@@ -483,7 +500,7 @@ public partial class Reader : IAsyncDisposable
     private async Task UpdateProgress()
     {
         if (_readerViewModel.TotalPages == null) return;
-
+        
         _bookProgress.Chapter = _readerViewModel.CurrentChapter;
         _bookProgress.Page = _readerViewModel.CurrentPage!.Value;
         _bookProgress.Progress = Progress;
@@ -491,18 +508,17 @@ public partial class Reader : IAsyncDisposable
         _bookProgress.PageCount = _readerViewModel.TotalPages!.Value;
         _bookProgress.PageCountPrev = _totalPagesPrev;
         _bookProgress.PageCountNext = _totalPagesNext;
-        SaveElapsedTime();
-        await Sender.Send(new UpdateBookProgress.Command(_bookProgress));
-    }
 
-    private void SaveElapsedTime()
-    {
-        if(_bookProgress.EndDate is not null) return;
-        var elapsedTime = DateTime.Now - _entryTime - _totalSuspendedTime;
-        _bookProgress.ElapsedTime += elapsedTime;
-        _bookProgress.LastRead = DateTimeOffset.Now;
-        if (_readerViewModel.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
-            _readerViewModel.CurrentPage == _readerViewModel.TotalPages) _bookProgress.EndDate = DateTimeOffset.Now;
+        if (_bookProgress.EndDate is null)
+        {
+            var elapsedTime = DateTime.Now - _entryTime - _totalSuspendedTime;
+            _bookProgress.ElapsedTime += elapsedTime;
+            _bookProgress.LastRead = DateTimeOffset.Now;
+            if (_readerViewModel.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
+                _readerViewModel.CurrentPage == _readerViewModel.TotalPages) _bookProgress.EndDate = DateTimeOffset.Now;
+        }
+        
+        await Sender.Send(new UpdateBookProgress.Command(_bookProgress));
     }
 
     private async Task SaveState()
