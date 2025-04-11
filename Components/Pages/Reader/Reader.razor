@@ -84,12 +84,12 @@
 	<LockscreenWallpaper ImageSrc="@_book.CoverUrl()" />
 }
 <FontManager />
-<Navigation OnNavigationButtonClicked="@NavigationButtonClicked" />
+<ImageViewer />
+<Navigation />
 @if (_bookLoading)
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
 }
-<ImageViewer />
 @if (OverlayService.IsOverlayVisible)
 {
     <Overlay
@@ -98,7 +98,6 @@
         ChapterTitle="@ChapterTitle"
         GoToChapter="@OnGoToChapter"/>
 }
-
 @if (OverlayService.IsTocVisible)
 {
 	<TableOfContents

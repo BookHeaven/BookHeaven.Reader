@@ -12,9 +12,6 @@
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private ImageViewerService ImageViewerService { get; set; } = null!;
     
-    [Parameter]
-    public EventCallback<NavigationButton> OnNavigationButtonClicked { get; set; }
-    
     private IJSObjectReference _module = null!;
     
     private NavigationLayoutType SelectedLayout { get; set; }
@@ -38,9 +35,9 @@
         }
     }
 
-    private async Task HandleNavigation(NavigationButton button)
+    private void HandleNavigation(NavigationButton button)
     {
-        if(!_cancelNavigation) await OnNavigationButtonClicked.InvokeAsync(button);
+        if(!_cancelNavigation) ReaderService.OnNavigationButtonClicked?.Invoke(button);
         _cancelNavigation = false;
     }
 
@@ -59,7 +56,7 @@
             var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
             if (!string.IsNullOrEmpty(data))
             {
-                ImageViewerService.OnOpenImage.Invoke(data);
+                ImageViewerService.OnOpenImage?.Invoke(data);
             }
         }
     }

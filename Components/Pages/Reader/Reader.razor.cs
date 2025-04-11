@@ -50,10 +50,10 @@ public partial class Reader : IAsyncDisposable
     private int? _totalPagesPrev, _totalPagesNext;
     private int _totalWords;
 
-    private SpineItem? _current, _previous, _next;
-    private SpineItem? Current => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter) ?? _current;
-	private SpineItem? Next => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter + 1) ?? _next;
-	private SpineItem? Previous => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter - 1) ?? _previous;
+    //private SpineItem? _current, _previous, _next;
+    private SpineItem? Current => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter);
+	private SpineItem? Next => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter + 1);
+	private SpineItem? Previous => _epubBook?.Content.Spine.ElementAtOrDefault(_readerViewModel.CurrentChapter - 1);
     private EpubChapter? CurrentChapter => _epubBook?.Content.GetChapterFromTableOfContents(Current?.Id);
     private string ChapterTitle => CurrentChapter?.Title ?? Current?.Title ?? string.Empty;
     
@@ -67,6 +67,7 @@ public partial class Reader : IAsyncDisposable
     {
         await ReaderService.Initialize();
         ReaderService.ProfileSettings.PropertyChanged += OnProfileSettingsChanged;
+        ReaderService.OnNavigationButtonClicked += NavigationButtonClicked;
         OverlayService.Initialize();
         OverlayService.OnOverlayChanged += StateHasChanged;
         _readerViewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -118,11 +119,12 @@ public partial class Reader : IAsyncDisposable
                 LifeCycleService.Destroyed += OnDestroy;
             }
 
-            await LoadFromCache();
+            /*await LoadFromCache();
             if (Current == null)
                 await LoadEpubBook();
             else
-                _ = LoadEpubBook();
+                _ = LoadEpubBook();*/
+            await LoadEpubBook();
             _bookLoading = false;
             if (_bookProgress.ElapsedTime != TimeSpan.Zero)
             {
@@ -175,7 +177,7 @@ public partial class Reader : IAsyncDisposable
             _ = WriteToCache(CacheKey.Styles, _styles);
         }
 
-        if(_current != null && _current.Id == Current?.Id)
+        /*if(_current != null && _current.Id == Current?.Id)
         {
             Current!.TextContent = _current.TextContent;
 			Current.IsContentProcessed = _current.IsContentProcessed;
@@ -194,7 +196,7 @@ public partial class Reader : IAsyncDisposable
 			Next!.TextContent = _next.TextContent;
 			Next.IsContentProcessed = _next.IsContentProcessed;
             _next = null;
-		}
+		}*/
 		StateHasChanged();
     }
 
@@ -210,9 +212,9 @@ public partial class Reader : IAsyncDisposable
             var chapters = await getChapters;
             if (chapters != null)
             {
-                _current = chapters[0]!;
+                /*_current = chapters[0]!;
                 _previous = chapters[1];
-                _next = chapters[2];
+                _next = chapters[2];*/
             }
             StateHasChanged();
         }
@@ -298,7 +300,7 @@ public partial class Reader : IAsyncDisposable
                 break;
             case nameof(ReaderViewModel.CurrentPage):
                 if (_readerViewModel.CurrentPage is null or -1) return;
-                StateHasChanged();
+                if(!_refreshTotalPages) StateHasChanged();
                 break;
         }
     }
@@ -506,6 +508,8 @@ public partial class Reader : IAsyncDisposable
     
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        EpubReader.Dispose();
+        ReaderService.OnNavigationButtonClicked -= NavigationButtonClicked;
         ReaderService.ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
         OverlayService.OnOverlayChanged -= StateHasChanged;
         _readerViewModel.PropertyChanged -= ViewModel_PropertyChanged;

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Features.ProfileSettingss;
+using BookHeaven.Reader.Enums;
 using MediatR;
 
 namespace BookHeaven.Reader.Services;
@@ -10,6 +11,8 @@ public class ReaderService(
     ISender sender)
 {
     public ProfileSettings ProfileSettings { get; set; } = null!;
+    
+    public Action<NavigationButton>? OnNavigationButtonClicked { get; set; }
 
     public async Task Initialize()
     {
