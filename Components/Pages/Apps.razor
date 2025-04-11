@@ -35,7 +35,7 @@
         {
             <ContextMenuTrigger MenuId="AppMenu" Data="@app">
                 <div class="grid p-1 gap-0.5 h-full rounded active:bg-neutral-200 active:outline-4 active:outline-neutral-200" @onclick="@(() => AppsService.OpenApp(app.PackageName!))">
-                    <img src="data:image/png;base64,@app.IconBase64" class="mx-auto w-16" alt="App icon"/>
+                    <img src="data:image/png;base64,@app.IconBase64" class="mx-auto w-16" alt="App icon" draggable="false"/>
                     <span class="text-sm line-clamp-2 text-center p-1">@app.Name</span>
                 </div>
             </ContextMenuTrigger>
