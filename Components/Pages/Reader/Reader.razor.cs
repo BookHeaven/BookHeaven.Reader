@@ -1,10 +1,10 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
-using BookHeaven.Domain.Features.ProfileSettingss;
 using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Services;
@@ -33,13 +33,12 @@ public partial class Reader : IAsyncDisposable
 
     private readonly ReaderViewModel _readerViewModel = new();
 
-    private DateTime _entryTime;
+    private readonly Stopwatch _readingStopwatch = new();
+    
     private bool _isSuspended;
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference _module = null!;
-    private DateTime _suspendStartTime;
-    private TimeSpan _totalSuspendedTime;
 
     private Book? _book;
     private bool _bookLoading = true;
@@ -112,7 +111,7 @@ public partial class Reader : IAsyncDisposable
 
             if (_bookProgress.EndDate is null)
             {
-                _entryTime = DateTime.Now;
+                _readingStopwatch.Start();
 
                 LifeCycleService.Resumed += OnResumed;
                 LifeCycleService.Paused += OnPaused;
@@ -144,22 +143,23 @@ public partial class Reader : IAsyncDisposable
             }
         }
     }
+    
+    private void OnPaused(object? sender, EventArgs e)
+    {
+        if(_isSuspended) return;
+        
+        _isSuspended = true;
+        _readingStopwatch.Stop();
+    }
 
     private void OnResumed(object? sender, EventArgs e)
     {
         if (!_isSuspended) return;
         
-        var resumeTime = DateTime.Now;
-        _totalSuspendedTime += resumeTime - _suspendStartTime;
+        _readingStopwatch.Start();
         _isSuspended = false;
     }
-
-    private void OnPaused(object? sender, EventArgs e)
-    {
-        _isSuspended = true;
-        _suspendStartTime = DateTime.Now;
-    }
-
+    
     private async void OnDestroy(object? sender, EventArgs e)
     {
         await SaveState();
@@ -489,8 +489,8 @@ public partial class Reader : IAsyncDisposable
 
         if (_bookProgress.EndDate is null)
         {
-            var elapsedTime = DateTime.Now - _entryTime - _totalSuspendedTime;
-            _bookProgress.ElapsedTime += elapsedTime;
+            _bookProgress.ElapsedTime += _readingStopwatch.Elapsed;
+            
             _bookProgress.LastRead = DateTimeOffset.Now;
             if (_readerViewModel.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
                 _readerViewModel.CurrentPage == _readerViewModel.TotalPages) _bookProgress.EndDate = DateTimeOffset.Now;
