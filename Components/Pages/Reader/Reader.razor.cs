@@ -28,6 +28,7 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
+    [Inject] private ReaderService ReaderService { get; set; } = null!;
     
 
     private readonly ReaderViewModel _readerViewModel = new();
@@ -37,7 +38,6 @@ public partial class Reader : IAsyncDisposable
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference _module = null!;
-    private ProfileSettings _profileSettings = new();
     private DateTime _suspendStartTime;
     private TimeSpan _totalSuspendedTime;
 
@@ -64,111 +64,85 @@ public partial class Reader : IAsyncDisposable
            (_readerViewModel.CurrentPage + 1 ?? 0)) / (decimal)_totalWords * 100
         : 0;
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        OverlayService.OnOverlayChanged -= StateHasChanged;
-        _readerViewModel.PropertyChanged -= ViewModel_PropertyChanged;
-        if (_bookProgress.EndDate is null)
-        {
-            LifeCycleService.Resumed -= OnResumed;
-            LifeCycleService.Paused -= OnPaused;
-            LifeCycleService.Destroyed -= OnDestroy;
-        }
-        await SaveState();
-        await _module.InvokeVoidAsync("Dispose");
-        await _module.DisposeAsync();
-        _dotNetReference.Dispose();
-#if ANDROID
-        var activity = Platform.CurrentActivity!;
-        activity.Window?.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
-#endif
-        GC.SuppressFinalize(this);
-    }
-
     protected override async Task OnInitializedAsync()
     {
-        OverlayService.Init();
+        await ReaderService.Initialize();
+        ReaderService.ProfileSettings.PropertyChanged += OnProfileSettingsChanged;
+        OverlayService.Initialize();
         OverlayService.OnOverlayChanged += StateHasChanged;
-#if ANDROID
-            var activity = Platform.CurrentActivity!;
-            activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
-#endif
-
-        var bookTask = Sender.Send(new GetBook.Query(Id));
-        var profileSettingsTask = Sender.Send(new GetProfileSettings.Query(AppStateService.ProfileId));
-        var bookProgressTask = Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
-
-        await Task.WhenAll(bookTask, profileSettingsTask, bookProgressTask);
-
-        var getBook = await bookTask;
-        if (getBook.IsFailure)
-        {
-            await Toast.Make(getBook.Error.Description!).Show();
-            return;
-        }
-        _book = getBook.Value;
-        
-        var getProfileSettings = await profileSettingsTask;
-        _profileSettings = getProfileSettings.IsSuccess ? getProfileSettings.Value : new() { ProfileId = AppStateService.ProfileId };
-        
-        if(_profileSettings.ProfileSettingsId == Guid.Empty)
-        {
-            await Sender.Send(new AddProfileSettings.Command(_profileSettings));
-        }
-        
-        var getBookProgress = await bookProgressTask;
-        if (getBookProgress.IsFailure)
-        {
-            await Toast.Make(getBookProgress.Error.Description!).Show();
-            return;
-        }
-
-        _bookProgress = getBookProgress.Value;
-
-        _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
-            "./Components/Pages/Reader/Reader.razor.js");
-        _dotNetReference = DotNetObjectReference.Create(this);
-        await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
-
         _readerViewModel.PropertyChanged += ViewModel_PropertyChanged;
-
-        if (_bookProgress.EndDate is null)
-        {
-            _entryTime = DateTime.Now;
-
-            LifeCycleService.Resumed += OnResumed;
-            LifeCycleService.Paused += OnPaused;
-            LifeCycleService.Destroyed += OnDestroy;
-        }
-
-        await LoadFromCache();
-        if (Current == null)
-            await LoadEpubBook();
-        else
-            _ = LoadEpubBook();
-        _bookLoading = false;
-        if (_bookProgress.ElapsedTime != TimeSpan.Zero)
-        {
-            if(_bookProgress.BookWordCount != 0)
-            {
-                _totalWords = _bookProgress.BookWordCount;
-            }
-            _readerViewModel.TotalPages = _bookProgress.PageCount;
-            _totalPagesPrev = _bookProgress.PageCountPrev;
-            _totalPagesNext = _bookProgress.PageCountNext;
-            NavigateToChapter(_bookProgress.Page, _bookProgress.Chapter, false);
-            _refreshTotalPages = true;
-        }
-        else
-        {
-            _bookProgress.StartDate = DateTimeOffset.Now;
-            NavigateToChapter(0, 0);
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_bookLoading && _refreshTotalPages) await UpdateTotalPages();
+        if (firstRender)
+        {
+    #if ANDROID
+                var activity = Platform.CurrentActivity!;
+                activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
+    #endif
+
+            var bookTask = Sender.Send(new GetBook.Query(Id));
+            var bookProgressTask = Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
+
+            await Task.WhenAll(bookTask, bookProgressTask);
+
+            var getBook = await bookTask;
+            if (getBook.IsFailure)
+            {
+                await Toast.Make(getBook.Error.Description!).Show();
+                return;
+            }
+            _book = getBook.Value;
+            
+            var getBookProgress = await bookProgressTask;
+            if (getBookProgress.IsFailure)
+            {
+                await Toast.Make(getBookProgress.Error.Description!).Show();
+                return;
+            }
+
+            _bookProgress = getBookProgress.Value;
+
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
+                "./Components/Pages/Reader/Reader.razor.js");
+            _dotNetReference = DotNetObjectReference.Create(this);
+            await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
+
+            if (_bookProgress.EndDate is null)
+            {
+                _entryTime = DateTime.Now;
+
+                LifeCycleService.Resumed += OnResumed;
+                LifeCycleService.Paused += OnPaused;
+                LifeCycleService.Destroyed += OnDestroy;
+            }
+
+            await LoadFromCache();
+            if (Current == null)
+                await LoadEpubBook();
+            else
+                _ = LoadEpubBook();
+            _bookLoading = false;
+            if (_bookProgress.ElapsedTime != TimeSpan.Zero)
+            {
+                if(_bookProgress.BookWordCount != 0)
+                {
+                    _totalWords = _bookProgress.BookWordCount;
+                }
+                _readerViewModel.TotalPages = _bookProgress.PageCount;
+                _totalPagesPrev = _bookProgress.PageCountPrev;
+                _totalPagesNext = _bookProgress.PageCountNext;
+                NavigateToChapter(_bookProgress.Page, _bookProgress.Chapter, false);
+                _refreshTotalPages = true;
+            }
+            else
+            {
+                _bookProgress.StartDate = DateTimeOffset.Now;
+                NavigateToChapter(0, 0);
+            }
+        }
     }
 
     private void OnResumed(object? sender, EventArgs e)
@@ -275,6 +249,11 @@ public partial class Reader : IAsyncDisposable
         await File.WriteAllTextAsync(_book!.GetCachePath(key), json);
     }
 
+    private void OnProfileSettingsChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        _refreshTotalPages = true;
+        InvokeAsync(StateHasChanged);
+    }
 
     private async void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -310,10 +289,9 @@ public partial class Reader : IAsyncDisposable
                     }));
                 }
 
-                if(tasks.Count > 0) await Task.WhenAll(tasks);
-
+                if (tasks.Count > 0) await Task.WhenAll(tasks);
+                
                 _refreshTotalPages = true;
-
                 StateHasChanged();
                 _ = UpdateChapterCache();
 
@@ -523,7 +501,28 @@ public partial class Reader : IAsyncDisposable
 
     private async Task SaveState()
     {
-        await Sender.Send(new UpdateProfileSettings.Command(_profileSettings));
         await UpdateProgress();
+    }
+    
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        ReaderService.ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
+        OverlayService.OnOverlayChanged -= StateHasChanged;
+        _readerViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+        if (_bookProgress.EndDate is null)
+        {
+            LifeCycleService.Resumed -= OnResumed;
+            LifeCycleService.Paused -= OnPaused;
+            LifeCycleService.Destroyed -= OnDestroy;
+        }
+        await SaveState();
+        await _module.InvokeVoidAsync("Dispose");
+        await _module.DisposeAsync();
+        _dotNetReference.Dispose();
+#if ANDROID
+        var activity = Platform.CurrentActivity!;
+        activity.Window?.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
+#endif
+        GC.SuppressFinalize(this);
     }
 }

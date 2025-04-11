@@ -2,7 +2,7 @@
 <div class="col-span-2 flex justify-center gap-4 p-3">
     @foreach (NavigationLayoutType type in Enum.GetValues(typeof(NavigationLayoutType)))
     {
-        <div class="grid grid-cols-3 grid-rows-3 w-[100px] h-[100px] hover:cursor-pointer @((ProfileSettings.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
+        <div class="grid grid-cols-3 grid-rows-3 w-[100px] h-[100px] hover:cursor-pointer @((ReaderService.ProfileSettings.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
             @{
                 var buttons = ReaderNavigation.GetLayoutForType(type);
             }
@@ -49,12 +49,11 @@
 
 
 @code {
-    [Parameter]
-    public ProfileSettings ProfileSettings { get; set; } = null!;
+    [Inject] private ReaderService ReaderService { get; set; } = null!;
 
     private void ChangeLayout(NavigationLayoutType type)
     {
-        ProfileSettings.SelectedLayout = (int)type;
+        ReaderService.ProfileSettings.SelectedLayout = (int)type;
     }
 
 }

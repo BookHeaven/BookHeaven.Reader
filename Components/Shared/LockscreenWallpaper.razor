@@ -1,13 +1,16 @@
 ﻿@implements IDisposable
-<div class="fixed z-[9000] inset-0 flex flex-col items-center justify-center bg-white @(!_screenLocked ? "hidden" : "")">
-	@if(!string.IsNullOrEmpty(ImageSrc)) {
-		<img decoding="async" class="w-full" src="@ImageSrc" alt=""/>
-	}
-	else {
-		<img decoding="async" class="w-[200px] mx-auto" src="/logo.svg" alt=""/>
-		<p class="absolute bottom-16 text-2xl text-center text-neutral-600">BookHeaven</p>
-	}
-</div>
+@if (_screenLocked)
+{
+	<div class="fixed z-[9000] inset-0 flex flex-col items-center justify-center bg-white">
+		@if(!string.IsNullOrEmpty(ImageSrc)) {
+			<img decoding="async" class="w-full" src="@ImageSrc" alt=""/>
+		}
+		else {
+			<img decoding="async" class="w-[200px] mx-auto" src="/logo.svg" alt=""/>
+			<p class="absolute bottom-16 text-2xl text-center text-neutral-600">BookHeaven</p>
+		}
+	</div>
+}
 
 @code {
 	[Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
@@ -24,16 +27,16 @@
 
 	private void Show(object? sender, EventArgs e)
 	{
-		#if DEBUG
+		#if WINDOWS
 		return;
 		#endif
 		_screenLocked = true;
-		StateHasChanged();
+		InvokeAsync(StateHasChanged);
 	}
 	private void Hide(object? sender, EventArgs e)
 	{
 		_screenLocked = false;
-		StateHasChanged();
+		InvokeAsync(StateHasChanged);
 	}
 
 	public void Dispose()

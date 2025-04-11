@@ -24,7 +24,7 @@
 	private void OpenImage(string data)
 	{
 		_base64 = data;
-		StateHasChanged();
+		InvokeAsync(StateHasChanged);
 	}
 
 	public void Dispose()

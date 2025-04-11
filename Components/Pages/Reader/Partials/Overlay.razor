@@ -1,5 +1,4 @@
-﻿@implements IDisposable
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
 
 <div class="z-[1000] absolute inset-0 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
     <div class="border-solid border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white" @onclick:stopPropagation="true">
@@ -12,11 +11,11 @@
     <div>
         @if (OverlayService.CurrentOverlayPanel == OverlayService.OverlayPanel.FontSettings)
         {
-            <TextSettings ProfileSettings="ProfileSettings"/>
+            <TextSettings/>
         }
         @if (OverlayService.CurrentOverlayPanel == OverlayService.OverlayPanel.PageSettings)
         {
-            <PageSettings ProfileSettings="ProfileSettings"/>
+            <PageSettings/>
         }
         <div class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
             <div class="flex items-center gap-3 px-2">

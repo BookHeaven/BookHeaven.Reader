@@ -8,14 +8,12 @@
 </div>
 
 @code {
+    [Inject] private ReaderService ReaderService { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private ImageViewerService ImageViewerService { get; set; } = null!;
     
     [Parameter]
     public EventCallback<NavigationButton> OnNavigationButtonClicked { get; set; }
-    
-    [Parameter]
-    public ProfileSettings? ProfileSettings { get; set; }
     
     private IJSObjectReference _module = null!;
     
@@ -25,9 +23,9 @@
     private bool _cancelNavigation;
     private DateTime _pointerDownTime;
     
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
-        SelectedLayout = (NavigationLayoutType)ProfileSettings!.SelectedLayout;
+        SelectedLayout = (NavigationLayoutType)ReaderService.ProfileSettings.SelectedLayout;
 
         _buttons = ReaderNavigation.GetLayoutForType(SelectedLayout);
     }

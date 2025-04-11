@@ -12,14 +12,14 @@
 	@@scope (#viewer) {
 		:scope {
 			--chapter-page: @_readerViewModel.CurrentPage;
-			--font-size: @_profileSettings.FontSize;
-			--line-height: @_profileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
-			--letter-spacing: @_profileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--paragraph-spacing: @_profileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--text-indent: @_profileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
-			--word-spacing: @_profileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--margin-vertical: @_profileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-			--margin-horizontal: @_profileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--font-size: @ReaderService.ProfileSettings.FontSize;
+			--line-height: @ReaderService.ProfileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
+			--letter-spacing: @ReaderService.ProfileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--paragraph-spacing: @ReaderService.ProfileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--text-indent: @ReaderService.ProfileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
+			--word-spacing: @ReaderService.ProfileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-vertical: @ReaderService.ProfileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-horizontal: @ReaderService.ProfileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
 			--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
 			--column-gap: 4px;
@@ -83,7 +83,8 @@
 {
 	<LockscreenWallpaper ImageSrc="@_book.CoverUrl()" />
 }
-<FontManager ProfileSettings="@_profileSettings" />
+<FontManager />
+<Navigation OnNavigationButtonClicked="@NavigationButtonClicked" />
 @if (_bookLoading)
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
@@ -93,10 +94,8 @@
 {
     <Overlay
         Progress="@Progress"
-        ProfileSettings="@_profileSettings"
         BookTitle="@_book?.Title"
         ChapterTitle="@ChapterTitle"
-        SettingsChanged="() => _refreshTotalPages = true"
         GoToChapter="@OnGoToChapter"/>
 }
 
@@ -108,7 +107,6 @@
 		OnChapterSelected="@OnChapterSelected"/>
 }
 
-<Navigation OnNavigationButtonClicked="@NavigationButtonClicked" ProfileSettings="@_profileSettings"/>
 <div class="flex h-screen flex-col">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current">
@@ -132,7 +130,6 @@
 	</div>
 
 	<div class="relative mt-auto flex h-[24px] gap-2 mx-2">
-		
 		@if (!_bookLoading)
 		{
 			<Clock/>

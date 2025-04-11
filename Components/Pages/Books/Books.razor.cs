@@ -32,7 +32,8 @@ public partial class Books
     private Filter _selectedFilter;
     
     private Book? _selectedBook;
-    
+
+    private bool _initialized;
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,5 +45,6 @@ public partial class Books
         }
   
         _selectedFilter = BookManager.Books.AnyReading() ? Filter.Reading : Filter.All;
+        _initialized = true;
     }
 }

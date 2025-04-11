@@ -1,9 +1,9 @@
 ﻿<div class="settings border-solid border-t-2 border-black bg-white" @onclick:stopPropagation="true">
-    <NavigationSettings ProfileSettings="ProfileSettings"/>
-    <TextSetting Label="@Translations.VERTICAL_MARGIN" Min="0" Max="10" Increment="0.5" @bind-Value="ProfileSettings.VerticalMargin"/>
-    <TextSetting Label="@Translations.HORIZONTAL_MARGIN" Min="0" Max="10" Increment="0.5" @bind-Value="ProfileSettings.HorizontalMargin"/>
+    <NavigationSettings/>
+    <TextSetting Label="@Translations.VERTICAL_MARGIN" Min="0" Max="10" Increment="0.5" @bind-Value="ReaderService.ProfileSettings.VerticalMargin"/>
+    <TextSetting Label="@Translations.HORIZONTAL_MARGIN" Min="0" Max="10" Increment="0.5" @bind-Value="ReaderService.ProfileSettings.HorizontalMargin"/>
 </div>
 
 @code {
-    [Parameter] public ProfileSettings ProfileSettings { get; set; } = null!;
+    [Inject] private ReaderService ReaderService { get; set; } = null!;
 }

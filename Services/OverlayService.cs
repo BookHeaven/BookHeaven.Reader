@@ -14,7 +14,7 @@ public class OverlayService
     }
     public OverlayPanel CurrentOverlayPanel { get; set; } = OverlayPanel.None;
     
-    public void Init()
+    public void Initialize()
     {
         IsOverlayVisible = false;
         IsTocVisible = false;

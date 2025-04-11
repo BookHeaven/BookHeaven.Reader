@@ -37,6 +37,7 @@ public static class MauiProgram
 
 		builder.Services.AddScoped<BookManager>();
 		builder.Services.AddScoped<IAppsService, AppsService>();
+		builder.Services.AddScoped<ReaderService>();
 		builder.Services.AddScoped<ImageViewerService>();
 		builder.Services.AddScoped<OverlayService>();
 			

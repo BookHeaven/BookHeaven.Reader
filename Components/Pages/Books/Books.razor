@@ -2,61 +2,66 @@
 @using BookHeaven.Domain.Enums
 @using BookHeaven.Reader.Components.Pages.Books.Components
 @layout BooksLayout
-
-@if (BookManager.Books.Count == 0)
+@if (!_initialized)
 {
-    <Message Content="@Translations.NO_BOOKS_FOUND" OnButtonClick="@(() => NavigationManager.NavigateTo("/books/remote"))">
-        <ButtonContent>
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-book-download"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 20h-6a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12v5" /><path d="M13 16h-7a2 2 0 0 0 -2 2" /><path d="M15 19l3 3l3 -3" /><path d="M18 22v-9" /></svg>
-            Download books
-        </ButtonContent>
-    </Message>
-    return;
+    <Message Content="Loading your library..." />
 }
-
-<BookInfo @bind-Book="_selectedBook"></BookInfo>
-
-
-<ContextMenu Id="BookMenu" Context="context" OverrideDefaultCssClass="absolute rounded border bg-white">
-    @{
-        var book = (Book)context.Data;
-    }
-    <Item OnClick="@(() => _selectedBook = book)">
-        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
-        @Translations.INFO
-    </Item>
-</ContextMenu>
-
-<RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />
-
-<div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
-    @if (FilteredBooks.Count == 0)
+else
+{
+    if(BookManager.Books.Count == 0)
     {
-        <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
+        <Message Content="@Translations.NO_BOOKS_FOUND" OnButtonClick="@(() => NavigationManager.NavigateTo("/books/remote"))">
+            <ButtonContent>
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-book-download"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 20h-6a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12v5" /><path d="M13 16h-7a2 2 0 0 0 -2 2" /><path d="M15 19l3 3l3 -3" /><path d="M18 22v-9" /></svg>
+                Download books
+            </ButtonContent>
+        </Message>
+        return;
     }
-    else
-    {
-        foreach (var book in FilteredBooks)
-        {
-            <ContextMenuTrigger MenuId="BookMenu" Data="@book">
-                <a class="h-full flex flex-col rounded overflow-hidden active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId">
-                    <div class="cover relative h-[190px] w-full rounded overflow-hidden">
-                        <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" draggable="false" alt=""/>
-                        <span class="progress-badge absolute -top-[1px] right-0 w-[40%] font-bold">
-                            <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
-                            @if (book.ReadingStatus() != BookStatus.New)
-                            {
-                                <span>@book.Progress()!.Progress.ToString("0.##")%</span>
-                            }
-                            else
-                            {
-                                <span>@Translations.NEW</span>
-                            }
-                        </span>
-                    </div>
-                    <div class="text-xs p-1">@book.Title</div>
-                </a>
-            </ContextMenuTrigger>
+
+    <BookInfo @bind-Book="_selectedBook"></BookInfo>
+
+
+    <ContextMenu Id="BookMenu" Context="context" OverrideDefaultCssClass="absolute rounded border bg-white">
+        @{
+            var book = (Book)context.Data;
         }
-    }
-</div>
+        <Item OnClick="@(() => _selectedBook = book)">
+            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
+            @Translations.INFO
+        </Item>
+    </ContextMenu>
+
+    <RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />
+
+    <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
+        @if (FilteredBooks.Count == 0)
+        {
+            <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
+        }
+        else
+        {
+            foreach (var book in FilteredBooks) {
+                <ContextMenuTrigger MenuId="BookMenu" Data="@book">
+                    <a class="h-full flex flex-col rounded overflow-hidden active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId">
+                        <div class="cover relative h-[190px] w-full rounded overflow-hidden">
+                            <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" draggable="false" alt=""/>
+                            <span class="progress-badge absolute -top-[1px] right-0 w-[40%] font-bold">
+                                            <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
+                                @if (book.ReadingStatus() != BookStatus.New)
+                                {
+                                    <span>@book.Progress()!.Progress.ToString("0.##")%</span>
+                                }
+                                else
+                                {
+                                    <span>@Translations.NEW</span>
+                                }
+                                        </span>
+                        </div>
+                        <div class="text-xs p-1">@book.Title</div>
+                    </a>
+                </ContextMenuTrigger>
+            }
+        }
+    </div>
+}

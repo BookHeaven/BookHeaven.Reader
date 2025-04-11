@@ -12,28 +12,27 @@
 	}
 	@@scope (#viewer) {
 		:scope {
-			font-family: '@ProfileSettings.SelectedFont', serif;
+			font-family: '@ReaderService.ProfileSettings.SelectedFont', serif;
 		}
 	}
 </style>
 @code {
+	[Inject] ReaderService ReaderService { get; set; } = null!;
 	[Inject] ISender Sender { get; set; } = null!;
 	[Inject] AppStateService AppStateService { get; set; } = null!;
-	
-	[Parameter] public required ProfileSettings ProfileSettings { get; set; }
 	
 	List<Font> _fonts = [];
 	string? _fontFamily = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
-		ProfileSettings.PropertyChanged += OnSelectedFontChanged;
+		ReaderService.ProfileSettings.PropertyChanged += OnSelectedFontChanged;
 		await GetFonts();
 	}
 	
 	private async Task GetFonts()
 	{
-		_fontFamily = ProfileSettings.SelectedFont;
+		_fontFamily = ReaderService.ProfileSettings.SelectedFont;
 		var getFonts = await Sender.Send(new GetAllFonts.Query(_fontFamily));
 		if (getFonts.IsFailure)
 		{
@@ -48,12 +47,12 @@
 		if (args.PropertyName != nameof(ProfileSettings.SelectedFont)) return;
 
 		await GetFonts();
-		StateHasChanged();
+		await InvokeAsync(StateHasChanged);
 	}
 
 	public void Dispose()
 	{
-		ProfileSettings.PropertyChanged -= OnSelectedFontChanged;
+		ReaderService.ProfileSettings.PropertyChanged -= OnSelectedFontChanged;
 	}
 
 }
