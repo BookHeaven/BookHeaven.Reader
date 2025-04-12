@@ -22,7 +22,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>BookHeaven Reader</ApplicationTitle>
+		<ApplicationTitle>BookHeaven</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
