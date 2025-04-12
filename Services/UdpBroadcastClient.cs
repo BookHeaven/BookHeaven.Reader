@@ -61,7 +61,7 @@ public class UdpBroadcastClient(AppStateService appStateService)
                 var completedTask = await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10)));
                 if (completedTask != task)
                 {
-                    return new Error("BROADCAST_ERROR", "No response from server");
+                    return new Error("No response from server");
                 }
 
                 var result = task.Result;
@@ -82,7 +82,7 @@ public class UdpBroadcastClient(AppStateService appStateService)
         }
         catch (Exception ex)
         {
-            return new Error("BROADCAST_ERROR", "Unknown error while connecting the to server");
+            return new Error("Unknown error while connecting the to server");
         }
     }
 }
