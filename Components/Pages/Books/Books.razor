@@ -45,7 +45,7 @@ else
                 <ContextMenuTrigger MenuId="BookMenu" Data="@book">
                     <a class="h-full flex flex-col rounded overflow-hidden active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId">
                         <div class="cover relative h-[190px] w-full rounded overflow-hidden">
-                            <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" draggable="false" alt=""/>
+                            <img class="h-full w-full" src="@book.CoverUrl()" draggable="false" alt=""/>
                             <span class="progress-badge absolute -top-[1px] right-0 w-[40%] font-bold">
                                             <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
                                 @if (book.ReadingStatus() != BookStatus.New)
