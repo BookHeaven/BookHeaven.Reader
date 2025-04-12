@@ -73,7 +73,6 @@ public partial class ReaderService(
             CurrentChapter++;
             OnChapterChanged?.Invoke();
             OnTotalPagesChanged?.Invoke();
-            //OnShouldRecalculateTotalPages?.Invoke();
         }
     }
     
@@ -96,7 +95,6 @@ public partial class ReaderService(
             CurrentChapter--;
             OnChapterChanged?.Invoke();
             OnTotalPagesChanged?.Invoke();
-            //OnShouldRecalculateTotalPages?.Invoke();
         }
     }
 
