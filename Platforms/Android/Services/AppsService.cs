@@ -67,15 +67,13 @@ public class AppsService : IAppsService
 		foreach (var app in apps)
 		{
 
-			if (app.ActivityInfo?.IsEnabled == false)
-			{
-				continue;
-			}
+			if (app.ActivityInfo?.IsEnabled == false) continue;
+			
 			var packageInfo = packageManager.GetPackageInfo(app.ActivityInfo?.PackageName!, 0)!;
 
 			installedApps.Add(new AppInfo
 			{
-				Name = app.LoadLabel(packageManager)?.ToString(),
+				Name = app.LoadLabel(packageManager),
 				PackageName = app.ActivityInfo?.PackageName,
 				IconBase64 = Helpers.ConvertDrawableToBase64(app.LoadIcon(packageManager)!),
 				FirstInstallTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(packageInfo.FirstInstallTime)

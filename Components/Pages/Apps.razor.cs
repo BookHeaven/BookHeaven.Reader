@@ -4,8 +4,14 @@ namespace BookHeaven.Reader.Components.Pages;
 
 public partial class Apps
 {
-    private List<AppInfo> _apps = new();
-    private List<AppInfo> _filteredApps = new();
+    private List<AppInfo> DeviceApps => AppsService.GetInstalledApps();
+    private List<AppInfo> FilteredApps =>
+        _sortBy switch
+        {
+            SortBy.Added => DeviceApps.OrderBy(x => x.FirstInstallTime).ToList(),
+            SortBy.Name => DeviceApps.OrderBy(x => x.Name).ToList(),
+            _ => DeviceApps
+        };
     
     private enum SortBy
     {
@@ -14,23 +20,6 @@ public partial class Apps
     }
 
     private SortBy _sortBy = SortBy.Added;
-
-    protected override void OnInitialized()
-    {
-        _apps = AppsService.GetInstalledApps();
-        _sortBy = SortBy.Added;
-        Sort();
-    }
-
-    private void Sort()
-    {
-        _filteredApps = _sortBy switch
-        {
-            SortBy.Added => _apps.OrderBy(x => x.FirstInstallTime).ToList(),
-            SortBy.Name => _apps.OrderBy(x => x.Name).ToList(),
-            _ => _filteredApps
-        };
-    }
 
     
 }

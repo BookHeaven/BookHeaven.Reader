@@ -3,10 +3,10 @@
 @inject IAppsService AppsService
 
 <SectionContent SectionName="Header">
-    <RadioButtonGroup Class="m-3" TOption="@SortBy" @bind-SelectedOption="_sortBy" @bind-SelectedOption:after="Sort" />
+    <RadioButtonGroup Class="m-3" TOption="@SortBy" @bind-SelectedOption="_sortBy" />
 </SectionContent>
 
-@if (_apps.Count > 0)
+@if (DeviceApps.Count > 0)
 {
     <ContextMenu Id="AppMenu" Context="appContext" OverrideDefaultCssClass="absolute rounded border bg-white">
         @{
@@ -31,7 +31,7 @@
     </ContextMenu>
 
     <div class="grid grid-cols-6 auto-rows-fr gap-x-4 gap-y-6 p-4 pt-1 justify-center">
-        @foreach (var app in _filteredApps)
+        @foreach (var app in FilteredApps)
         {
             <ContextMenuTrigger CssClass="max-w-full" MenuId="AppMenu" Data="@app">
                 <div class="grid gap-0.5 w-full overflow-hidden rounded active:bg-neutral-200 active:outline-4 active:outline-neutral-200" @onclick="@(() => AppsService.OpenApp(app.PackageName!))">
