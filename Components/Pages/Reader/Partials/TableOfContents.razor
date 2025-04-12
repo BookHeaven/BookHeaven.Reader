@@ -1,5 +1,5 @@
 ﻿@using EpubManager.Entities
-@implements IAsyncDisposable
+@implements IDisposable
 @if (!OverlayService.IsTocVisible)
 {   
     return;
@@ -7,61 +7,27 @@
 <div @onclick="OverlayService.ToggleToc" class="absolute top-0 left-0 right-0 bottom-0 z-[1000]">
     <div id="spine" @onclick:stopPropagation="true" @onclick:preventDefault="true" class="w-[70%] border-solid border-r-2 z-[1001] h-full overflow-y-auto border-black bg-white">
         <div class="ms-2 text-center font-bold">@Translations.INDEX</div>
-        @if (_jsModule != null)
+        @foreach (var chapter in Chapters)
         {
-            foreach (var chapter in Chapters)
-            {
-                <TableOfContentsEntry EpubChapter="@chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" />
-            }
-            
+            <TableOfContentsEntry EpubChapter="@chapter" CurrentChapterId="@CurrentChapterId" />
         }
     </div>
 </div>
 
 @code {
-    [Inject] IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] OverlayService OverlayService { get; set; } = null!;
     
     [Parameter] public IReadOnlyList<EpubChapter> Chapters { get; set; } = [];
     [Parameter] public string? CurrentChapterId { get; set; }
-    [Parameter] public EventCallback<string> OnChapterSelected { get; set; }
-
-    private IJSObjectReference? _jsModule;
-    private string _lastChapterId = string.Empty;
-    private bool _shouldScroll;
+    //[Parameter] public EventCallback<string> OnChapterSelected { get; set; }
 
     protected override void OnInitialized()
     {
         OverlayService.OnOverlayChanged += StateHasChanged;
     }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TableOfContents.razor.js");
-            StateHasChanged();
-        }
-
-        if (_shouldScroll)
-        {
-            var scrolled = await _jsModule!.InvokeAsync<bool>("ScrollToChapterInIndex", CurrentChapterId);
-           if(scrolled) _shouldScroll = false;
-        }
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (!string.IsNullOrEmpty(CurrentChapterId) && CurrentChapterId != _lastChapterId && !_shouldScroll)
-        {
-            _shouldScroll = true;
-            _lastChapterId = CurrentChapterId;
-        }
-    }
-
-    public async ValueTask DisposeAsync()
+    
+    public void Dispose()
     {
         OverlayService.OnOverlayChanged -= StateHasChanged;
-        await _jsModule!.DisposeAsync();
     }
 }

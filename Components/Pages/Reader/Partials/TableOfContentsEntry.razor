@@ -1,4 +1,7 @@
-﻿@if (EpubChapter.Title != null)
+﻿@using System.Diagnostics
+@using EpubManager.Entities
+@implements IAsyncDisposable
+@if (EpubChapter.Title != null)
 {
     <span id="@EpubChapter.ItemId" class="flex items-center scroll-mt-40 w-full">
         @if (EpubChapter.Chapters.Count > 0)
@@ -14,7 +17,7 @@
                 }
             </Button>
         }
-        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => OnChapterSelected.InvokeAsync(EpubChapter.ItemId))">@EpubChapter.Title</Button>
+        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => ReaderService.OnChapterSelected?.Invoke(EpubChapter.ItemId!))">@EpubChapter.Title</Button>
     </span>
 }
 
@@ -26,9 +29,69 @@
             @foreach (var chapter in EpubChapter.Chapters)
             {
                 <li>
-                    <TableOfContentsEntry EpubChapter="chapter" CurrentChapterId="@CurrentChapterId" OnChapterSelected="@OnChapterSelected" />
+                    <TableOfContentsEntry EpubChapter="chapter" CurrentChapterId="@CurrentChapterId" />
                 </li>
             }
         </ul>
     }
+}
+
+@code {
+    [Inject] IJSRuntime JsRuntime { get; set; } = null!;
+    [Inject] ReaderService ReaderService { get; set; } = null!;
+    
+    [Parameter] public EpubChapter EpubChapter { get; set; } = null!;
+
+    [Parameter] public string? CurrentChapterId { get; set; }
+
+    //[Parameter] public EventCallback<string> OnChapterSelected { get; set; }
+    
+    private IJSObjectReference? _jsModule;
+    private bool _collapsed = true;
+    private bool _isSelected = false;
+    private bool _shouldScroll;
+
+    private string? _lastSelectedChapterId = null;
+
+    protected override void OnInitialized()
+    {
+        if (EpubChapter.Chapters.Count > 0) _collapsed = !EpubChapter.ContainsChapter(CurrentChapterId!);
+    }
+    
+    protected override void OnParametersSet()
+    {
+        if (EpubChapter.ItemId != null) _isSelected = CurrentChapterId == EpubChapter.ItemId;
+
+        if (_isSelected && _lastSelectedChapterId != EpubChapter.ItemId)
+        {
+            _shouldScroll = true;
+            _lastSelectedChapterId = EpubChapter.ItemId;
+        }
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TableOfContentsEntry.razor.js");
+        }
+        if (_shouldScroll && _jsModule is not null)
+        {
+            _shouldScroll = false;
+            await _jsModule!.InvokeVoidAsync("ScrollToChapterInIndex", CurrentChapterId);
+        }
+    }
+
+    
+
+    private void ToggleCollapse()
+    {
+        _collapsed = !_collapsed;
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        if (_jsModule != null) await _jsModule.DisposeAsync();
+    }
+
 }

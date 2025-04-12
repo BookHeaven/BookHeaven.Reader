@@ -22,6 +22,7 @@ public partial class ReaderService(
     public Action? OnPageChanged { get; set; }
     public Action? OnChapterChanged { get; set; }
     public Action? OnTotalPagesChanged { get; set; }
+    public Action<string>? OnChapterSelected { get; set; }
 
     public async Task Initialize()
     {

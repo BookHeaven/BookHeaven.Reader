@@ -64,6 +64,7 @@ public partial class Reader : IAsyncDisposable
         ReaderService.OnPageChanged += StateHasChanged;
         ReaderService.OnChapterChanged += OnChapterChanged;
         ReaderService.OnTotalPagesChanged += OnTotalPagesChanged;
+        ReaderService.OnChapterSelected += OnChapterSelected;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -350,6 +351,7 @@ public partial class Reader : IAsyncDisposable
         ReaderService.OnPageChanged -= StateHasChanged;
         ReaderService.OnChapterChanged -= OnChapterChanged;
         ReaderService.OnTotalPagesChanged -= OnTotalPagesChanged;
+        ReaderService.OnChapterSelected -= OnChapterSelected;
         ReaderService.ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
         if (_bookProgress.EndDate is null)
         {
