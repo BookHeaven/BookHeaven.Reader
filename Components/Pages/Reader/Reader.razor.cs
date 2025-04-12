@@ -63,7 +63,7 @@ public partial class Reader : IAsyncDisposable
         ReaderService.ProfileSettings.PropertyChanged += OnProfileSettingsChanged;
         ReaderService.OnPageChanged += StateHasChanged;
         ReaderService.OnChapterChanged += OnChapterChanged;
-        ReaderService.OnTotalPagesChanged += OnTotalPagesChanged;
+        ReaderService.OnTotalPagesChanged += StateHasChanged;
         ReaderService.OnChapterSelected += OnChapterSelected;
     }
 
@@ -102,8 +102,7 @@ public partial class Reader : IAsyncDisposable
 
             _bookProgress = getBookProgress.Value;
 
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
-                "./Components/Pages/Reader/Reader.razor.js");
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
 
@@ -251,7 +250,7 @@ public partial class Reader : IAsyncDisposable
     private void OnProfileSettingsChanged(object? sender, PropertyChangedEventArgs e)
     {
         _refreshTotalPages = true;
-        InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     private async void OnChapterChanged()
@@ -284,12 +283,9 @@ public partial class Reader : IAsyncDisposable
         }
         if (tasks.Count > 0) await Task.WhenAll(tasks);
         
+        //_ = UpdateChapterCache();
+        
         _refreshTotalPages = true;
-        StateHasChanged();
-    }
-    
-    private void OnTotalPagesChanged()
-    {
         StateHasChanged();
     }
 
@@ -350,7 +346,7 @@ public partial class Reader : IAsyncDisposable
         EpubReader.Dispose();
         ReaderService.OnPageChanged -= StateHasChanged;
         ReaderService.OnChapterChanged -= OnChapterChanged;
-        ReaderService.OnTotalPagesChanged -= OnTotalPagesChanged;
+        ReaderService.OnTotalPagesChanged -= StateHasChanged;
         ReaderService.OnChapterSelected -= OnChapterSelected;
         ReaderService.ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
         if (_bookProgress.EndDate is null)
