@@ -1,4 +1,10 @@
-﻿@inherits LayoutComponentBase
+﻿@using BookHeaven.Domain.Features.Fonts
+@using BookHeaven.Domain.Features.ProfileSettingss
+@inherits LayoutComponentBase
+@foreach(var variant in _variants)
+{
+    <link rel="preload" href="@variant.Url()" as="font" crossorigin="anonymous"/>
+}
 <LockscreenWallpaper />
 <div class="page overflow-hidden">
     <SectionOutlet SectionName="Header"/>
@@ -20,3 +26,28 @@
         </NavLink>
     </nav>
 </div>
+
+@code {
+    [Inject] AppStateService AppStateService { get; set; } = null!;
+    [Inject] ISender Sender { get; set; } = null!;
+
+    List<Font> _variants = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var getProfileSettings = await Sender.Send(new GetProfileSettings.Query(AppStateService.ProfileId));
+        if (getProfileSettings.IsFailure || string.IsNullOrEmpty(getProfileSettings.Value.SelectedFont))
+        {
+            return;
+        }
+        
+        var getFonts = await Sender.Send(new GetAllFonts.Query(getProfileSettings.Value.SelectedFont));
+        if (getFonts.IsFailure)
+        {
+            return;
+        }
+
+        _variants = getFonts.Value;
+    }
+
+}
