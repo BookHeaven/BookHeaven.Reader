@@ -16,7 +16,7 @@ public partial class BooksLayout
 
     private async Task<bool> CheckConnection()
     {
-        if (!await ServerService.CanConnect())
+        if ((await ServerService.CanConnect()).IsFailure)
         {
             await Toast.Make(Translations.CONNECTION_FAILED, ToastDuration.Long).Show();
             return false;

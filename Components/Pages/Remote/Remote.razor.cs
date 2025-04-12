@@ -43,12 +43,24 @@ public partial class Remote
 
     private async Task GetData()
     {
-        _canConnect = await ServerService.CanConnect();
+        _canConnect = (await ServerService.CanConnect()).IsSuccess;
         if (!_canConnect) return;
-        _books = (await ServerService.GetAllBooks())?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name)
-            .ThenBy(x => x.SeriesIndex).ToList();
+        var getBooks = await ServerService.GetAllBooks();
+        if (getBooks.IsFailure)
+        {
+            _canConnect = false;
+            return;
+        }
+        _books = getBooks.Value.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
         await FilterBooks();
-        _authors = (await ServerService.GetAllAuthors())?.OrderBy(x => x.Name).ToList();
+
+        var getAuthors = await ServerService.GetAllAuthors();
+        if (getAuthors.IsFailure)
+        {
+            _canConnect = false;
+            return;
+        }
+        _authors = getAuthors.Value.OrderBy(x => x.Name).ToList();
     }
 
     private async Task FilterChanged()

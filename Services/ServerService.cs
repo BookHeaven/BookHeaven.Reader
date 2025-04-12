@@ -8,6 +8,7 @@ using BookHeaven.Domain.Features.BooksProgress;
 using BookHeaven.Domain.Features.Fonts;
 using BookHeaven.Domain.Features.ProfileSettingss;
 using BookHeaven.Domain.Features.Seriess;
+using BookHeaven.Domain.Shared;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using MediatR;
@@ -17,16 +18,16 @@ namespace BookHeaven.Reader.Services
 {
 	public interface IServerService
 	{
-		Task<bool> CanConnect();
-		Task<List<Book>?> GetAllBooks();
-		Task<List<Author>?> GetAllAuthors();
-		Task<List<Profile>> GetAllProfiles();
-		Task<BookProgress?> GetBookProgress(Guid profileId, Guid bookId);
-		Task DownloadBook(Book book, Guid profileId);
-		Task UpdateBookProgress(BookProgress progress);
-		Task UpdateProgressByProfile(Guid profileId);
-		Task UpdateProfileSettings(ProfileSettings settings);
-		Task DownloadFonts();
+		Task<Result> CanConnect();
+		Task<Result<List<Book>>> GetAllBooks();
+		Task<Result<List<Author>>> GetAllAuthors();
+		Task<Result<List<Profile>>> GetAllProfiles();
+		Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId);
+		Task<Result> DownloadBook(Book book, Guid profileId);
+		Task<Result> UpdateBookProgress(BookProgress progress);
+		Task<Result> UpdateProgressByProfile(Guid profileId);
+		Task<Result> UpdateProfileSettings(ProfileSettings settings);
+		Task<Result> DownloadFonts();
 	}
 	public class ServerService(
 		ISender sender,
@@ -35,18 +36,18 @@ namespace BookHeaven.Reader.Services
 	{
 		private HttpClient _httpClient = new();
 
-		public async Task<bool> CanConnect()
+		public async Task<Result> CanConnect()
 		{
 			if(Connectivity.Current.NetworkAccess == NetworkAccess.None)
 			{
-				return false;
+				return Result.Failure(new Error("No internet connection"));
 			}
 			
 			var url = appStateService.ServerUrl;
 
 			if (string.IsNullOrEmpty(url))
 			{
-				return false;
+				return new Error("Server URL is not set");
 			}
 			
 			if(_httpClient.BaseAddress == null)
@@ -60,16 +61,18 @@ namespace BookHeaven.Reader.Services
 			try
 			{
 				var response = await _httpClient.GetAsync("api/ping");
-				return response.IsSuccessStatusCode;
+				return response.IsSuccessStatusCode 
+					? Result.Success()
+					: Result.Failure(new Error("Failed to connect to server"));;
 			}
 			catch (Exception ex)
 			{
 				logger.LogError(ex, "Failed to connect to server");
-				return false;
+				return new Error("Failed to connect to server");
 			}
 		}
 
-		public async Task<List<Book>?> GetAllBooks()
+		public async Task<Result<List<Book>>> GetAllBooks()
 		{
 			var endpoint = "api/books";
 
@@ -77,15 +80,16 @@ namespace BookHeaven.Reader.Services
 			{
 				var response = await _httpClient.GetFromJsonAsync<List<Book>?>(endpoint);
 
-				return response;
+				return response ?? [];
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to get books from server", ex);
+				logger.LogError(ex, "Failed to get books from server");
+				return new Error("Failed to get books from server");
 			}
 		}
 
-		public async Task<List<Author>?> GetAllAuthors()
+		public async Task<Result<List<Author>>> GetAllAuthors()
 		{
 			var endpoint = "api/authors";
 
@@ -93,15 +97,16 @@ namespace BookHeaven.Reader.Services
 			{
 				var response = await _httpClient.GetFromJsonAsync<List<Author>>(endpoint);
 
-				return response;
+				return response ?? [];
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to get authors from server", ex);
+				logger.LogError(ex, "Failed to get authors from server");
+				return new Error("Failed to get authors from server");
 			}
 		}
 
-		public async Task<List<Profile>> GetAllProfiles()
+		public async Task<Result<List<Profile>>> GetAllProfiles()
 		{
 			var endpoint = "api/profiles";
 
@@ -109,15 +114,16 @@ namespace BookHeaven.Reader.Services
 			{
 				var response = await _httpClient.GetFromJsonAsync<List<Profile>>(endpoint);
 
-				return response!;
+				return response ?? [];
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to get profiles from server", ex);
+				logger.LogError(ex, "Failed to get profiles from server");
+				return new Error("Failed to get profiles from server");
 			}
 		}
 
-		public async Task<BookProgress?> GetBookProgress(Guid profileId, Guid bookId)
+		public async Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId)
 		{
 			var endpoint = $"api/profiles/{profileId}/{bookId}";
 			try
@@ -128,11 +134,12 @@ namespace BookHeaven.Reader.Services
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to get book progress from server", ex);
+				logger.LogError(ex, "Failed to get book progress from server");
+				return new Error("Failed to get book progress from server");
 			}
 		}
 
-		public async Task DownloadBook(Book book, Guid profileId)
+		public async Task<Result> DownloadBook(Book book, Guid profileId)
 		{
 			try
 			{
@@ -151,7 +158,13 @@ namespace BookHeaven.Reader.Services
 				await DownloadFile(book.EpubUrl(), book.BookId);
 				await DownloadFile(book.CoverUrl(), book.BookId);
 				
-				var progress = await GetBookProgress(profileId, book.BookId);
+				var getProgress = await GetBookProgress(profileId, book.BookId);
+				if (getProgress.IsFailure)
+				{
+					return new Error("Failed to get book progress from server");
+				}
+				
+				var progress = getProgress.Value;
 				var getCurrentProgress = await sender.Send(new GetBookProgressByProfile.Query(book.BookId, profileId));
 
 				if (getCurrentProgress.IsFailure && progress != null)
@@ -164,14 +177,17 @@ namespace BookHeaven.Reader.Services
 					progress.BookWordCount = 0;
 					await sender.Send(new UpdateBookProgress.Command(progress));
 				}
+				
+				return Result.Success();
 			}
 			catch (Exception ex)
 			{
-				await Toast.Make(ex.Message, ToastDuration.Long).Show();
+				logger.LogError(ex, "Failed to download book from server");
+				return new Error("Failed to download book from server");
 			}
 		}
 
-		public async Task UpdateBookProgress(BookProgress progress)
+		public async Task<Result> UpdateBookProgress(BookProgress progress)
 		{
 			var endpoint = "api/progress/update";
 
@@ -181,12 +197,14 @@ namespace BookHeaven.Reader.Services
 				if(!response.IsSuccessStatusCode)
 				{
 					var errorResponse = await response.Content.ReadAsStringAsync();
-					throw new Exception($"Server responded with {response.StatusCode}: {errorResponse}");
+					return new Error("Failed to update book progress from server");
 				}
+				return Result.Success();
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to update book progress on server", ex);
+				logger.LogError(ex, "Failed to update book progress from server");
+				return new Error("Failed to update book progress from server");
 			}
 		}
 
@@ -200,21 +218,26 @@ namespace BookHeaven.Reader.Services
 			await File.WriteAllBytesAsync(Path.Combine(path, $"{id}.{extension}"), fileBytes);
 		}
 
-		public async Task UpdateProgressByProfile(Guid profileId)
+		public async Task<Result> UpdateProgressByProfile(Guid profileId)
 		{
 			var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
 			if (getProgresses.IsFailure)
 			{
-				return;
+				return getProgresses.Error;
 			}
 			
 			foreach (var progress in getProgresses.Value)
 			{
-				await UpdateBookProgress(progress);
+				var updateProgress = await UpdateBookProgress(progress);
+				if (updateProgress.IsFailure)
+				{
+					return updateProgress.Error;
+				}
 			}
+			return Result.Success();
 		}
 		
-		public async Task UpdateProfileSettings(ProfileSettings settings)
+		public async Task<Result> UpdateProfileSettings(ProfileSettings settings)
 		{
 			var endpoint = "api/profile/settings/update";
 
@@ -224,16 +247,18 @@ namespace BookHeaven.Reader.Services
 				if(!response.IsSuccessStatusCode)
 				{
 					var errorResponse = await response.Content.ReadAsStringAsync();
-					throw new Exception($"Server responded with {response.StatusCode}: {errorResponse}");
+					return new Error("Failed to backup profile settings to server");
 				}
+				return Result.Success();
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to backup profile settings", ex);
+				logger.LogError(ex, "Failed to backup profile settings to server");
+				return new Error("Failed to backup profile settings to server");
 			}
 		}
 
-		public async Task DownloadFonts()
+		public async Task<Result> DownloadFonts()
 		{
 			var endpoint = "api/fonts";
 			try
@@ -266,10 +291,12 @@ namespace BookHeaven.Reader.Services
 					getProfileSettings.Value.SelectedFont = response.FirstOrDefault()?.Family ?? string.Empty;
 					await sender.Send(new UpdateProfileSettings.Command(getProfileSettings.Value));
 				}
+				return Result.Success();
 			}
 			catch (Exception ex)
 			{
-				throw new Exception("Failed to download fonts from server", ex);
+				logger.LogError(ex, "Failed to download fonts from server");
+				return new Error("Failed to download fonts from server");
 			}
 		}
 	}

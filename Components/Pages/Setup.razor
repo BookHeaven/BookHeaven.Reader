@@ -116,7 +116,7 @@ else
         _state = PageState.Connecting;
         StateHasChanged();
         await Task.Delay(FakeDelay);
-        if (!await ServerService.CanConnect())
+        if ((await ServerService.CanConnect()).IsFailure)
         {
             _state = PageState.Error;
             return;
@@ -124,8 +124,15 @@ else
         _state = PageState.Success;
         StateHasChanged();
         
-        var serverProfiles = await ServerService.GetAllProfiles();
-        foreach (var profile in serverProfiles)
+        var getProfiles = await ServerService.GetAllProfiles();
+        if (getProfiles.IsFailure)
+        {
+            _state = PageState.Error;
+            StateHasChanged();
+            return;
+        }
+        
+        foreach (var profile in getProfiles.Value)
         {
             await Sender.Send(new AddProfile.Command(profile));
             if (!profile.Name.Equals("Default")) continue;
