@@ -84,10 +84,12 @@ jobs:
             sha: context.sha,
             ref: `refs/tags/v${{ steps.extract_version.outputs.version }}`
           })
-      
+        
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.extract_version.outputs.version }}
+        generate_release_notes: true
+        make_latest: true
         files: |
             ./BookHeaven/BookHeaven.Reader/bin/Release/net9.0-android/publish/dev.ggarrido.bookheaven-Signed.apk
