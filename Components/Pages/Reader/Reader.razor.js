@@ -26,12 +26,12 @@ export async function GetPageCount() {
     let pagesNext = (pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : null);*/
 
     const [pagesPrev, pages, pagesNext] = await Promise.all([
-        pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : null,
+        pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : 1,
         Math.round(parseFloat((page.scrollWidth / pageWidth).toFixed(1))),
-        pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : null
+        pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : 1
     ]);
 
-    return [pagesPrev, pages, pagesNext];
+    return [pagesPrev - 1, pages - 1, pagesNext - 1];
 }
 
 export function Dispose() {

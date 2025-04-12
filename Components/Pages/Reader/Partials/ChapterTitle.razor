@@ -1,10 +1,11 @@
-﻿<div class="absolute left-0 right-0 flex justify-center">
-    @if (Title?.Length > MaxCharacters)
+﻿@implements IDisposable
+<div class="absolute left-0 right-0 flex justify-center">
+    @if (Title.Length > MaxCharacters)
     {
         var maxWidth = (Title.Length - MaxCharacters) / 2;
 
-        var left = Title.Substring(0, Title.Length / 2 - maxWidth).Trim();
-        var right = Title.Substring(Title.Length / 2 + maxWidth).Trim();
+        var left = Title[..(Title.Length / 2 - maxWidth)].Trim();
+        var right = Title[(Title.Length / 2 + maxWidth)..].Trim();
         <span class="flex">
             <span class="inline-block">@left...</span>
             <span class="inline-block text-right">@right</span>
@@ -14,14 +15,28 @@
     {
         <span>@Title</span>
     }
-    <span class="ms-1">(@(CurrentPage + 1) / @(TotalPages + 1))</span>
+    <span class="ms-1">(@(ReaderService.CurrentPage + 1) / @(ReaderService.TotalPages + 1))</span>
 
 </div>
 
 @code {
+    [Inject] private ReaderService ReaderService { get; set; } = null!;
+    
     [Parameter] public string Title { get; set; } = string.Empty;
-    [Parameter] public int? CurrentPage { get; set; }
-    [Parameter] public int? TotalPages { get; set; }
 
     private int MaxCharacters { get; set; } = 40;
+    
+    protected override void OnInitialized()
+    {
+        ReaderService.OnPageChanged += StateHasChanged;
+        ReaderService.OnChapterChanged += StateHasChanged;
+        ReaderService.OnTotalPagesChanged += StateHasChanged;
+    }
+    
+    public void Dispose()
+    {
+        ReaderService.OnPageChanged -= StateHasChanged;
+        ReaderService.OnChapterChanged -= StateHasChanged;
+        ReaderService.OnTotalPagesChanged -= StateHasChanged;
+    }
 }

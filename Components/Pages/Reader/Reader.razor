@@ -11,7 +11,7 @@
 	
 	@@scope (#viewer) {
 		:scope {
-			--chapter-page: @_readerViewModel.CurrentPage;
+			--chapter-page: @ReaderService.CurrentPage;
 			--font-size: @ReaderService.ProfileSettings.FontSize;
 			--line-height: @ReaderService.ProfileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
 			--letter-spacing: @ReaderService.ProfileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
@@ -44,6 +44,7 @@
 					word-break: auto-phrase !important;
 
 					&.drop-cap {
+						orphans: 2;
 						min-height: 2em;
 						&::first-letter {
 							initial-letter: 2;
@@ -69,10 +70,29 @@
 		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",:scope > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",:scope > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",:scope > .chapter.next .{Next.ParagraphClassName}" : "")}") {
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
-
-		@if (_styles.Count > 0 && Current?.Styles.Count > 0)
+	}
+	@@scope(#viewer .current) {
+		@if (_styles.Count > 0)
 		{
 			foreach (var style in _styles.Where(style => Current?.Styles.Any(s => s.Contains(style.Name)) == true))
+			{
+				@style.Content
+			}
+		}
+	}
+	@@scope(#viewer .prev) {
+		@if (_styles.Count > 0)
+		{
+			foreach (var style in _styles.Where(style => Previous?.Styles.Any(s => s.Contains(style.Name)) == true))
+			{
+				@style.Content
+			}
+		}
+	}
+	@@scope(#viewer .next) {
+		@if (_styles.Count > 0)
+		{
+			foreach (var style in _styles.Where(style => Next?.Styles.Any(s => s.Contains(style.Name)) == true))
 			{
 				@style.Content
 			}
@@ -90,38 +110,33 @@
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
 }
-@if (OverlayService.IsOverlayVisible)
-{
-    <Overlay
-        Progress="@Progress"
-        BookTitle="@_book?.Title"
-        ChapterTitle="@ChapterTitle"
-        GoToChapter="@OnGoToChapter"/>
-}
-@if (OverlayService.IsTocVisible)
-{
-	<TableOfContents
-		Chapters="@_epubBook?.Content.TableOfContents"
-		CurrentChapterId="@Current?.Id"
-		OnChapterSelected="@OnChapterSelected"/>
-}
+<Overlay
+	Progress="@Progress"
+	BookTitle="@_book?.Title"
+	ChapterTitle="@ChapterTitle"/>
+
+<TableOfContents
+	Chapters="@_epubBook?.Content.TableOfContents"
+	CurrentChapterId="@Current?.Id"
+	OnChapterSelected="@OnChapterSelected"/>
+
 
 <div class="flex h-screen flex-col">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current">
-			@if (!_bookLoading && Current?.IsContentProcessed == true)
+			@if (Current?.IsContentProcessed == true)
 			{
 				@((MarkupString)Current.TextContent)
 			}
 		</div>
 		<div class="chapter prev invisible">
-			@if (!_bookLoading && Previous?.IsContentProcessed == true)
+			@if (Previous?.IsContentProcessed == true)
 			{
 				@((MarkupString)Previous.TextContent)
 			}
 		</div>
 		<div class="chapter next invisible">
-			@if (!_bookLoading && Next?.IsContentProcessed == true)
+			@if (Next?.IsContentProcessed == true)
 			{
 				@((MarkupString)Next.TextContent)
 			}
@@ -133,7 +148,7 @@
 		{
 			<Clock/>
 			<BatteryInfo/>
-			<ChapterTitle Title="@ChapterTitle" CurrentPage="@_readerViewModel.CurrentPage" TotalPages="@_readerViewModel.TotalPages"/>
+			<ChapterTitle Title="@ChapterTitle"/>
 			<div class="ms-auto text-end">
 				@(Progress.ToString("0.00"))%
 			</div>

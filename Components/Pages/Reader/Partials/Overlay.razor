@@ -1,5 +1,9 @@
 ﻿@inject NavigationManager NavigationManager
 
+@if (!OverlayService.IsOverlayVisible)
+{
+    return;
+}
 <div class="z-[1000] absolute inset-0 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
     <div class="border-solid border-bottom border-b-2 mb-auto flex w-full items-center gap-3 border-black bg-white" @onclick:stopPropagation="true">
         <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
@@ -19,17 +23,17 @@
         }
         <div class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
             <div class="flex items-center gap-3 px-2">
-                <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Previous))">
+                <Button OnClick="@ReaderService.PreviousChapter">
                     <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-7 icon icon-tabler icons-tabler-outline icon-tabler-chevrons-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 7l-5 5l5 5" /><path d="M17 7l-5 5l5 5" /></svg>
                 </Button>
                 <Progress Value="@((double)Progress)"/>
-                <Button OnClick="@(() => GoToChapter.InvokeAsync(NavigationButton.Next))">
+                <Button OnClick="@ReaderService.NextChapter">
                     <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-7 icon icon-tabler icons-tabler-outline icon-tabler-chevrons-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7l5 5l-5 5" /><path d="M13 7l5 5l-5 5" /></svg>
                 </Button>
             </div>
             <div class="flex items-center gap-3 px-2">
                 <Button OnClick="@OverlayService.ToggleToc">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-list-tree"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6h11" /><path d="M12 12h8" /><path d="M15 18h5" /><path d="M5 6v.01" /><path d="M8 12v.01" /><path d="M11 18v.01" /></svg>
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-list"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg>
                 </Button>
                 <span class="flex-1">@ChapterTitle</span>
                 <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.FontSettings))">

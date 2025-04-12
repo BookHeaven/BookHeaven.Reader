@@ -1,30 +1,36 @@
+@using System.ComponentModel
+@using System.Diagnostics
 @using BookHeaven.Reader.Functions
 @implements IAsyncDisposable
 <div class="absolute w-screen h-screen z-[999] grid grid-cols-3" @onpointerdown="@PointerDown" @onpointerup="@PointerUp">
-    @foreach(var button in _buttons)
+    @foreach(var button in Buttons)
     {
         <span @onclick="@(() => HandleNavigation(button))"></span>
     }
 </div>
 
 @code {
+    [Inject] private OverlayService OverlayService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private ImageViewerService ImageViewerService { get; set; } = null!;
     
     private IJSObjectReference _module = null!;
     
-    private NavigationLayoutType SelectedLayout { get; set; }
-    private List<NavigationButton> _buttons = [];
+    private List<NavigationButton> Buttons => ReaderNavigation.GetLayoutForType((NavigationLayoutType)ReaderService.ProfileSettings.SelectedLayout);
 
     private bool _cancelNavigation;
-    private DateTime _pointerDownTime;
+    private Stopwatch _stopwatch = new();
     
     protected override void OnInitialized()
     {
-        SelectedLayout = (NavigationLayoutType)ReaderService.ProfileSettings.SelectedLayout;
-
-        _buttons = ReaderNavigation.GetLayoutForType(SelectedLayout);
+        ReaderService.ProfileSettings.PropertyChanged += OnSelectedLayoutChanged;
+    }
+    
+    private void OnSelectedLayoutChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName != nameof(ProfileSettings.SelectedLayout)) return;
+        StateHasChanged();
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -37,20 +43,35 @@
 
     private void HandleNavigation(NavigationButton button)
     {
-        if(!_cancelNavigation) ReaderService.OnNavigationButtonClicked?.Invoke(button);
+        if (!_cancelNavigation)
+        {
+            //button == NavigationButton.Next ? ReaderService.NextPage() : ReaderService.PreviousPage();
+            switch (button)
+            {
+                case NavigationButton.Next:
+                    ReaderService.NextPage();
+                    break;
+                case NavigationButton.Previous:
+                    ReaderService.PreviousPage();
+                    break;
+                case NavigationButton.Overlay:
+                    OverlayService.ToggleOverlay();
+                    break;
+            }
+        }
         _cancelNavigation = false;
     }
 
     private void PointerDown()
     {
-        _pointerDownTime = DateTime.UtcNow;
+        _stopwatch.Restart();
     }
     
     private async Task PointerUp(MouseEventArgs e)
     {
-        var downTime = (DateTime.UtcNow.Ticks - _pointerDownTime.Ticks) / TimeSpan.TicksPerMillisecond;
+        _stopwatch.Stop();
         _cancelNavigation = false;
-        if (downTime > 400)
+        if (_stopwatch.ElapsedMilliseconds > 400)
         {
             _cancelNavigation = true;
             var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
@@ -63,6 +84,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        ReaderService.ProfileSettings.PropertyChanged -= OnSelectedLayoutChanged;
         await _module.DisposeAsync();
     }
 

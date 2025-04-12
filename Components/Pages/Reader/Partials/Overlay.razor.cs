@@ -6,11 +6,23 @@ using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Reader.Partials;
 
-public partial class Overlay
+public partial class Overlay : IDisposable
 {
     [Inject] private OverlayService OverlayService { get; set; } = null!;
+    [Inject] private ReaderService ReaderService { get; set; } = null!;
     [Parameter] public string? BookTitle { get; set; }
     [Parameter] public string? ChapterTitle { get; set; }
     [Parameter] public decimal Progress { get; set; }
-    [Parameter] public EventCallback<NavigationButton> GoToChapter { get; set; }
+
+    protected override void OnInitialized()
+    {
+        OverlayService.Initialize();
+        OverlayService.OnOverlayChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        OverlayService.OnOverlayChanged -= StateHasChanged;
+        GC.SuppressFinalize(this);
+    }
 }
