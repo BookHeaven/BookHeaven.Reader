@@ -27,9 +27,6 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
-    
-
-    //private readonly ReaderViewModel _readerViewModel = new();
 
     private readonly Stopwatch _readingStopwatch = new();
     
@@ -162,7 +159,7 @@ public partial class Reader : IAsyncDisposable
     
     private async void OnDestroy(object? sender, EventArgs e)
     {
-        await SaveState();
+        await UpdateProgress();
     }
 
     private async Task LoadEpubBook()
@@ -325,6 +322,7 @@ public partial class Reader : IAsyncDisposable
     private async Task UpdateProgress()
     {
         if (ReaderService.TotalPages == -1) return;
+        _readingStopwatch.Stop();
         
         _bookProgress.Chapter = ReaderService.CurrentChapter;
         _bookProgress.Page = ReaderService.CurrentPage;
@@ -345,11 +343,6 @@ public partial class Reader : IAsyncDisposable
         
         await Sender.Send(new UpdateBookProgress.Command(_bookProgress));
     }
-
-    private async Task SaveState()
-    {
-        await UpdateProgress();
-    }
     
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
@@ -364,7 +357,7 @@ public partial class Reader : IAsyncDisposable
             LifeCycleService.Paused -= OnPaused;
             LifeCycleService.Destroyed -= OnDestroy;
         }
-        await SaveState();
+        await UpdateProgress();
         await _module.InvokeVoidAsync("Dispose");
         await _module.DisposeAsync();
         _dotNetReference.Dispose();
