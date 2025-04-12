@@ -29,11 +29,11 @@ public partial class Remote
     protected override async Task OnInitializedAsync()
     {
         await GetData();
-        var getFonts = await Sender.Send(new GetAllFonts.Query());
+        /*var getFonts = await Sender.Send(new GetAllFonts.Query());
         if (getFonts is { IsSuccess: true, Value.Count: 0 })
         {
             _ = ServerService.DownloadFonts();
-        }
+        }*/
     }
 
     private async Task OnButtonClick()

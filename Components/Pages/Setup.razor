@@ -132,6 +132,7 @@ else
             AppStateService.ProfileId = profile.ProfileId;
             break;
         }
+        await ServerService.DownloadFonts();
         NavigationManager.NavigateTo("/books");
     }
 
