@@ -28,7 +28,7 @@ public static class MauiProgram
 			.UseMauiCommunityToolkit();
 
 		builder.Services.AddDomain(FileSystem.AppDataDirectory);
-		builder.Services.AddEpubManager(true);
+		builder.Services.AddEpubManager();
 			
 			
 		builder.Services.AddSingleton<AppStateService>();
