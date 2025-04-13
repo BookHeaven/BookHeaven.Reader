@@ -33,14 +33,6 @@ jobs:
       with:
         node-version: latest
         cache: 'npm'
-        
-    - name: Install npm packages
-      working-directory: .\BookHeaven\BookHeaven.Reader
-      run: npm ci
-      
-    - name: Build tailwindcss
-      working-directory: .\BookHeaven\BookHeaven.Reader
-      run: npm run tailwindcss:build
     
     - name: Move to BookHeaven directory
       shell: pwsh
@@ -61,7 +53,15 @@ jobs:
         git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/BookHeaven.Domain.git temp\BookHeaven.Domain
         New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
         Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
-      
+        
+    - name: Install npm packages
+      working-directory: .\BookHeaven\BookHeaven.Reader
+      run: npm ci
+
+    - name: Build tailwindcss
+      working-directory: .\BookHeaven\BookHeaven.Reader
+      run: npm run tailwindcss:build
+    
     - name: Restore dependencies
       working-directory: .\BookHeaven\BookHeaven.Reader
       run: dotnet restore
