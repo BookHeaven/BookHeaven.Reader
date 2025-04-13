@@ -27,6 +27,20 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+        
+    - name: Setup node js
+      uses: actions/setup-node@v3
+      with:
+        node-version: latest
+        cache: 'npm'
+        
+    - name: Install npm packages
+      working-directory: .\BookHeaven\BookHeaven.Reader
+      run: npm ci
+      
+    - name: Build tailwindcss
+      working-directory: .\BookHeaven\BookHeaven.Reader
+      run: npm run tailwindcss:build
     
     - name: Move to BookHeaven directory
       shell: pwsh
