@@ -21,10 +21,13 @@
         </div>
     </div>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+    <div id="blazor-error-ui" class="fixed inset-0 hidden z-[99999]">
+        <div class="flex h-full w-full items-center justify-center bg-black/50">
+            <div class="flex flex-col items-center rounded-2xl border-2 border-black bg-white p-5">
+                An error has occurred.
+                <a href="" class="mt-3 rounded-full bg-neutral-700 px-3 py-2 text-sm text-white reload">Reload</a>
+            </div>
+        </div>
     </div>
 
     <script async src="_content/Blazor.ContextMenu/blazorContextMenu.min.js"></script>
