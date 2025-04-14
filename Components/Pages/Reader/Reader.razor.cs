@@ -164,7 +164,7 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        _epubBook = await EpubReader.ReadAsync(_book!.EpubPath(MauiProgram.BooksPath), false);
+        _epubBook = await EpubReader.ReadAll(_book!.EpubPath(MauiProgram.BooksPath));
         if (_totalWords == 0) _totalWords = _epubBook.Content.GetWordCount();
         if (_styles.Count == 0)
         {
