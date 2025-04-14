@@ -323,7 +323,6 @@ public partial class Reader : IAsyncDisposable
         
         _bookProgress.Chapter = ReaderService.CurrentChapter;
         _bookProgress.Page = ReaderService.CurrentPage;
-        _bookProgress.Progress = Progress;
         _bookProgress.BookWordCount = _totalWords;
         _bookProgress.PageCount = ReaderService.TotalPages;
         _bookProgress.PageCountPrev = ReaderService.TotalPagesPrev;
@@ -331,6 +330,7 @@ public partial class Reader : IAsyncDisposable
 
         if (_bookProgress.EndDate is null)
         {
+            _bookProgress.Progress = Progress;
             _bookProgress.ElapsedTime += _readingStopwatch.Elapsed;
             
             _bookProgress.LastRead = DateTimeOffset.Now;
