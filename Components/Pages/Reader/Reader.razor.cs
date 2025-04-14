@@ -261,7 +261,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Current.TextContent = await EpubReader.ApplyTextContentProcessing(Current.TextContent);
+                Current.TextContent = await EpubReader.ApplyHtmlProcessingAsync(Current.TextContent);
                 Current.IsContentProcessed = true;
             }));
         }
@@ -269,7 +269,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Previous.TextContent = await EpubReader.ApplyTextContentProcessing(Previous.TextContent);
+                Previous.TextContent = await EpubReader.ApplyHtmlProcessingAsync(Previous.TextContent);
                 Previous.IsContentProcessed = true;
             }));
         }
@@ -277,7 +277,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Next.TextContent = await EpubReader.ApplyTextContentProcessing(Next.TextContent);
+                Next.TextContent = await EpubReader.ApplyHtmlProcessingAsync(Next.TextContent);
                 Next.IsContentProcessed = true;
             }));
         }
