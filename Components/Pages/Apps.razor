@@ -3,7 +3,10 @@
 @inject IAppsService AppsService
 
 <SectionContent SectionName="Header">
-    <RadioButtonGroup Class="m-3" TOption="@SortBy" @bind-SelectedOption="_sortBy" />
+    <RadioButtonGroup Class="m-3" @bind-SelectedOption="_sortBy">
+        <RadioButton Option="SortBy.Added" />
+        <RadioButton Option="SortBy.Name"/>
+    </RadioButtonGroup>
 </SectionContent>
 
 @if (DeviceApps.Count > 0)

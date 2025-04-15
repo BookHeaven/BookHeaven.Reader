@@ -1,26 +1,18 @@
 ﻿@typeparam TOption where TOption : Enum
-<div class="flex w-fit overflow-hidden gap-2 @(Class)">
-    @foreach (var option in _options)
-    {
-        <button class="px-4 py-2 rounded-full @(SelectedOption.Equals(option) ? "bg-neutral-700 text-white" : "bg-neutral-200")" @onclick="() => Select(option)">@(option.StringValue())</button>
-    }
-</div>
+<CascadingValue Value="this">
+	<div class="flex flex-wrap gap-2 @(Class)">
+		@ChildContent
+	</div>
+</CascadingValue>
 
 @code {
-    [Parameter] public string? Class { get; set; }
-    [Parameter] public required TOption SelectedOption { get; set; }
-    [Parameter] public EventCallback<TOption> SelectedOptionChanged { get; set; }
-    [Parameter] public List<TOption>? Options { get; set; }
+	[Parameter] public string? Class { get; set; }
+	[Parameter] public required TOption SelectedOption { get; set; }
+	[Parameter] public EventCallback<TOption> SelectedOptionChanged { get; set; }
+	[Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private List<TOption> _options = null!;
-
-    protected override void OnInitialized()
-    {
-        _options = Options ?? Enum.GetValues(typeof(TOption)).Cast<TOption>().ToList();
-    }
-
-    private void Select(TOption option)
-    {
-        SelectedOptionChanged.InvokeAsync(option);
-    }
+	internal Task SelectOptionAsync(TOption option)
+	{
+		return SelectedOptionChanged.InvokeAsync(option);
+	}
 }

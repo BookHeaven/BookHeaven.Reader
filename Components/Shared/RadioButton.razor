@@ -1,0 +1,22 @@
+﻿@typeparam TOption where TOption : Enum
+<button class="px-4 py-2 rounded-full @(ParentGroup.SelectedOption!.Equals(Option) ? "bg-neutral-700 text-white" : "bg-neutral-200")" @onclick="OnClick">
+	@Option.StringValue()
+</button>
+
+@code {
+	[CascadingParameter] public required RadioButtonGroup<TOption> ParentGroup { get; set; }
+	[Parameter] public required TOption Option { get; set; }
+
+	private async Task OnClick()
+	{
+		await ParentGroup.SelectOptionAsync(Option);
+	}
+
+	protected override void OnInitialized()
+	{
+		if (ParentGroup == null)
+		{
+			throw new InvalidOperationException($"{nameof(RadioButton<TOption>)} must be used within {nameof(RadioButtonGroup<TOption>)}");
+		}
+	}
+}

@@ -49,7 +49,12 @@ else
         </Item>
     </ContextMenu>
 
-    <RadioButtonGroup Class="mx-3 mt-3" Options="[BookStatus.Reading,BookStatus.New,BookStatus.Finished,BookStatus.All]" @bind-SelectedOption="BookManager.Filter" />
+    <RadioButtonGroup Class="mx-3 mt-3" @bind-SelectedOption="BookManager.Filter">
+        <RadioButton Option="@BookStatus.Reading" />
+        <RadioButton Option="BookStatus.New" />
+        <RadioButton Option="BookStatus.Finished" />
+        <RadioButton Option="BookStatus.All" />
+    </RadioButtonGroup>
 
     <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
         @if (BookManager.Books.Count == 0)
