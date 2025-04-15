@@ -93,9 +93,6 @@
     <data name="UNINSTALL" xml:space="preserve">
         <value>Uninstall</value>
     </data>
-    <data name="ALL_M" xml:space="preserve">
-        <value>All</value>
-    </data>
     <data name="BY_AUTHOR" xml:space="preserve">
         <value>By Author</value>
     </data>
@@ -110,9 +107,6 @@
     </data>
     <data name="LOADING_BOOK" xml:space="preserve">
         <value>Loading your book...</value>
-    </data>
-    <data name="READING" xml:space="preserve">
-        <value>Reading</value>
     </data>
     <data name="SYNC_COMPLETED" xml:space="preserve">
         <value>Sync completed</value>

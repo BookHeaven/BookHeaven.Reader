@@ -60,15 +60,6 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All.
-        /// </summary>
-        public static string ALL_M {
-            get {
-                return ResourceManager.GetString("ALL_M", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Apps.
         /// </summary>
         public static string APPS {
@@ -443,15 +434,6 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string READ_TIME {
             get {
                 return ResourceManager.GetString("READ_TIME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Reading.
-        /// </summary>
-        public static string READING {
-            get {
-                return ResourceManager.GetString("READING", resourceCulture);
             }
         }
         

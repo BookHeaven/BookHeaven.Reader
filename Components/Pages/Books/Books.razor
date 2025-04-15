@@ -8,7 +8,7 @@
 }
 else
 {
-    if(BookManager.Books.Count == 0)
+    if(BookManager.IsEmpty)
     {
         <Message Content="@Translations.NO_BOOKS_FOUND" OnButtonClick="@(() => NavigationManager.NavigateTo("/books/remote"))">
             <ButtonContent>
@@ -20,8 +20,7 @@ else
     }
 
     <BookInfo @bind-Book="_selectedBook"></BookInfo>
-
-
+    
     <ContextMenu Id="BookMenu" Context="context" OverrideDefaultCssClass="absolute rounded border bg-white">
         @{
             var book = (Book)context.Data;
@@ -50,20 +49,20 @@ else
         </Item>
     </ContextMenu>
 
-    <RadioButtonGroup Class="mx-3 mt-3" TOption="@Filter" @bind-SelectedOption="_selectedFilter" />
+    <RadioButtonGroup Class="mx-3 mt-3" Options="[BookStatus.Reading,BookStatus.All]" @bind-SelectedOption="BookManager.Filter" />
 
     <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
-        @if (FilteredBooks.Count == 0)
+        @if (BookManager.Books.Count == 0)
         {
             <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
         }
         else
         {
-            foreach (var book in FilteredBooks) {
+            foreach (var book in BookManager.Books) {
                 <ContextMenuTrigger CssClass="relative" MenuId="BookMenu" Data="@book">
                     <a class="h-full flex flex-col rounded overflow-hidden active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId" draggable="false">
                         <div class="cover h-[190px] w-full rounded overflow-hidden">
-                            <img class="h-full w-full" src="@book.GetCoverAsBase64(MauiProgram.CoversPath)" draggable="false" alt=""/>
+                            <img class="h-full w-full" src="@book.GetCoverAsBase64()" draggable="false" alt=""/>
                             <span class="absolute -top-[1px] right-[2px] w-[40%] font-bold">
                                 <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
                                 <span class="absolute inset-0 text-[.6rem] text-center">

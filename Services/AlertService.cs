@@ -1,34 +1,27 @@
-﻿namespace BookHeaven.Reader.Services;
+﻿using BookHeaven.Domain.Abstractions;
+using BookHeaven.Domain.Enums;
+using CommunityToolkit.Maui.Alerts;
 
-public class AlertService
+namespace BookHeaven.Reader.Services;
+
+public class AlertService : IAlertService
 {
-    public Task ShowAlertAsync(string title, string message, string cancel = "OK")
+    public async Task ShowAlertAsync(string title, string message, string cancel = "OK")
     {
-        return Application.Current!.Windows[0].Page!.DisplayAlert(title, message, cancel);
+        await Application.Current!.Windows[0].Page!.DisplayAlert(title, message, cancel);
     }
 
-    public Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No")
+    public async Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No")
     {
-        return Application.Current!.Windows[0].Page!.DisplayAlert(title, message, accept, cancel);
+        return await Application.Current!.Windows[0].Page!.DisplayAlert(title, message, accept, cancel);
     }
 
-    public Task<string> ShowPromptAsync(string title, string message, string accept = "Yes", string cancel = "No")
+    public async Task<string> ShowPromptAsync(string title, string message, string accept = "Yes", string cancel = "No")
     {
-        return Application.Current!.Windows[0].Page!.DisplayPromptAsync(title, message, accept, cancel,maxLength:100);
+        return await Application.Current!.Windows[0].Page!.DisplayPromptAsync(title, message, accept, cancel,maxLength:100);
     }
-    
-    public void ShowAlert(string title, string message, string cancel = "OK")
+    public async Task ShowToastAsync(string message, AlertSeverity alertSeverity = AlertSeverity.Info)
     {
-        Application.Current!.Windows[0].Page!.Dispatcher.DispatchAsync(async () =>
-            await ShowAlertAsync(title, message, cancel)
-        );
-    }
-    public void ShowConfirmation(string title, string message, Action<bool> callback, string accept = "Yes", string cancel = "No")
-    {
-        Application.Current!.Windows[0].Page!.Dispatcher.DispatchAsync(async () =>
-        {
-            var answer = await ShowConfirmationAsync(title, message, accept, cancel);
-            callback(answer);
-        });
+        await Toast.Make(message).Show();
     }
 }

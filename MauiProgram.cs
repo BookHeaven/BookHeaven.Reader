@@ -1,5 +1,7 @@
 ﻿using BlazorPanzoom;
 using BookHeaven.Domain;
+using BookHeaven.Domain.Abstractions;
+using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui;
@@ -27,22 +29,21 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit();
 
-		builder.Services.AddDomain(FileSystem.AppDataDirectory);
+		builder.Services.AddDomain(BooksPath, CoversPath, FontsPath, FileSystem.AppDataDirectory);
 		builder.Services.AddEpubManager();
 			
 			
 		builder.Services.AddSingleton<AppStateService>();
 		builder.Services.AddSingleton<LifeCycleService>();
 		builder.Services.AddSingleton<UdpBroadcastClient>();
-
-		builder.Services.AddScoped<BookManager>();
+		
 		builder.Services.AddScoped<IAppsService, AppsService>();
 		builder.Services.AddScoped<ReaderService>();
 		builder.Services.AddScoped<ImageViewerService>();
 		builder.Services.AddScoped<OverlayService>();
 			
 		builder.Services.AddTransient<IServerService, ServerService>();
-		builder.Services.AddTransient<AlertService>();
+		builder.Services.AddTransient<IAlertService, AlertService>();
 
 		builder.Services.AddBlazorContextMenu();
 		builder.Services.AddMauiBlazorWebView();

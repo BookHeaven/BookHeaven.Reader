@@ -1,4 +1,6 @@
-﻿@using BookHeaven.Domain.Enums
+﻿@using BookHeaven.Domain.Abstractions
+@using BookHeaven.Domain.Enums
+@using BookHeaven.Domain.Services
 @if (Book == null)
 {
 	return;
@@ -12,7 +14,7 @@
 		</div>
 		<div class="grid-cols-[150px_1fr] grid items-start gap-5">
 			<div class="grid gap-2">
-				<img src="@Book.GetCoverAsBase64(MauiProgram.CoversPath)" class="block w-full" alt=""/>
+				<img src="@Book.GetCoverAsBase64()" class="block w-full" alt=""/>
 				<span class="bg-neutral-600 px-2 py-1 text-center text-xs text-white">
 					@switch (Book.ReadingStatus())
 					{
@@ -63,14 +65,12 @@
 					<p class="mt-2 text-xs">@((MarkupString)Book.Description)</p>
 				</div>
 			}
-
 		</div>
 	</div>
 </div>
 
 @code {
 	[Inject] private BookManager BookManager { get; set; } = null!;
-	[Inject] private AlertService Alert { get; set; } = null!;
 
 	[Parameter] public Book? Book { get; set; }
 	[Parameter] public EventCallback<Book?> BookChanged { get; set; }

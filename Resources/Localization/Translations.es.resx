@@ -86,9 +86,6 @@
     <data name="UNINSTALL" xml:space="preserve">
         <value>Desinstalar</value>
     </data>
-    <data name="ALL_M" xml:space="preserve">
-        <value>Todos</value>
-    </data>
     <data name="BY_AUTHOR" xml:space="preserve">
         <value>Por Autor</value>
     </data>
@@ -103,9 +100,6 @@
     </data>
     <data name="LOADING_BOOK" xml:space="preserve">
         <value>Cargando tu libro...</value>
-    </data>
-    <data name="READING" xml:space="preserve">
-        <value>Leyendo</value>
     </data>
     <data name="SYNC_COMPLETED" xml:space="preserve">
         <value>Sincronización completada</value>

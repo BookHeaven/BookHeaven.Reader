@@ -272,8 +272,8 @@ namespace BookHeaven.Reader.Services
 
 				foreach (var font in response)
 				{
-					var fontPath = font.FilePath(MauiProgram.FontsPath);
-					var folderPath = font.FolderPath(MauiProgram.FontsPath);
+					var fontPath = font.FilePath();
+					var folderPath = font.FolderPath();
 					if (!Directory.Exists(folderPath))
 					{
 						Directory.CreateDirectory(folderPath);
