@@ -1,10 +1,6 @@
 ﻿@using System.ComponentModel
 @using BookHeaven.Domain.Features.Fonts
 @implements IDisposable
-@if (_fonts.Count == 0)
-{
-	return;
-}
 <style>
 	@foreach (var font in _fonts)
 	{
@@ -47,7 +43,7 @@
 		if (args.PropertyName != nameof(ProfileSettings.SelectedFont)) return;
 
 		await GetFonts();
-		await InvokeAsync(StateHasChanged);
+		StateHasChanged();
 	}
 
 	public void Dispose()
