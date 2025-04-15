@@ -25,7 +25,22 @@ public partial class Books
     {
         if (AppStateService.ProfileId == Guid.Empty) return;
         await BookManager.GetBooks(AppStateService.ProfileId);
-        BookManager.Filter = BookManager.Books.AnyReading() ? BookStatus.Reading : BookStatus.All;
+        if(BookManager.Books.Any(b => b.ReadingStatus() == BookStatus.Reading))
+        {
+            BookManager.Filter = BookStatus.Reading;
+        }
+        else if (BookManager.Books.Any(b => b.ReadingStatus() == BookStatus.New))
+        {
+            BookManager.Filter = BookStatus.New;
+        }
+        else if (BookManager.Books.Any(b => b.ReadingStatus() == BookStatus.Finished))
+        {
+            BookManager.Filter = BookStatus.Finished;
+        }
+        else
+        {
+            BookManager.Filter = BookStatus.All;
+        }
         _initialized = true;
     }
 }

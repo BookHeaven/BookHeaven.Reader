@@ -49,7 +49,7 @@ else
         </Item>
     </ContextMenu>
 
-    <RadioButtonGroup Class="mx-3 mt-3" Options="[BookStatus.Reading,BookStatus.All]" @bind-SelectedOption="BookManager.Filter" />
+    <RadioButtonGroup Class="mx-3 mt-3" Options="[BookStatus.Reading,BookStatus.New,BookStatus.Finished,BookStatus.All]" @bind-SelectedOption="BookManager.Filter" />
 
     <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
         @if (BookManager.Books.Count == 0)
@@ -60,12 +60,12 @@ else
         {
             foreach (var book in BookManager.Books) {
                 <ContextMenuTrigger CssClass="relative" MenuId="BookMenu" Data="@book">
-                    <a class="h-full flex flex-col rounded overflow-hidden active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId" draggable="false">
-                        <div class="cover h-[190px] w-full rounded overflow-hidden">
+                    <a class="flex h-full flex-col overflow-hidden rounded active:bg-neutral-200 active:outline-4 active:outline-neutral-200" href="/reader/@book.BookId" draggable="false">
+                        <div class="w-full overflow-hidden rounded h-[190px]">
                             <img class="h-full w-full" src="@book.GetCoverAsBase64()" draggable="false" alt=""/>
-                            <span class="absolute -top-[1px] right-[2px] w-[40%] font-bold">
+                            <span class="absolute font-bold -top-[1px] right-[2px] w-[40%]">
                                 <img src="/progress-badge.svg" class="w-full align-top" alt=""/>
-                                <span class="absolute inset-0 text-[.6rem] text-center">
+                                <span class="absolute inset-0 text-center text-[.6rem]">
                                     @if (book.ReadingStatus() != BookStatus.New)
                                     {
                                         @book.Progress().Progress.ToString("0.##")@:%
@@ -77,7 +77,7 @@ else
                                 </span>
                             </span>
                         </div>
-                        <div class="text-xs p-1">@book.Title</div>
+                        <div class="p-1 text-xs">@book.Title</div>
                     </a>
                 </ContextMenuTrigger>
             }
