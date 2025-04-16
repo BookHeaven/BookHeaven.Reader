@@ -39,7 +39,7 @@
             <ContextMenuTrigger CssClass="max-w-full" MenuId="AppMenu" Data="@app">
                 <div class="grid gap-0.5 w-full overflow-hidden rounded active:bg-neutral-200 active:outline-4 active:outline-neutral-200" @onclick="@(() => AppsService.OpenApp(app.PackageName!))">
                     <img src="data:image/png;base64,@app.IconBase64" class="mx-auto w-16 px-2" alt="App icon" draggable="false"/>
-                    <label class="text-sm text-nowrap select-none overflow-hidden overflow-ellipsis text-center mt-1">@app.Name</label>
+                    <label class="text-xs text-nowrap select-none overflow-hidden overflow-ellipsis text-center mt-2">@app.Name</label>
                 </div>
             </ContextMenuTrigger>
         }
