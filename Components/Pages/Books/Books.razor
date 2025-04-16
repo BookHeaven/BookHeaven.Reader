@@ -51,9 +51,9 @@ else
 
     <RadioButtonGroup Class="mx-3 mt-3" @bind-SelectedOption="BookManager.Filter">
         <RadioButton Option="@BookStatus.Reading" />
-        <RadioButton Option="BookStatus.New" />
-        <RadioButton Option="BookStatus.Finished" />
-        <RadioButton Option="BookStatus.All" />
+        <RadioButton Option="@BookStatus.New" />
+        <RadioButton Option="@BookStatus.Finished" />
+        <RadioButton Option="@BookStatus.All" />
     </RadioButtonGroup>
 
     <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
