@@ -5,7 +5,7 @@ using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui;
-using EpubManager;
+using BookHeaven.EpubManager;
 using Microsoft.Extensions.Logging;
 
 namespace BookHeaven.Reader;

@@ -9,12 +9,12 @@ using BookHeaven.Reader.Enums;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
-using EpubManager;
-using EpubManager.Entities;
+using BookHeaven.EpubManager;
+using BookHeaven.EpubManager.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Style = EpubManager.Entities.Style;
+using Style = BookHeaven.EpubManager.Entities.Style;
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
