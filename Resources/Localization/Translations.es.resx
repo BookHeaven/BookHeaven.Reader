@@ -179,4 +179,16 @@
     <data name="HTTPS_RECOMMENDED_INFO" xml:space="preserve">
         <value>Algunos recursos del servidor (como las portadas de los libros) podrían no cargar al utilizar HTTP</value>
     </data>
+    <data name="DOWNLOAD_BOOKS" xml:space="preserve">
+        <value>Descargar libros</value>
+    </data>
+    <data name="MARK_AS_FINISHED" xml:space="preserve">
+        <value>Marcar como finalizado</value>
+    </data>
+    <data name="MARK_AS_NEW" xml:space="preserve">
+        <value>Marcar como nuevo</value>
+    </data>
+    <data name="DELETE" xml:space="preserve">
+        <value>Eliminar</value>
+    </data>
 </root>

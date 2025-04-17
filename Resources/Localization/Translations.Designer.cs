@@ -150,6 +150,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string DELETE {
+            get {
+                return ResourceManager.GetString("DELETE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Details.
         /// </summary>
         public static string DETAILS {
@@ -164,6 +173,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string DOWNLOAD {
             get {
                 return ResourceManager.GetString("DOWNLOAD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Download books.
+        /// </summary>
+        public static string DOWNLOAD_BOOKS {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_BOOKS", resourceCulture);
             }
         }
         
@@ -362,6 +380,24 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string MANUAL_CONNECTION {
             get {
                 return ResourceManager.GetString("MANUAL_CONNECTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark as finished.
+        /// </summary>
+        public static string MARK_AS_FINISHED {
+            get {
+                return ResourceManager.GetString("MARK_AS_FINISHED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark as new.
+        /// </summary>
+        public static string MARK_AS_NEW {
+            get {
+                return ResourceManager.GetString("MARK_AS_NEW", resourceCulture);
             }
         }
         

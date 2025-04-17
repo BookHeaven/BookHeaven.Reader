@@ -186,4 +186,16 @@
     <data name="HTTPS_RECOMMENDED_INFO" xml:space="preserve">
         <value>Some assets from the server (mostly book covers) might not load if using plain HTTP</value>
     </data>
+    <data name="DOWNLOAD_BOOKS" xml:space="preserve">
+        <value>Download books</value>
+    </data>
+    <data name="MARK_AS_FINISHED" xml:space="preserve">
+        <value>Mark as finished</value>
+    </data>
+    <data name="MARK_AS_NEW" xml:space="preserve">
+        <value>Mark as new</value>
+    </data>
+    <data name="DELETE" xml:space="preserve">
+        <value>Delete</value>
+    </data>
 </root>
