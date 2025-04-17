@@ -42,5 +42,6 @@ public partial class Books
             BookManager.Filter = BookStatus.All;
         }
         _initialized = true;
+        StateHasChanged();
     }
 }
