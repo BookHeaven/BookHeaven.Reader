@@ -43,14 +43,14 @@ jobs:
     - name: Clone EpubManager
       shell: pwsh
       run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/EpubManager.git temp\EpubManager
-        New-Item -ItemType Directory -Path BookHeaven\EpubManager -Force
-        Get-ChildItem -Path temp\EpubManager | Move-Item -Destination BookHeaven\EpubManager -Force
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.EpubManager.git temp\BookHeaven.EpubManager
+        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.EpubManager -Force
+        Get-ChildItem -Path temp\BookHeaven.EpubManager | Move-Item -Destination BookHeaven\BookHeaven.EpubManager -Force
         
     - name: Clone BookHeaven.Domain
       shell: pwsh
       run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/HeasHeartfire/BookHeaven.Domain.git temp\BookHeaven.Domain
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.Domain.git temp\BookHeaven.Domain
         New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
         Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
         
