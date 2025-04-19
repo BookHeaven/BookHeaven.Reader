@@ -10,11 +10,12 @@ using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
 using BookHeaven.EpubManager;
-using BookHeaven.EpubManager.Entities;
+using BookHeaven.EpubManager.Epub.Entities;
+using BookHeaven.EpubManager.Epub.Services;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Style = BookHeaven.EpubManager.Entities.Style;
+using Style = BookHeaven.EpubManager.Epub.Entities.Style;
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
