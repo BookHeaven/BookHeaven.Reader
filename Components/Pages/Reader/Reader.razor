@@ -35,6 +35,7 @@
 				orphans: 1;
 				widows: 1;
 				text-wrap: pretty;
+				
 
 				&.current {
 					transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
@@ -42,19 +43,6 @@
 
 				& > p {
 					word-break: auto-phrase !important;
-
-					&.drop-cap {
-						orphans: 2;
-						min-height: 2em;
-						&::first-letter {
-							initial-letter: 2;
-							margin-inline-end: 0.3em;
-						}
-
-						& + p {
-							clear: both;
-						}
-					}
 				}
 			}
 		}
@@ -70,6 +58,8 @@
 		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",:scope > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",:scope > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",:scope > .chapter.next .{Next.ParagraphClassName}" : "")}") {
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
+		
+		@_epubBook?.Content.CustomCss
 	}
 	@@scope(#viewer .current) {
 		@if (_styles.Count > 0)
