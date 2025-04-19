@@ -73,7 +73,7 @@ else
                                 <span class="absolute inset-0 text-center text-[.6rem]">
                                     @if (book.ReadingStatus() != BookStatus.New)
                                     {
-                                        @book.Progress().Progress.ToString("0.##")@:%
+                                        @book.Progress().Progress.ToString("0.##") @:%
                                     }
                                     else
                                     {

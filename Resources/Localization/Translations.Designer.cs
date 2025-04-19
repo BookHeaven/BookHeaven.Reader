@@ -339,6 +339,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Last read.
+        /// </summary>
+        public static string LAST_READ {
+            get {
+                return ResourceManager.GetString("LAST_READ", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Line Height.
         /// </summary>
         public static string LINE_HEIGHT {

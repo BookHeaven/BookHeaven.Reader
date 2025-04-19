@@ -191,4 +191,7 @@
     <data name="DELETE" xml:space="preserve">
         <value>Eliminar</value>
     </data>
+    <data name="LAST_READ" xml:space="preserve">
+        <value>Última lectura</value>
+    </data>
 </root>

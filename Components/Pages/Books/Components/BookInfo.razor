@@ -44,16 +44,26 @@
 					<hr class="mt-4"/>
 					<p class="my-1 font-bold">@Translations.STATS</p>
 					<hr class="mb-2"/>
-					<div class="grid-cols-2 grid gap-1">
+					<div class="grid grid-cols-2 gap-1">
 						<span>@Translations.START_DATE</span>
-						<span>@Book.Progress().StartDate?.ToString("d")</span>
-						<span>@Translations.END_DATE</span>
-						<span>@Book.Progress().EndDate?.ToString("d")</span>
-						<span>@Translations.PROGRESS</span>
-						<span>@Book.Progress().Progress.ToString("0.#")%</span>
-						<span>@Translations.READ_TIME</span>
-						<span>@Book.Progress().ElapsedTimeFormatted()</span>
+						<span class="text-end">@Book.Progress().StartDate?.ToString("d")</span>
+						@if (Book.ReadingStatus() == BookStatus.Reading)
+						{
+							<span>@Translations.LAST_READ</span>
+							<span class="text-end">@Book.Progress().LastRead?.ToString("d")</span>
+						}
+						else
+						{
+							<span>@Translations.END_DATE</span>
+							<span class="text-end">@Book.Progress().EndDate?.ToString("d")</span>
+						}
+						
 					</div>
+					<div class="flex items-center gap-2 my-2">
+						<ProgressBar Value="@((double)Book.Progress().Progress)" />
+						<span class="text-nowrap">@Book.Progress().Progress.ToString("0.##") %</span>
+					</div>
+					<p class="text-center">@Book.Progress().ElapsedTimeFormatted()</p>
 				}
 			</div>
 		</div>
