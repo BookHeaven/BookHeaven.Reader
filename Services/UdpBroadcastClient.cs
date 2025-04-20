@@ -19,11 +19,16 @@ public class UdpBroadcastClient
 {
     public async Task<Result<string>> StartAsync()
     {
-        using var udpClient = new UdpClient
+        if(Connectivity.Current.NetworkAccess == NetworkAccess.None)
         {
-            EnableBroadcast = true
-        };
-        var ip = IPAddress.Parse("192.168.68.250");
+            return new Error("No internet connection");
+        }
+        
+        IPAddress? ip = null;
+#if DEBUG
+        ip = IPAddress.Parse("192.168.68.250");
+#endif
+        
 #if ANDROID31_0_OR_GREATER
         var connectivityManager = (ConnectivityManager)Android.App.Application.Context.GetSystemService(Context.ConnectivityService)!;
         var activeNetwork = connectivityManager?.ActiveNetwork;
@@ -43,6 +48,13 @@ public class UdpBroadcastClient
         
         ip = new IPAddress(wifiManager.ConnectionInfo.IpAddress);
 #endif
+        if (ip is null)
+        {
+            return new Error("Unable to get local IP address");
+        }
+        
+        using var udpClient = new UdpClient();
+        udpClient.EnableBroadcast = true;
 
         udpClient.Client.Bind(new IPEndPoint(ip, Broadcast.BROADCAST_PORT));
 
