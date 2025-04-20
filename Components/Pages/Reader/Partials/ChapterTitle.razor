@@ -27,15 +27,20 @@
     
     protected override void OnInitialized()
     {
-        ReaderService.OnPageChanged += StateHasChanged;
-        ReaderService.OnChapterChanged += StateHasChanged;
-        ReaderService.OnTotalPagesChanged += StateHasChanged;
+        ReaderService.OnPageChanged += RefreshUi;
+        ReaderService.OnChapterChanged += RefreshUi;
+        ReaderService.OnTotalPagesChanged += RefreshUi;
     }
     
     public void Dispose()
     {
-        ReaderService.OnPageChanged -= StateHasChanged;
-        ReaderService.OnChapterChanged -= StateHasChanged;
-        ReaderService.OnTotalPagesChanged -= StateHasChanged;
+        ReaderService.OnPageChanged -= RefreshUi;
+        ReaderService.OnChapterChanged -= RefreshUi;
+        ReaderService.OnTotalPagesChanged -= RefreshUi;
+    }
+    
+    private void RefreshUi()
+    {
+        InvokeAsync(StateHasChanged);
     }
 }

@@ -20,7 +20,7 @@
     [Inject] private ReaderService ReaderService { get; set; } = null!;
     [Inject]private ISender Sender { get; set; } = null!;
 
-    List<Font> _fonts = [];
+    readonly List<Font> _fonts = [];
     
     protected override async Task OnInitializedAsync()
     {

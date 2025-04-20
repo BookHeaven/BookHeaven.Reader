@@ -62,10 +62,15 @@ public partial class Reader : IAsyncDisposable
     {
         await ReaderService.Initialize();
         ReaderService.ProfileSettings.PropertyChanged += OnProfileSettingsChanged;
-        ReaderService.OnPageChanged += StateHasChanged;
+        ReaderService.OnPageChanged += RefreshUi;
         ReaderService.OnChapterChanged += OnChapterChanged;
-        ReaderService.OnTotalPagesChanged += StateHasChanged;
+        ReaderService.OnTotalPagesChanged += RefreshUi;
         ReaderService.OnChapterSelected += OnChapterSelected;
+    }
+
+    private void RefreshUi()
+    {
+        InvokeAsync(StateHasChanged);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -197,7 +202,7 @@ public partial class Reader : IAsyncDisposable
 		StateHasChanged();
     }
 
-    private async Task LoadFromCache()
+    /*private async Task LoadFromCache()
     {
         try
         {
@@ -211,7 +216,7 @@ public partial class Reader : IAsyncDisposable
             {
                 /*_current = chapters[0]!;
                 _previous = chapters[1];
-                _next = chapters[2];*/
+                _next = chapters[2];#1#
             }
             StateHasChanged();
         }
@@ -220,16 +225,16 @@ public partial class Reader : IAsyncDisposable
             await Toast.Make("Error loading cache").Show();
         }
         
-    }
+    }*/
 
-    private async Task UpdateChapterCache()
+    /*private async Task UpdateChapterCache()
     {
         if (Current == null) return;
         List<SpineItem?> chapters = [Current, Previous, Next];
         await WriteToCache(CacheKey.Progress, chapters);
-    }
+    }*/
 
-    private async Task<T?> LoadFromCache<T>(CacheKey key)
+    /*private async Task<T?> LoadFromCache<T>(CacheKey key)
     {
         try
         {
@@ -240,18 +245,18 @@ public partial class Reader : IAsyncDisposable
         {
             return default;
         }
-    }
+    }*/
 
-    private async Task WriteToCache<T>(CacheKey key, T item)
+    /*private async Task WriteToCache<T>(CacheKey key, T item)
     {
         var json = JsonSerializer.Serialize(item);
         await File.WriteAllTextAsync(_book!.GetCachePath(key), json);
-    }
+    }*/
 
     private void OnProfileSettingsChanged(object? sender, PropertyChangedEventArgs e)
     {
         _refreshTotalPages = true;
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
 
     private async void OnChapterChanged()
@@ -287,7 +292,7 @@ public partial class Reader : IAsyncDisposable
         //_ = UpdateChapterCache();
         
         _refreshTotalPages = true;
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnChapterSelected(string itemId)
@@ -345,9 +350,9 @@ public partial class Reader : IAsyncDisposable
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         EpubReader.Dispose();
-        ReaderService.OnPageChanged -= StateHasChanged;
+        ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= OnChapterChanged;
-        ReaderService.OnTotalPagesChanged -= StateHasChanged;
+        ReaderService.OnTotalPagesChanged -= RefreshUi;
         ReaderService.OnChapterSelected -= OnChapterSelected;
         ReaderService.ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
         if (_bookProgress.EndDate is null)

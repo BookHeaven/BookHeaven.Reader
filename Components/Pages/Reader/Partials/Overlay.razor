@@ -58,13 +58,18 @@
     protected override void OnInitialized()
     {
         OverlayService.Initialize();
-        OverlayService.OnOverlayChanged += StateHasChanged;
+        OverlayService.OnOverlayChanged += RefreshUi;
     }
 
     public void Dispose()
     {
-        OverlayService.OnOverlayChanged -= StateHasChanged;
+        OverlayService.OnOverlayChanged -= RefreshUi;
         GC.SuppressFinalize(this);
+    }
+    
+    private void RefreshUi()
+    {
+        InvokeAsync(StateHasChanged);
     }
 
 }

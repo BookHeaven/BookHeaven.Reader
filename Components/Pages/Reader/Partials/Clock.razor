@@ -6,28 +6,27 @@
 
 @code {
     string _clock = DateTime.Now.ToString("HH:mm");
-    Timer _clockTimer = new() { Interval = 1000 };
-
-
+    readonly Timer _clockTimer = new() { Interval = 1000 };
+    
     protected override void OnInitialized()
     {
         _clockTimer.Elapsed += OnTimerTick;
         _clockTimer.Start();
     }
 
-    private async Task UpdateClock()
-    {
-        _clock = DateTime.Now.ToString("HH:mm");
-        await InvokeAsync(StateHasChanged);
-    }
-
     private void OnTimerTick(object? sender, EventArgs e)
     {
-        InvokeAsync(UpdateClock);
+        var time = DateTime.Now.ToString("HH:mm");
+        if (time == _clock)
+            return;
+        
+        _clock = time;
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
+        _clockTimer.Elapsed -= OnTimerTick;
         _clockTimer.Stop();
         _clockTimer.Dispose();
         GC.SuppressFinalize(this);

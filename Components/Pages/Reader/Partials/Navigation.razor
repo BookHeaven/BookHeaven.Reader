@@ -30,7 +30,7 @@
     private void OnSelectedLayoutChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName != nameof(ProfileSettings.SelectedLayout)) return;
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)

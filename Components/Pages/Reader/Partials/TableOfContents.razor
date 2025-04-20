@@ -23,11 +23,16 @@
 
     protected override void OnInitialized()
     {
-        OverlayService.OnOverlayChanged += StateHasChanged;
+        OverlayService.OnOverlayChanged += RefreshUi;
     }
     
     public void Dispose()
     {
-        OverlayService.OnOverlayChanged -= StateHasChanged;
+        OverlayService.OnOverlayChanged -= RefreshUi;
+    }
+    
+    private void RefreshUi()
+    {
+        InvokeAsync(StateHasChanged);
     }
 }
