@@ -1,15 +1,11 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text.Json;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
-using BookHeaven.Reader.Enums;
-using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
-using BookHeaven.EpubManager;
 using BookHeaven.EpubManager.Epub.Entities;
 using BookHeaven.EpubManager.Epub.Services;
 using MediatR;
