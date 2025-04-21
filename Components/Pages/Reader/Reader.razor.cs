@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
@@ -25,7 +24,9 @@ public partial class Reader : IAsyncDisposable
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
 
-    private readonly Stopwatch _readingStopwatch = new();
+    private DateTimeOffset _entryTime;
+    private DateTimeOffset _suspendStartTime;
+    private TimeSpan _totalSuspendedTime;
     
     private bool _isSuspended;
 
@@ -110,7 +111,7 @@ public partial class Reader : IAsyncDisposable
 
             if (_bookProgress.EndDate is null)
             {
-                _readingStopwatch.Start();
+                _entryTime = DateTimeOffset.UtcNow;
 
                 LifeCycleService.Resumed += OnResumed;
                 LifeCycleService.Paused += OnPaused;
@@ -147,15 +148,16 @@ public partial class Reader : IAsyncDisposable
     {
         if(_isSuspended) return;
         
+        _suspendStartTime = DateTimeOffset.UtcNow;
         _isSuspended = true;
-        _readingStopwatch.Stop();
+        
     }
 
     private void OnResumed(object? sender, EventArgs e)
     {
         if (!_isSuspended) return;
         
-        _readingStopwatch.Start();
+        _totalSuspendedTime += DateTimeOffset.UtcNow - _suspendStartTime;
         _isSuspended = false;
     }
     
@@ -321,7 +323,6 @@ public partial class Reader : IAsyncDisposable
     private async Task UpdateProgress()
     {
         if (ReaderService.TotalPages == -1) return;
-        _readingStopwatch.Stop();
         
         _bookProgress.Chapter = ReaderService.CurrentChapter;
         _bookProgress.Page = ReaderService.CurrentPage;
@@ -333,9 +334,9 @@ public partial class Reader : IAsyncDisposable
         if (_bookProgress.EndDate is null)
         {
             _bookProgress.Progress = Progress;
-            _bookProgress.ElapsedTime += _readingStopwatch.Elapsed;
-            
+            _bookProgress.ElapsedTime += DateTimeOffset.UtcNow - _entryTime - _totalSuspendedTime;
             _bookProgress.LastRead = DateTimeOffset.Now;
+            
             if (ReaderService.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
                 ReaderService.CurrentPage == ReaderService.TotalPages) _bookProgress.EndDate = DateTimeOffset.Now;
         }
