@@ -49,14 +49,15 @@ else
         </Item>
     </ContextMenu>
 
-    <RadioButtonGroup Class="mx-3 mt-3" @bind-SelectedOption="BookManager.Filter">
-        <RadioButton Option="@BookStatus.Reading" />
-        <RadioButton Option="@BookStatus.New" />
-        <RadioButton Option="@BookStatus.Finished" />
-        <RadioButton Option="@BookStatus.All" />
-    </RadioButtonGroup>
-
-    <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3">
+    <SectionContent SectionName="Filters">
+        <RadioButtonGroup Class="mx-3 my-3" @bind-SelectedOption="BookManager.Filter">
+            <RadioButton Option="@BookStatus.Reading" Count="BookManager.CountByStatus(BookStatus.Reading)" />
+            <RadioButton Option="@BookStatus.New" Count="BookManager.CountByStatus(BookStatus.New)" />
+            <RadioButton Option="@BookStatus.Finished" Count="BookManager.CountByStatus(BookStatus.Finished)" />
+            <RadioButton Option="@BookStatus.All" />
+        </RadioButtonGroup>
+    </SectionContent>
+    <div class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly gap-2 p-3 pt-1">
         @if (BookManager.Books.Count == 0)
         {
             <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
