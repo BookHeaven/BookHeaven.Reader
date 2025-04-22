@@ -12,14 +12,14 @@
 	@@scope (#viewer) {
 		:scope {
 			--chapter-page: @ReaderService.CurrentPage;
-			--font-size: @ReaderService.ProfileSettings.FontSize;
-			--line-height: @ReaderService.ProfileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
-			--letter-spacing: @ReaderService.ProfileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--paragraph-spacing: @ReaderService.ProfileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--text-indent: @ReaderService.ProfileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
-			--word-spacing: @ReaderService.ProfileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--margin-vertical: @ReaderService.ProfileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-			--margin-horizontal: @ReaderService.ProfileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--font-size: @ProfileSettingsService.ProfileSettings.FontSize.ToString("0.00", CultureInfo.InvariantCulture);
+			--line-height: @ProfileSettingsService.ProfileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
+			--letter-spacing: @ProfileSettingsService.ProfileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--paragraph-spacing: @ProfileSettingsService.ProfileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--text-indent: @ProfileSettingsService.ProfileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
+			--word-spacing: @ProfileSettingsService.ProfileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-vertical: @ProfileSettingsService.ProfileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-horizontal: @ProfileSettingsService.ProfileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
 			--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
 			--column-gap: 4px;
@@ -29,6 +29,7 @@
 				height: var(--page-height);
 				column-width: var(--page-width);
 				font-size: calc(var(--font-size) * 1px) !important;
+				letter-spacing: calc(var(--letter-spacing) * 1px);
 				column-fill: auto;
 				column-gap: var(--column-gap);
 				padding: 0 2px;

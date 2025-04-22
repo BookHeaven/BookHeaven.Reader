@@ -42,6 +42,4 @@ public class OverlayService
     {
         CurrentOverlayPanel = CurrentOverlayPanel == overlayPanel ? OverlayPanel.None : overlayPanel;
     }
-    
-    
 }

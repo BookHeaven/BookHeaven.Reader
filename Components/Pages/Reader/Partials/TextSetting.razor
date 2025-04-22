@@ -12,13 +12,13 @@
 @code {
 
     [Parameter] public string Label { get; set; } = null!;
-    [Parameter] public double Min { get; set; }
-    [Parameter] public double Max { get; set; }
-    [Parameter] public double Increment { get; set; } = 1;
-    [Parameter] public double Value { get; set; }
-    [Parameter] public EventCallback<double> ValueChanged { get; set; }
+    [Parameter] public decimal Min { get; set; }
+    [Parameter] public decimal Max { get; set; }
+    [Parameter] public decimal Increment { get; set; } = 1;
+    [Parameter] public decimal Value { get; set; }
+    [Parameter] public EventCallback<decimal> ValueChanged { get; set; }
 
-    private async Task AddAmount(double amount)
+    private async Task AddAmount(decimal amount)
     {
         if ((amount > 0 && Value + amount <= Max) || (amount < 0 && Value + amount >= Min))
         {
@@ -26,5 +26,4 @@
             await ValueChanged.InvokeAsync(Value);
         }
     }
-
 }

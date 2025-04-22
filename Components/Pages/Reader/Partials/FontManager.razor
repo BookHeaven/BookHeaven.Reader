@@ -8,12 +8,12 @@
 	}
 	@@scope (#viewer) {
 		:scope {
-			font-family: '@ReaderService.ProfileSettings.SelectedFont', serif;
+			font-family: '@ProfileSettingsService.ProfileSettings.SelectedFont', serif;
 		}
 	}
 </style>
 @code {
-	[Inject] ReaderService ReaderService { get; set; } = null!;
+	[Inject] ProfileSettingsService ProfileSettingsService { get; set; } = null!;
 	[Inject] ISender Sender { get; set; } = null!;
 	[Inject] AppStateService AppStateService { get; set; } = null!;
 	
@@ -22,13 +22,13 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		ReaderService.ProfileSettings.PropertyChanged += OnSelectedFontChanged;
+		ProfileSettingsService.OnProfileSettingsChanged += OnSelectedFontChanged;
 		await GetFonts();
 	}
 	
 	private async Task GetFonts()
 	{
-		_fontFamily = ReaderService.ProfileSettings.SelectedFont;
+		_fontFamily = ProfileSettingsService.ProfileSettings.SelectedFont;
 		var getFonts = await Sender.Send(new GetAllFonts.Query(_fontFamily));
 		if (getFonts.IsFailure)
 		{
@@ -38,9 +38,9 @@
 		_fonts = getFonts.Value;
 	}
 	
-	private async void OnSelectedFontChanged(object? sender, PropertyChangedEventArgs args)
+	private async void OnSelectedFontChanged(string? propertyName)
 	{
-		if (args.PropertyName != nameof(ProfileSettings.SelectedFont)) return;
+		if (propertyName != nameof(ProfileSettings.SelectedFont)) return;
 
 		await GetFonts();
 		await InvokeAsync(StateHasChanged);
@@ -48,7 +48,7 @@
 
 	public void Dispose()
 	{
-		ReaderService.ProfileSettings.PropertyChanged -= OnSelectedFontChanged;
+		ProfileSettingsService.OnProfileSettingsChanged-= OnSelectedFontChanged;
 	}
 
 }

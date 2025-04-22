@@ -12,24 +12,26 @@
 @code {
     [Inject] private OverlayService OverlayService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
+    [Inject] private ProfileSettingsService ProfileSettingsService { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private ImageViewerService ImageViewerService { get; set; } = null!;
     
     private IJSObjectReference _module = null!;
+
+    private long _timeStamp;
     
-    private List<NavigationButton> Buttons => ReaderNavigation.GetLayoutForType((NavigationLayoutType)ReaderService.ProfileSettings.SelectedLayout);
+    private List<NavigationButton> Buttons => ReaderNavigation.GetLayoutForType((NavigationLayoutType)ProfileSettingsService.ProfileSettings.SelectedLayout);
 
     private bool _cancelNavigation;
-    private Stopwatch _stopwatch = new();
     
     protected override void OnInitialized()
     {
-        ReaderService.ProfileSettings.PropertyChanged += OnSelectedLayoutChanged;
+        ProfileSettingsService.OnProfileSettingsChanged += OnSelectedLayoutChanged;
     }
     
-    private void OnSelectedLayoutChanged(object? sender, PropertyChangedEventArgs args)
+    private void OnSelectedLayoutChanged(string? propertyName)
     {
-        if (args.PropertyName != nameof(ProfileSettings.SelectedLayout)) return;
+        if (propertyName != nameof(ProfileSettings.SelectedLayout)) return;
         InvokeAsync(StateHasChanged);
     }
     
@@ -64,14 +66,13 @@
 
     private void PointerDown()
     {
-        _stopwatch.Restart();
+        _timeStamp = Stopwatch.GetTimestamp();
     }
     
     private async Task PointerUp(MouseEventArgs e)
     {
-        _stopwatch.Stop();
         _cancelNavigation = false;
-        if (_stopwatch.ElapsedMilliseconds > 400)
+        if (Stopwatch.GetElapsedTime(_timeStamp).Milliseconds > 400)
         {
             _cancelNavigation = true;
             var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
@@ -84,8 +85,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        ReaderService.ProfileSettings.PropertyChanged -= OnSelectedLayoutChanged;
+        ProfileSettingsService.OnProfileSettingsChanged -= OnSelectedLayoutChanged;
         await _module.DisposeAsync();
     }
-
 }

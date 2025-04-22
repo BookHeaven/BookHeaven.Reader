@@ -6,12 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace BookHeaven.Reader.Services;
 
-public partial class ReaderService(
-    AppStateService appStateService,
-    ISender sender,
-    ILogger<ReaderService> logger) : IDisposable
+public partial class ReaderService(ILogger<ReaderService> logger)
 {
-    public ProfileSettings ProfileSettings { get; set; } = null!;
     public int CurrentChapter { get; private set; }
     public int CurrentPage { get; private set; }
     public int TotalPages { get; private set; }
@@ -23,18 +19,6 @@ public partial class ReaderService(
     public Action? OnChapterChanged { get; set; }
     public Action? OnTotalPagesChanged { get; set; }
     public Action<string>? OnChapterSelected { get; set; }
-
-    public async Task Initialize()
-    {
-        var getSettings = await sender.Send(new GetProfileSettings.Query(appStateService.ProfileId));
-        ProfileSettings = getSettings.IsSuccess ? getSettings.Value : new() {ProfileId = appStateService.ProfileId};
-        if (ProfileSettings.ProfileSettingsId == Guid.Empty)
-        {
-            await sender.Send(new AddProfileSettings.Command(ProfileSettings));
-        }
-        
-        ProfileSettings.PropertyChanged += OnProfileSettingsChanged;
-    }
     
     public void SetTotalPages(int totalPages, int? totalPagesPrev = null, int? totalPagesNext = null)
     {
@@ -112,16 +96,5 @@ public partial class ReaderService(
         CurrentChapter--;
         CurrentPage = 0;
         OnChapterChanged?.Invoke();
-    }
-
-    private async void OnProfileSettingsChanged(object? s, PropertyChangedEventArgs e)
-    {
-        await sender.Send(new UpdateProfileSettings.Command(ProfileSettings));
-    }
-
-    public void Dispose()
-    {
-        ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
-        GC.SuppressFinalize(this);
     }
 }

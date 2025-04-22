@@ -1,24 +1,24 @@
 ﻿@using BookHeaven.Domain.Features.Fonts
 <div class="settings border-solid border-t-2 border-black bg-white" @onclick:stopPropagation="true">
     <label class="ms-3 text-nowrap my-auto">@Translations.FONT</label>
-    <select @bind="ReaderService.ProfileSettings.SelectedFont" class="my-2 mx-4">
+    <select @bind="ProfileSettingsService.ProfileSettings.SelectedFont" @bind:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.SelectedFont))" class="my-2 mx-4">
         <option value="">@Translations.DEFAULT</option>
         @foreach (var font in _fonts)
         {
             <option value="@font.Family">@font.Family</option>
         }
     </select>
-    <TextSetting Label="@Translations.FONT_SIZE" Min="10" Max="32" @bind-Value="ReaderService.ProfileSettings.FontSize"/>
-    @* <TextSetting Label="Letter Spacing" Min="0" Max="2" Increment="0.1" @bind-Value="ReaderService.ProfileSettings.LetterSpacing" /> *@
+    <TextSetting Label="@Translations.FONT_SIZE" Min="10" Max="32" @bind-Value="ProfileSettingsService.ProfileSettings.FontSize" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
+    <TextSetting Label="Letter Spacing" Min="0" Max="2" Increment="0.1m" @bind-Value="ProfileSettingsService.ProfileSettings.LetterSpacing" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)" />
     @* <TextSetting Label="Word Spacing" Min="0" Max="5" Increment="0.25" @bind-Value="ReaderService.ProfileSettings.WordSpacing" /> *@
-    <TextSetting Label="@Translations.LINE_HEIGHT" Min="-0.5" Max="1" Increment="0.1" @bind-Value="ReaderService.ProfileSettings.LineHeight"/>
-    <TextSetting Label="@Translations.TEXT_INDENT" Min="0" Max="3" Increment="0.5" @bind-Value="ReaderService.ProfileSettings.TextIndent"/>
-    <TextSetting Label="@Translations.PARAGRAPH_SPACING" Min="0" Max="20" Increment="2" @bind-Value="ReaderService.ProfileSettings.ParagraphSpacing"/>
+    <TextSetting Label="@Translations.LINE_HEIGHT" Min="-0.5m" Max="1" Increment="0.1m" @bind-Value="ProfileSettingsService.ProfileSettings.LineHeight" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
+    <TextSetting Label="@Translations.TEXT_INDENT" Min="0" Max="3" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.TextIndent" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
+    <TextSetting Label="@Translations.PARAGRAPH_SPACING" Min="0" Max="20" Increment="2" @bind-Value="ProfileSettingsService.ProfileSettings.ParagraphSpacing" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
 </div>
 
 @code {
-    [Inject] private ReaderService ReaderService { get; set; } = null!;
-    [Inject]private ISender Sender { get; set; } = null!;
+    [Inject] private ProfileSettingsService ProfileSettingsService { get; set; } = null!;
+    [Inject] private ISender Sender { get; set; } = null!;
 
     readonly List<Font> _fonts = [];
     

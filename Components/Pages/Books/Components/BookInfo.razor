@@ -60,7 +60,7 @@
 						
 					</div>
 					<div class="flex items-center gap-2 my-2">
-						<ProgressBar Value="@((double)Book.Progress().Progress)" />
+						<ProgressBar Value="@Book.Progress().Progress" />
 						<span class="text-nowrap">@Book.Progress().Progress.ToString("0.##") %</span>
 					</div>
 					<p class="text-center">@Book.Progress().ElapsedTimeFormatted()</p>

@@ -23,6 +23,7 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IEpubReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
+    [Inject] private ProfileSettingsService ProfileSettingsService { get; set; } = null!;
 
     private DateTimeOffset _entryTime;
     private DateTimeOffset _suspendStartTime;
@@ -57,8 +58,8 @@ public partial class Reader : IAsyncDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        await ReaderService.Initialize();
-        ReaderService.ProfileSettings.PropertyChanged += OnProfileSettingsChanged;
+        await ProfileSettingsService.LoadSettings();
+        ProfileSettingsService.OnProfileSettingsChanged += OnProfileSettingsChanged;
         ReaderService.OnPageChanged += RefreshUi;
         ReaderService.OnChapterChanged += OnChapterChanged;
         ReaderService.OnTotalPagesChanged += RefreshUi;
@@ -251,7 +252,7 @@ public partial class Reader : IAsyncDisposable
         await File.WriteAllTextAsync(_book!.GetCachePath(key), json);
     }*/
 
-    private void OnProfileSettingsChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnProfileSettingsChanged(string? propertyName)
     {
         _refreshTotalPages = true;
         InvokeAsync(StateHasChanged);
@@ -351,7 +352,7 @@ public partial class Reader : IAsyncDisposable
         ReaderService.OnChapterChanged -= OnChapterChanged;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
         ReaderService.OnChapterSelected -= OnChapterSelected;
-        ReaderService.ProfileSettings.PropertyChanged -= OnProfileSettingsChanged;
+        ProfileSettingsService.OnProfileSettingsChanged -= OnProfileSettingsChanged;
         if (_bookProgress.EndDate is null)
         {
             LifeCycleService.Resumed -= OnResumed;
