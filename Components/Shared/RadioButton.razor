@@ -1,11 +1,16 @@
 ﻿@typeparam TOption where TOption : Enum
-<button class="px-4 py-2 rounded-full @(ParentGroup.SelectedOption!.Equals(Option) ? "bg-neutral-700 text-white" : "bg-neutral-200")" @onclick="OnClick">
+<button class="relative px-4 py-2 rounded-full @(ParentGroup.SelectedOption.Equals(Option) ? "bg-neutral-700 text-white" : "bg-neutral-200")" @onclick="OnClick">
 	@Option.StringValue()
+	@if (Count > 0 && !ParentGroup.SelectedOption.Equals(Option))
+	{
+		<span class="absolute size-4 rounded-full text-xs top-0 right-0 bg-neutral-500 text-white">@Count</span>
+	}
 </button>
 
 @code {
 	[CascadingParameter] public required RadioButtonGroup<TOption> ParentGroup { get; set; }
 	[Parameter] public required TOption Option { get; set; }
+	[Parameter] public int Count { get; set; } = 0;
 
 	private async Task OnClick()
 	{
