@@ -25,7 +25,7 @@
 		LifeCycleService.Resumed += Hide;
 	}
 
-	private void Show(object? sender, EventArgs e)
+	private void Show()
 	{
 		#if WINDOWS
 		return;
@@ -33,7 +33,7 @@
 		_screenLocked = true;
 		InvokeAsync(StateHasChanged);
 	}
-	private void Hide(object? sender, EventArgs e)
+	private void Hide()
 	{
 		_screenLocked = false;
 		InvokeAsync(StateHasChanged);

@@ -145,7 +145,7 @@ public partial class Reader : IAsyncDisposable
         }
     }
     
-    private void OnPaused(object? sender, EventArgs e)
+    private void OnPaused()
     {
         if(_isSuspended) return;
         
@@ -154,7 +154,7 @@ public partial class Reader : IAsyncDisposable
         
     }
 
-    private void OnResumed(object? sender, EventArgs e)
+    private void OnResumed()
     {
         if (!_isSuspended) return;
         
@@ -162,7 +162,7 @@ public partial class Reader : IAsyncDisposable
         _isSuspended = false;
     }
     
-    private async void OnDestroy(object? sender, EventArgs e)
+    private async void OnDestroy()
     {
         await UpdateProgress();
     }

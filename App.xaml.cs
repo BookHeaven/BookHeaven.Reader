@@ -27,13 +27,12 @@ public partial class App : Application
 				_window.Width = 562;
 				_window.Height = 750;
 #endif
-			_window.Activated += (sender, args) => _lifeCycleService.OnResume();
-			_window.Deactivated += (sender, args) => _lifeCycleService.OnPause();
-			_window.Stopped += (sender, args) => _lifeCycleService.OnStop();
-			_window.Destroying += (sender, args) => _lifeCycleService.OnDestroy();
+			_window.Activated += (sender, args) => _lifeCycleService.Resumed?.Invoke();
+			_window.Deactivated += (sender, args) => _lifeCycleService.Paused?.Invoke();
+			_window.Stopped += (sender, args) => _lifeCycleService.Stopped?.Invoke();
+			_window.Destroying += (sender, args) => _lifeCycleService.Destroyed?.Invoke();
 		}
-			
-
+		
 		return _window;
 	}
 
