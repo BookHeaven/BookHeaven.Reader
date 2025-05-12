@@ -50,10 +50,14 @@
 		<PublishTrimmed>False</PublishTrimmed>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)|$(Platform)'=='net9.0-android|AnyCPU'">
-		<AndroidSupportedAbis>armeabi-v7a;x86;x86_64;arm64-v8a</AndroidSupportedAbis>
-		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
+	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-android'">
+		<RuntimeIdentifiers>android-arm;android-arm64</RuntimeIdentifiers>
 	</PropertyGroup>
+	
+	<!--<PropertyGroup Condition="'$(TargetFramework)|$(Environment)'=='net9.0-android|Development'">
+		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
+	</PropertyGroup>-->
+
 
 	<ItemGroup>
 		<MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" Include="Resources\AppIcon\appiconfg.svg" />
