@@ -15,13 +15,17 @@
 <div class="flex h-full flex-col bg-[lightgray]">
     <div class="my-2 ms-3">
         <div class="flex items-center gap-3">
-            <div class="col-auto">
+            @*<div class="col-auto">
                 <select @bind="@_selectedFilter" @bind:after="FilterChanged" class="form-select">
                     <option value="@Filters.All" selected>@Domain.Localization.Translations.ALL_M</option>
                     <option value="@Filters.Author">@Translations.BY_AUTHOR</option>
                     <option value="@Filters.Missing">@Translations.BY_MISSING</option>
                 </select>
-            </div>
+            </div>*@
+            <RadioButtonGroup @bind-SelectedOption="_selectedFilter" @bind-SelectedOption:after="FilterChanged">
+                <RadioButton Option="@Filters.Missing" Label="@Translations.BY_MISSING" />
+                <RadioButton Option="@Filters.All" Label="@Domain.Localization.Translations.ALL_M"/>
+            </RadioButtonGroup>
             @if (_selectedFilter == Filters.Author && _authors is { Count: > 0 })
             {
                 <div class="col-auto">

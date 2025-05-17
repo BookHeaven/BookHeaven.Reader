@@ -1,6 +1,5 @@
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Features.Books;
-using BookHeaven.Domain.Features.Fonts;
 using BookHeaven.Reader.Services;
 using MediatR;
 using Microsoft.AspNetCore.Components;
