@@ -15,15 +15,12 @@ public partial class Remote
     private const int ItemsPerPage = 6;
     private int _currentPage = 1;
 
-    private List<Author>? _authors;
-
     private List<Book>? _books;
     private bool _canConnect = true;
     private List<Guid>? _deviceBooks = [];
     private List<Book>? _filteredBooks;
     private List<Book> CurrentPageBooks => _filteredBooks?.Skip((_currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList() ?? [];
-    private Guid? _selectedAuthor;
-    private Filters _selectedFilter = Filters.All;
+    private Filters _selectedFilter = Filters.Missing;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,20 +49,10 @@ public partial class Remote
         }
         _books = getBooks.Value.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
         await FilterBooks();
-
-        var getAuthors = await ServerService.GetAllAuthors();
-        if (getAuthors.IsFailure)
-        {
-            _canConnect = false;
-            return;
-        }
-        _authors = getAuthors.Value.OrderBy(x => x.Name).ToList();
     }
 
     private async Task FilterChanged()
     {
-        if(_selectedFilter == Filters.Author && _selectedAuthor == null)
-            return;
         await FilterBooks();
     }
 
@@ -75,10 +62,6 @@ public partial class Remote
         {
             case Filters.All:
                 _filteredBooks = _books;
-                break;
-            case Filters.Author when _selectedAuthor.HasValue:
-                _filteredBooks = _books?.Where(x => x.AuthorId == _selectedAuthor).OrderBy(x => x.Author?.Name)
-                    .ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
                 break;
             case Filters.Missing:
             {
@@ -106,7 +89,6 @@ public partial class Remote
     private enum Filters
     {
         All,
-        Author,
         Missing
     }
 }
