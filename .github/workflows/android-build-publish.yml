@@ -107,3 +107,4 @@ jobs:
         make_latest: true
         files: |
             ./BookHeaven/BookHeaven.Reader/bin/Release/net9.0-android/publish/dev.ggarrido.bookheaven-Signed.apk
+            ./BookHeaven/BookHeaven.Reader/bin/Release/net9.0-android/publish/dev.ggarrido.bookheaven-Signed.aab
