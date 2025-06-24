@@ -52,35 +52,33 @@ Steps might vary for your device, but overall this is what you need to do:
 <table>
   <tr>
     <td>
-      <img src="screenshots/local_reading.png" alt="" />
-    </td>
-    <td>
-      <img src="screenshots/local_all.png" alt="" />
+      <img src="screenshots/local.png" alt="" />
     </td>
     <td>
       <img src="screenshots/remote.png" alt="" />
     </td>
-  </tr>
-  <tr>
     <td>
       <img src="screenshots/app_drawer.png" alt="" />
     </td>
+  </tr>
+  <tr>
     <td>
       <img src="screenshots/reader.png" alt="" />
     </td>
     <td>
       <img src="screenshots/overlay.png" alt="" />
     </td>
-  </tr>
-  <tr>
     <td>
       <img src="screenshots/overlay_index.png" alt="" />
     </td>
+  </tr>
+  <tr>
     <td>
       <img src="screenshots/overlay_text_settings.png" alt="" />
     </td>
     <td>
       <img src="screenshots/overlay_page_settings.png" alt="" />
     </td>
+    <td></td>
   </tr>
 </table>
