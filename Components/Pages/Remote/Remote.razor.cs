@@ -41,6 +41,7 @@ public partial class Remote
     {
         _canConnect = (await ServerService.CanConnect()).IsSuccess;
         if (!_canConnect) return;
+        
         var getBooks = await ServerService.GetAllBooks();
         if (getBooks.IsFailure)
         {
@@ -66,8 +67,7 @@ public partial class Remote
             case Filters.Missing:
             {
                 await GetDownloadedBooks();
-                if (_deviceBooks == null || _deviceBooks.Count == 0) return;
-                _filteredBooks = _books?.Where(x => !_deviceBooks.Contains(x.BookId)).OrderBy(x => x.Author?.Name)
+                _filteredBooks = _books?.Where(x => _deviceBooks?.Contains(x.BookId) == false).OrderBy(x => x.Author?.Name)
                     .ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
                 break;
             }
