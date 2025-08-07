@@ -1,35 +1,65 @@
 ﻿@implements IDisposable
-<div class="absolute left-0 right-0 flex justify-center">
-    @if (Title.Length > MaxCharacters)
-    {
-        var maxWidth = (Title.Length - MaxCharacters) / 2;
-
-        var left = Title[..(Title.Length / 2 - maxWidth)].Trim();
-        var right = Title[(Title.Length / 2 + maxWidth)..].Trim();
-        <span class="flex">
-            <span class="inline-block">@left...</span>
-            <span class="inline-block text-right">@right</span>
-        </span>
-    }
-    else
-    {
-        <span>@Title</span>
-    }
-    <span class="ms-1">(@(ReaderService.CurrentPage + 1) / @(ReaderService.TotalPages + 1))</span>
+<div @ref="_containerRef" class="w-full flex items-center justify-center">
+    <span @ref="_textRef">@DisplayText</span>
+    <span @ref="_pageRef" class="ms-1">(@(ReaderService.CurrentPage + 1) / @(ReaderService.TotalPages + 1))</span>
 </div>
 
 @code {
+    [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
     
     [Parameter] public string Title { get; set; } = string.Empty;
 
-    private int MaxCharacters { get; set; } = 40;
+    private ElementReference _containerRef;
+    private ElementReference _textRef;
+    private ElementReference _pageRef;
+    private IJSObjectReference? _module;
+    private string DisplayText { get; set; } = string.Empty;
     
-    protected override void OnInitialized()
+    private string _currentTitle = string.Empty;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ReaderService.OnPageChanged += RefreshUi;
-        ReaderService.OnChapterChanged += RefreshUi;
-        ReaderService.OnTotalPagesChanged += RefreshUi;
+        if (firstRender)
+        {
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/ChapterTitle.razor.js");
+            ReaderService.OnPageChanged += RefreshUi;
+            ReaderService.OnChapterChanged += RefreshUi;
+            ReaderService.OnTotalPagesChanged += RefreshUi;
+            RefreshUi();
+        }
+    }
+    
+    private async void RefreshUi()
+    {
+        if (_module is null) return;
+        try
+        {
+            if(_currentTitle == Title) return;
+            _currentTitle = Title;
+
+            var containerWidth = await _module.InvokeAsync<double>("getElementWidth", _containerRef);
+            var paginationWidth = await _module.InvokeAsync<double>("getElementWidth", _pageRef);
+            var availableWidth = containerWidth - paginationWidth - 4; // 4px spacing fallback for .ms-1
+
+            var fullTextWidth = await _module.InvokeAsync<double>("measureTextWidth", _textRef, Title);
+
+            if (fullTextWidth <= availableWidth)
+            {
+                DisplayText = Title;
+            }
+            else
+            {
+                var avgCharWidth = fullTextWidth / Title.Length;
+                var maxChars = Math.Max(4, (int)(availableWidth / avgCharWidth));
+                var half = (maxChars - 1) / 2;
+                DisplayText = Title[..half] + "…" + Title[^half..];
+            }
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
     }
     
     public void Dispose()
@@ -37,10 +67,6 @@
         ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= RefreshUi;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
-    }
-    
-    private void RefreshUi()
-    {
-        InvokeAsync(StateHasChanged);
+        _module?.DisposeAsync();
     }
 }
