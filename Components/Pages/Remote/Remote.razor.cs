@@ -79,7 +79,7 @@ public partial class Remote
 
     private async Task GetDownloadedBooks()
     {
-        var getBooks = await Sender.Send(new GetAllBooks.Query(AppStateService.ProfileId));
+        var getBooks = await Sender.Send(new GetAllBooks.Query());
         if (getBooks.IsSuccess)
         {
             _deviceBooks = getBooks.Value.Select(x => x.BookId).ToList();
