@@ -89,7 +89,7 @@ jobs:
       id: extract_version
       shell: pwsh
       run: |
-        $version = nbgv get-version -p .\BookHeaven\BookHeaven.Reader | Select-String "Version"
+        $version = nbgv get-version -p .\BookHeaven\BookHeaven.Reader | Select-String "NuGetPackageVersion"
         echo "version=$($version)" >> $env:GITHUB_OUTPUT
     
     - name: Create Tag
