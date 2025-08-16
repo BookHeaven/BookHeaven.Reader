@@ -81,9 +81,6 @@ jobs:
       working-directory: .\BookHeaven
       run: |
           dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
-      
-    - name: Install Nerdbank.GitVersioning
-      run: dotnet tool install --global nbgv
 
     - name: Extract version
       id: extract_version
