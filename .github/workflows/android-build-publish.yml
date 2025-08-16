@@ -22,7 +22,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for accurate versioning
+          
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -78,13 +82,14 @@ jobs:
       run: |
           dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
       
+    - name: Install Nerdbank.GitVersioning
+      run: dotnet tool install --global nbgv
+
     - name: Extract version
       id: extract_version
       shell: pwsh
       run: |
-        $xml = [Xml] (Get-Content .\BookHeaven\BookHeaven.Reader\BookHeaven.Reader.csproj)
-        [string] $version = $xml.Project.PropertyGroup.ApplicationDisplayVersion
-        $version = $version.Trim()
+        $version = nbgv get-version -p .\BookHeaven\BookHeaven.Reader | Select-String "Version"
         echo "version=$($version)" >> $env:GITHUB_OUTPUT
     
     - name: Create Tag
