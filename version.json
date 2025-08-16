@@ -1,3 +1,7 @@
 ﻿{
-  "version": "1.6.18"
+  "version": "1.6.18",
+  "publicReleaseRefSpec":  [
+    "^refs/heads/main$",
+    "^refs/tags/v\\d+\\.\\d+"
+  ]
 }
