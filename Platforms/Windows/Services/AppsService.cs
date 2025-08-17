@@ -10,6 +10,9 @@ namespace BookHeaven.Reader.Services;
 
 public class AppsService : IAppsService
 {
+	public List<AppInfo> Apps { get; set; } = [];
+	public Action? OnAppsChanged { get; set; }
+	
     public void OpenApp(string packageName)
     {
     }
@@ -17,6 +20,10 @@ public class AppsService : IAppsService
     public void OpenInfo(string packageName)
     {
     }
+    
+    public void OpenAppShortcut(string packageName, string shortcutId)
+	{
+	}
 
     public bool CanBeUninstalled(string packageName)
     {
@@ -27,14 +34,14 @@ public class AppsService : IAppsService
     {
     }
 
-    public List<AppInfo> GetInstalledApps()
+    public void RefreshInstalledApps()
     {
-    	List<AppInfo> apps = [];
 	    using var key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
-	    if (key == null) return apps;
+	    if (key == null) return;
 	    // Get the names of all subkeys (which represent installed programs)
 	    var subkeyNames = key.GetSubKeyNames();
 
+	    Apps.Clear();
 	    // Iterate through each subkey and retrieve program information
 	    foreach (var subkeyName in subkeyNames)
 	    {
@@ -51,15 +58,13 @@ public class AppsService : IAppsService
 		    var icon = Icon.ExtractAssociatedIcon(displayIconPath);
 		    if (icon != null)
 		    {
-			    apps.Add(new AppInfo
+			    Apps.Add(new AppInfo
 			    {
 				    Name = displayName,
 				    IconBase64 = ConvertBitmapToBase64(icon)
 			    });
 		    }
 	    }
-
-	    return apps;
     }
 
     private string ConvertBitmapToBase64(Icon icon)

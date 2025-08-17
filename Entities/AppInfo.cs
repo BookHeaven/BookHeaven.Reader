@@ -8,4 +8,6 @@ public class AppInfo
 
 	public DateTime? FirstInstallTime { get; set; }
 	public DateTime? LastOpened { get; set; }
+
+	public List<AppShortcut> Shortcuts { get; set; } = [];
 }

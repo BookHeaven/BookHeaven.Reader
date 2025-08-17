@@ -35,8 +35,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<AppStateService>();
 		builder.Services.AddSingleton<LifeCycleService>();
 		builder.Services.AddSingleton<UdpBroadcastClient>();
+		builder.Services.AddSingleton<IAppsService, AppsService>();
 		
-		builder.Services.AddScoped<IAppsService, AppsService>();
 		builder.Services.AddScoped<ReaderService>();
 		builder.Services.AddScoped<ProfileSettingsService>();
 		builder.Services.AddScoped<ImageViewerService>();

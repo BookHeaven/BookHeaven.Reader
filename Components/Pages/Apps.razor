@@ -9,13 +9,26 @@
     </RadioButtonGroup>
 </SectionContent>
 
-@if (DeviceApps.Count > 0)
+@if (AppsService.Apps.Count > 0)
 {
     <ContextMenu Id="AppMenu" Context="appContext" OverrideDefaultCssClass="absolute rounded border bg-white">
         @{
             var app = (AppInfo)appContext.Data;
         }
         <Item OverrideDefaultCssClass="p-2">@app.Name</Item>
+        @if (app.Shortcuts.Count > 0)
+        {
+            foreach(var shortcut in app.Shortcuts)
+            {
+                <Item OnClick="@(() => AppsService.OpenAppShortcut(app.PackageName!, shortcut.Id!))">
+                    @if (shortcut.IconBase64 is not null)
+                    {
+                        <img src="data:image/png;base64,@shortcut.IconBase64" class="me-2 w-6 h-6 inline-block" alt="Shortcut icon" draggable="false"/>
+                    }
+                    @shortcut.ShortLabel
+                </Item>
+            }
+        }
         <Item OnClick="@(() => AppsService.OpenApp(app.PackageName!))">
             <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-5 icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
             @Translations.OPEN

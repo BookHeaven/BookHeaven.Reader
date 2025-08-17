@@ -1,4 +1,5 @@
-﻿using BookHeaven.Reader.Services;
+﻿using BookHeaven.Reader.Interfaces;
+using BookHeaven.Reader.Services;
 using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
 using Application = Microsoft.Maui.Controls.Application;
 
@@ -7,13 +8,15 @@ namespace BookHeaven.Reader;
 public partial class App : Application
 {
 	private readonly LifeCycleService _lifeCycleService;
-		
+
 	private Window? _window;
 
-	public App(LifeCycleService lifeCycleService)
+	public App(LifeCycleService lifeCycleService, IAppsService appsService)
 	{
 		InitializeComponent();
 		_lifeCycleService = lifeCycleService;
+
+		appsService.RefreshInstalledApps();
 
 		Current!.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
 	}
