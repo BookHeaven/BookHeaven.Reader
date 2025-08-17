@@ -11,6 +11,9 @@ public class AppEventsReceiver : BroadcastReceiver
     public override void OnReceive(Context? context, Intent? intent)
     {
         var appsService = IPlatformApplication.Current!.Services.GetService<IAppsService>();
-        appsService?.RefreshInstalledApps();
+        if (appsService != null)
+        {
+            _ = appsService.RefreshInstalledAppsAsync(); // Ejecutar asíncrono, no bloquear
+        }
     }
 }

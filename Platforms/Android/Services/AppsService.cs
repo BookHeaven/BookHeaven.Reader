@@ -65,7 +65,7 @@ public class AppsService : IAppsService
         Android.App.Application.Context.StartActivity(intent);
     }
 
-    public void RefreshInstalledApps()
+    public async Task RefreshInstalledAppsAsync()
     {
         var packageManager = Android.App.Application.Context.PackageManager!;
         var apps = packageManager.QueryIntentActivities(new Intent(Intent.ActionMain).AddCategory(Intent.CategoryLauncher), 0);
@@ -77,75 +77,78 @@ public class AppsService : IAppsService
             : null;
         var userHandle = Process.MyUserHandle();
 
-        Parallel.ForEach(apps, app =>
+        await Task.Run(() =>
         {
-            if (app.ActivityInfo?.IsEnabled == false) return;
-            var packageInfo = packageManager.GetPackageInfo(app.ActivityInfo?.PackageName!, 0)!;
-            Drawable? iconDrawable = null;
-            // Intentar obtener el icono del launcher (pack por defecto del sistema)
-            if (launcherApps != null)
+            Parallel.ForEach(apps, app =>
             {
-                try
+                if (app.ActivityInfo?.IsEnabled == false) return;
+                var packageInfo = packageManager.GetPackageInfo(app.ActivityInfo?.PackageName!, 0)!;
+                Drawable? iconDrawable = null;
+                // Intentar obtener el icono del launcher (pack por defecto del sistema)
+                if (launcherApps != null)
                 {
-                    var appInfoLauncher = launcherApps.GetApplicationInfo(app.ActivityInfo?.PackageName!, 0, userHandle!)!;
-                    iconDrawable = appInfoLauncher.LoadIcon(packageManager);
+                    try
+                    {
+                        var appInfoLauncher = launcherApps.GetApplicationInfo(app.ActivityInfo?.PackageName!, 0, userHandle!)!;
+                        iconDrawable = appInfoLauncher.LoadIcon(packageManager);
+                    }
+                    catch
+                    {
+                        // Si falla, usar el icono nativo
+                        iconDrawable = app.LoadIcon(packageManager);
+                    }
                 }
-                catch
+                else
                 {
-                    // Si falla, usar el icono nativo
                     iconDrawable = app.LoadIcon(packageManager);
                 }
-            }
-            else
-            {
-                iconDrawable = app.LoadIcon(packageManager);
-            }
-            var iconBase64 = Helpers.ConvertDrawableToBase64(iconDrawable!);
-            var appInfo = new AppInfo
-            {
-                Name = app.LoadLabel(packageManager),
-                PackageName = app.ActivityInfo?.PackageName,
-                IconBase64 = iconBase64,
-                Date = packageInfo.LastUpdateTime == 0 ? null : DateTimeOffset.FromUnixTimeMilliseconds(packageInfo.LastUpdateTime).DateTime
-            };
-
-            try
-            {
-                // Get shortcuts using LauncherApps (API 25+)
-                if (launcherApps != null && Build.VERSION.SdkInt >= BuildVersionCodes.NMr1)
+                var iconBase64 = Helpers.ConvertDrawableToBase64(iconDrawable!);
+                var appInfo = new AppInfo
                 {
-                    var shortcutQuery = new LauncherApps.ShortcutQuery();
-                    shortcutQuery.SetPackage(app.ActivityInfo?.PackageName);
-                    shortcutQuery.SetQueryFlags(LauncherAppsShortcutQueryFlags.MatchDynamic | LauncherAppsShortcutQueryFlags.MatchPinned | LauncherAppsShortcutQueryFlags.MatchManifest);
-                    var shortcuts = launcherApps.GetShortcuts(shortcutQuery, userHandle!);
-                    if (shortcuts != null)
+                    Name = app.LoadLabel(packageManager),
+                    PackageName = app.ActivityInfo?.PackageName,
+                    IconBase64 = iconBase64,
+                    Date = packageInfo.LastUpdateTime == 0 ? null : DateTimeOffset.FromUnixTimeMilliseconds(packageInfo.LastUpdateTime).DateTime
+                };
+
+                try
+                {
+                    // Get shortcuts using LauncherApps (API 25+)
+                    if (launcherApps != null && Build.VERSION.SdkInt >= BuildVersionCodes.NMr1)
                     {
-                        foreach (var shortcut in shortcuts)
+                        var shortcutQuery = new LauncherApps.ShortcutQuery();
+                        shortcutQuery.SetPackage(app.ActivityInfo?.PackageName);
+                        shortcutQuery.SetQueryFlags(LauncherAppsShortcutQueryFlags.MatchDynamic | LauncherAppsShortcutQueryFlags.MatchPinned | LauncherAppsShortcutQueryFlags.MatchManifest);
+                        var shortcuts = launcherApps.GetShortcuts(shortcutQuery, userHandle!);
+                        if (shortcuts != null)
                         {
-                            string? shortcutIconBase64 = null;
-                            var iconDrawableShortcut = launcherApps.GetShortcutIconDrawable(shortcut, 0);
-                            if (iconDrawableShortcut != null)
+                            foreach (var shortcut in shortcuts)
                             {
-                                shortcutIconBase64 = Helpers.ConvertDrawableToBase64(iconDrawableShortcut);
+                                string? shortcutIconBase64 = null;
+                                var iconDrawableShortcut = launcherApps.GetShortcutIconDrawable(shortcut, 0);
+                                if (iconDrawableShortcut != null)
+                                {
+                                    shortcutIconBase64 = Helpers.ConvertDrawableToBase64(iconDrawableShortcut);
+                                }
+                                appInfo.Shortcuts.Add(new AppShortcut
+                                {
+                                    Id = shortcut.Id,
+                                    ShortLabel = shortcut.ShortLabel,
+                                    LongLabel = shortcut.LongLabel,
+                                    IconBase64 = shortcutIconBase64
+                                });
                             }
-                            appInfo.Shortcuts.Add(new AppShortcut
-                            {
-                                Id = shortcut.Id,
-                                ShortLabel = shortcut.ShortLabel,
-                                LongLabel = shortcut.LongLabel,
-                                IconBase64 = shortcutIconBase64
-                            });
                         }
                     }
                 }
-            }
-            catch { }
+                catch { }
 
 
-            lock (appInfos)
-            {
-                appInfos.Add(appInfo);
-            }
+                lock (appInfos)
+                {
+                    appInfos.Add(appInfo);
+                }
+            });
         });
         Apps.AddRange(appInfos);
         OnAppsChanged?.Invoke();

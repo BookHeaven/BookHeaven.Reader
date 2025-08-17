@@ -34,37 +34,41 @@ public class AppsService : IAppsService
     {
     }
 
-    public void RefreshInstalledApps()
+    public async Task RefreshInstalledAppsAsync()
     {
-	    using var key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
-	    if (key == null) return;
-	    // Get the names of all subkeys (which represent installed programs)
-	    var subkeyNames = key.GetSubKeyNames();
+        await Task.Run(() =>
+        {
+            using var key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall");
+            if (key == null) return;
+            // Get the names of all subkeys (which represent installed programs)
+            var subkeyNames = key.GetSubKeyNames();
 
-	    Apps.Clear();
-	    // Iterate through each subkey and retrieve program information
-	    foreach (var subkeyName in subkeyNames)
-	    {
-		    using var subkey = key.OpenSubKey(subkeyName);
-		    // Retrieve the program name and display it
-		    var displayName = subkey?.GetValue("DisplayName") as string;
-		    if (string.IsNullOrEmpty(displayName)) continue;
-		    Console.WriteLine(displayName);
+            Apps.Clear();
+            // Iterate through each subkey and retrieve program information
+            foreach (var subkeyName in subkeyNames)
+            {
+			    using var subkey = key.OpenSubKey(subkeyName);
+			    // Retrieve the program name and display it
+			    var displayName = subkey?.GetValue("DisplayName") as string;
+			    if (string.IsNullOrEmpty(displayName)) continue;
+			    Console.WriteLine(displayName);
 
-		    // Retrieve the display icon path
-		    var displayIconPath = subkey?.GetValue("DisplayIcon") as string;
-		    if (string.IsNullOrEmpty(displayIconPath) || !File.Exists(displayIconPath)) continue;
-		    // Load the icon from the file
-		    var icon = Icon.ExtractAssociatedIcon(displayIconPath);
-		    if (icon != null)
-		    {
-			    Apps.Add(new AppInfo
+			    // Retrieve the display icon path
+			    var displayIconPath = subkey?.GetValue("DisplayIcon") as string;
+			    if (string.IsNullOrEmpty(displayIconPath) || !File.Exists(displayIconPath)) continue;
+			    // Load the icon from the file
+			    var icon = Icon.ExtractAssociatedIcon(displayIconPath);
+			    if (icon != null)
 			    {
-				    Name = displayName,
-				    IconBase64 = ConvertBitmapToBase64(icon)
-			    });
+				    Apps.Add(new AppInfo
+				    {
+					    Name = displayName,
+					    IconBase64 = ConvertBitmapToBase64(icon)
+				    });
+			    }
 		    }
-	    }
+        });
+        OnAppsChanged?.Invoke();
     }
 
     private string ConvertBitmapToBase64(Icon icon)
@@ -81,4 +85,3 @@ public class AppsService : IAppsService
     	return base64Icon;
     }
 }
-

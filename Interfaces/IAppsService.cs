@@ -4,10 +4,9 @@ namespace BookHeaven.Reader.Interfaces;
 
 public interface IAppsService
 {
-	
 	List<AppInfo> Apps { get; set; }
 	Action? OnAppsChanged { get; set; }
-	void RefreshInstalledApps();
+	Task RefreshInstalledAppsAsync();
 	void OpenApp(string packageName);
 	void OpenInfo(string packageName);
 	void OpenAppShortcut(string packageName, string shortcutId);
