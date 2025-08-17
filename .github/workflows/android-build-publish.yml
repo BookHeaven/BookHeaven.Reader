@@ -58,6 +58,22 @@ jobs:
         New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
         Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
         
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('BookHeaven/BookHeaven.Reader/**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Cache npm modules
+      uses: actions/cache@v3
+      with:
+        path: BookHeaven/BookHeaven.Reader/node_modules
+        key: ${{ runner.os }}-npm-${{ hashFiles('BookHeaven/BookHeaven.Reader/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
+
     - name: Install npm packages
       working-directory: .\BookHeaven\BookHeaven.Reader
       run: npm ci
@@ -70,17 +86,24 @@ jobs:
       working-directory: .\BookHeaven\BookHeaven.Reader
       run: dotnet restore
 
-    - name: Setup keystore file
-      id: decode_keystore
+    - name: Restore keystore from cache
+      id: restore_keystore
+      uses: actions/cache@v3
+      with:
+        path: BookHeaven/keystore/bookheaven.jks
+        key: ${{ runner.os }}-keystore-bookheaven
+
+    - name: Decode keystore if not cached
+      if: steps.restore_keystore.outputs.cache-hit != 'true'
       uses: timheuer/base64-to-file@v1.2.4
       with:
-        fileName: bookheaven.jks
+        fileName: BookHeaven/keystore/bookheaven.jks
         encodedString: ${{ secrets.KEYSTORE_BASE64 }}
     
     - name: Publish
       working-directory: .\BookHeaven
       run: |
-          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
+          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f net9.0-android /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="BookHeaven/keystore/bookheaven.jks" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
 
     - name: Extract version
       id: extract_version
