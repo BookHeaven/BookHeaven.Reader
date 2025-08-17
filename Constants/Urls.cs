@@ -9,4 +9,9 @@ public static class Urls
     public const string Books = "/books";
     public const string Remote = "/books/remote";
     public const string Reader = "/reader";
+    
+    public static string GetReaderUrl(Guid bookId)
+    {
+        return $"{Reader}/{bookId}";
+    }
 }
