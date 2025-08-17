@@ -6,8 +6,8 @@ public static class Helpers
 {
 	public static string ConvertDrawableToBase64(Drawable drawable)
 		{
-			Bitmap bitmap = ConvertDrawableToBitmap(drawable);
-			using (MemoryStream ms = new MemoryStream())
+			var bitmap = ConvertDrawableToBitmap(drawable);
+			using (var ms = new MemoryStream())
 			{
 				bitmap.Compress(Bitmap.CompressFormat.Png!, 100, ms);
 				return Convert.ToBase64String(ms.ToArray());
@@ -16,8 +16,8 @@ public static class Helpers
 
 	public static Bitmap ConvertDrawableToBitmap(Drawable drawable)
 	{
-		Bitmap bitmap = Bitmap.CreateBitmap(drawable.IntrinsicWidth, drawable.IntrinsicHeight, Bitmap.Config.Argb8888!);
-		using (Canvas canvas = new Canvas(bitmap))
+		var bitmap = Bitmap.CreateBitmap(drawable.IntrinsicWidth, drawable.IntrinsicHeight, Bitmap.Config.Argb8888!);
+		using (var canvas = new Canvas(bitmap))
 		{
 			drawable.SetBounds(0, 0, canvas.Width, canvas.Height);
 			drawable.Draw(canvas);
