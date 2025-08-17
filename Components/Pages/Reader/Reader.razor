@@ -1,4 +1,4 @@
-﻿@page "/reader/{id:guid}"
+﻿@attribute [Route($"{Urls.Reader}/{{id:guid}}")]
 @using System.Globalization
 @using BookHeaven.Reader.Components.Pages.Reader.Partials
 @layout EmptyLayout

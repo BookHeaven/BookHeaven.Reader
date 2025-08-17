@@ -13,11 +13,11 @@
         @Body
     </main>
     <nav class="w-full flex border-neutral-300 h-[60px]">
-        <NavLink class="flex-1 flex items-center justify-center border-neutral-300 border-t-2 border-e-2 [&.active]:border-e-[0px] [&.active]:border-black [&.active]:!border-t-3" href="/books" ActiveClass="active" Match="NavLinkMatch.Prefix">
+        <NavLink class="flex-1 flex items-center justify-center border-neutral-300 border-t-2 border-e-2 [&.active]:border-e-[0px] [&.active]:border-black [&.active]:!border-t-3" href="@Urls.Books" ActiveClass="active" Match="NavLinkMatch.Prefix">
             <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon me-2 icon-tabler icons-tabler-outline icon-tabler-book"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></svg>
             @Translations.BOOKS
         </NavLink>
-        <NavLink class="flex-1 flex items-center justify-center border-neutral-300 border-t-2 border-s-2 [&.active]:border-s-[0px] [&.active]:border-black [&.active]:!border-t-3" href="/apps" ActiveClass="active" Match="NavLinkMatch.All">
+        <NavLink class="flex-1 flex items-center justify-center border-neutral-300 border-t-2 border-s-2 [&.active]:border-s-[0px] [&.active]:border-black [&.active]:!border-t-3" href="@Urls.Apps" ActiveClass="active" Match="NavLinkMatch.All">
             <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="me-2 icon icon-tabler icons-tabler-outline icon-tabler-layout-grid"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /></svg>
             @Translations.APPS
         </NavLink>
