@@ -4,6 +4,7 @@ using Android.Content.PM;
 using Android.Provider;
 using Android.OS;
 using Android.Net;
+using Android.Graphics.Drawables;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Entities;
 using AppInfo = BookHeaven.Reader.Entities.AppInfo;
@@ -12,7 +13,7 @@ namespace BookHeaven.Reader.Services;
 
 public class AppsService : IAppsService
 {
-    public List<AppInfo> Apps { get; set; } = new List<AppInfo>();
+    public List<AppInfo> Apps { get; set; } = [];
     public Action? OnAppsChanged { get; set; }
 
     public void OpenApp(string packageName)
@@ -80,7 +81,26 @@ public class AppsService : IAppsService
         {
             if (app.ActivityInfo?.IsEnabled == false) return;
             var packageInfo = packageManager.GetPackageInfo(app.ActivityInfo?.PackageName!, 0)!;
-            var iconBase64 = Helpers.ConvertDrawableToBase64(app.LoadIcon(packageManager)!);
+            Drawable? iconDrawable = null;
+            // Intentar obtener el icono del launcher (pack por defecto del sistema)
+            if (launcherApps != null)
+            {
+                try
+                {
+                    var appInfoLauncher = launcherApps.GetApplicationInfo(app.ActivityInfo?.PackageName!, 0, userHandle!)!;
+                    iconDrawable = appInfoLauncher.LoadIcon(packageManager);
+                }
+                catch
+                {
+                    // Si falla, usar el icono nativo
+                    iconDrawable = app.LoadIcon(packageManager);
+                }
+            }
+            else
+            {
+                iconDrawable = app.LoadIcon(packageManager);
+            }
+            var iconBase64 = Helpers.ConvertDrawableToBase64(iconDrawable!);
             var appInfo = new AppInfo
             {
                 Name = app.LoadLabel(packageManager),
@@ -95,18 +115,18 @@ public class AppsService : IAppsService
                 if (launcherApps != null && Build.VERSION.SdkInt >= BuildVersionCodes.NMr1)
                 {
                     var shortcutQuery = new LauncherApps.ShortcutQuery();
-                    shortcutQuery.SetPackage(app.ActivityInfo.PackageName);
+                    shortcutQuery.SetPackage(app.ActivityInfo?.PackageName);
                     shortcutQuery.SetQueryFlags(LauncherAppsShortcutQueryFlags.MatchDynamic | LauncherAppsShortcutQueryFlags.MatchPinned | LauncherAppsShortcutQueryFlags.MatchManifest);
-                    var shortcuts = launcherApps.GetShortcuts(shortcutQuery, userHandle);
+                    var shortcuts = launcherApps.GetShortcuts(shortcutQuery, userHandle!);
                     if (shortcuts != null)
                     {
                         foreach (var shortcut in shortcuts)
                         {
                             string? shortcutIconBase64 = null;
-                            var iconDrawable = launcherApps.GetShortcutIconDrawable(shortcut, 0);
-                            if (iconDrawable != null)
+                            var iconDrawableShortcut = launcherApps.GetShortcutIconDrawable(shortcut, 0);
+                            if (iconDrawableShortcut != null)
                             {
-                                shortcutIconBase64 = Helpers.ConvertDrawableToBase64(iconDrawable);
+                                shortcutIconBase64 = Helpers.ConvertDrawableToBase64(iconDrawableShortcut);
                             }
                             appInfo.Shortcuts.Add(new AppShortcut
                             {
@@ -120,8 +140,8 @@ public class AppsService : IAppsService
                 }
             }
             catch { }
-            
-            
+
+
             lock (appInfos)
             {
                 appInfos.Add(appInfo);
