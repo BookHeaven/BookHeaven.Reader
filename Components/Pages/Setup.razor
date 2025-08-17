@@ -98,7 +98,7 @@
     {
         if(AppStateService.ProfileId != Guid.Empty)
         {
-            NavigationManager.NavigateTo("/books");
+            NavigationManager.NavigateTo(Urls.Books);
             return;
         }
         _initialized = true;
@@ -167,6 +167,6 @@
             break;
         }
         AppStateService.ProfileId = profileId;
-        NavigationManager.NavigateTo("/books");
+        NavigationManager.NavigateTo(Urls.Books);
     }
 }
