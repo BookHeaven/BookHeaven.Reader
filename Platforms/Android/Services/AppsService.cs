@@ -106,7 +106,7 @@ public class AppsService : IAppsService
                 Name = app.LoadLabel(packageManager),
                 PackageName = app.ActivityInfo?.PackageName,
                 IconBase64 = iconBase64,
-                FirstInstallTime = packageInfo.FirstInstallTime == 0 ? null : DateTimeOffset.FromUnixTimeMilliseconds(packageInfo.FirstInstallTime).DateTime
+                Date = packageInfo.LastUpdateTime == 0 ? null : DateTimeOffset.FromUnixTimeMilliseconds(packageInfo.LastUpdateTime).DateTime
             };
 
             try

@@ -7,7 +7,7 @@ public partial class Apps : IDisposable
     private List<AppInfo> FilteredApps =>
         _sortBy switch
         {
-            SortBy.Added => AppsService.Apps.OrderBy(x => x.FirstInstallTime).ToList(),
+            SortBy.Added => AppsService.Apps.OrderBy(x => x.Date).ToList(),
             SortBy.Name => AppsService.Apps.OrderBy(x => x.Name).ToList(),
             _ => AppsService.Apps
         };

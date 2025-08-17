@@ -6,8 +6,7 @@ public class AppInfo
 	public string? PackageName { get; set; }
 	public string? IconBase64 { get; set; }
 
-	public DateTime? FirstInstallTime { get; set; }
-	public DateTime? LastOpened { get; set; }
+	public DateTime? Date { get; set; }
 
 	public List<AppShortcut> Shortcuts { get; set; } = [];
 }
