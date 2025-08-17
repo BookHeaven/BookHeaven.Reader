@@ -68,6 +68,7 @@
 
 @code {
     [Inject] private IAppsService AppsService { get; set; } = null!;
+    [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     
     private List<AppInfo> FilteredApps =>
         _sortBy switch
@@ -88,15 +89,17 @@
     protected override void OnInitialized()
     {
         AppsService.OnAppsChanged += StateHasChanged;
+        LifeCycleService.Resumed += RefreshAppsAsync;
     }
     
     public void Dispose()
     {
         AppsService.OnAppsChanged -= StateHasChanged;
+        LifeCycleService.Resumed -= RefreshAppsAsync;
         GC.SuppressFinalize(this);
     }
 
-    private async Task RefreshAppsAsync()
+    private async void RefreshAppsAsync()
     {
         await AppsService.RefreshInstalledAppsAsync();
         StateHasChanged();
