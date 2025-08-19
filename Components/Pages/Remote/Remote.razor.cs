@@ -32,7 +32,7 @@ public partial class Remote
         }*/
     }
 
-    private async Task OnButtonClick()
+    private async Task OnReconnectButtonClick()
     {
         await GetData();
     }
