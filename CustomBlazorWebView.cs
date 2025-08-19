@@ -3,7 +3,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace BookHeaven.Reader
 {
-	public class CustomBlazorWebView : BlazorWebView
+	public partial class CustomBlazorWebView : BlazorWebView
 	{
 		/*
 		 * This is so files from the app data directory can be served (covers, books)
