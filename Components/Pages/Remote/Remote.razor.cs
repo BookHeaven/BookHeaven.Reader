@@ -1,5 +1,6 @@
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Features.Books;
+using BookHeaven.Domain.Features.Profiles;
 using BookHeaven.Reader.Services;
 using MediatR;
 using Microsoft.AspNetCore.Components;
@@ -41,6 +42,26 @@ public partial class Remote
     {
         _canConnect = (await ServerService.CanConnect()).IsSuccess;
         if (!_canConnect) return;
+        
+        var getRemoteProfiles = await ServerService.GetAllProfiles();
+        if (getRemoteProfiles.IsSuccess)
+        {
+            var getLocalProfiles = await Sender.Send(new GetAllProfiles.Query());
+            if (getLocalProfiles.IsSuccess)
+            {
+                foreach (var profile in getLocalProfiles.Value)
+                {
+                    var remoteProfile = getRemoteProfiles.Value.FirstOrDefault(p => p.ProfileId == profile.ProfileId);
+                    if (remoteProfile is null || remoteProfile.Name == profile.Name) continue;
+                    
+                    await Sender.Send(new UpdateProfileName.Command(profile.ProfileId, remoteProfile.Name));
+                    if (profile.ProfileId == AppStateService.ProfileId)
+                    {
+                        AppStateService.OnProfileNameChanged?.Invoke(remoteProfile.Name);
+                    }
+                }
+            }
+        }
         
         var getBooks = await ServerService.GetAllBooks();
         if (getBooks.IsFailure)
