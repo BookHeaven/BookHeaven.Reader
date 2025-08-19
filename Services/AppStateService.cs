@@ -2,6 +2,8 @@ namespace BookHeaven.Reader.Services;
 
 public class AppStateService
 {
+    public Action<string>? OnProfileNameChanged;
+    
     public string? ServerUrl
     {
         get => Get<string>(nameof(ServerUrl));
