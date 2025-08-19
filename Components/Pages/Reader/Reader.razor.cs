@@ -169,7 +169,7 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        _epubBook = await EpubReader.ReadAll(_book!.EpubPath());
+        _epubBook = await EpubReader.ReadAllAsync(_book!.EpubPath());
         if (_totalWords == 0) _totalWords = _epubBook.Content.GetWordCount();
         if (_styles.Count == 0)
         {
