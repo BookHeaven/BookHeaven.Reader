@@ -24,7 +24,7 @@ public partial class Books
     protected override async Task OnInitializedAsync()
     {
         if (AppStateService.ProfileId == Guid.Empty) return;
-        await BookManager.GetBooks(AppStateService.ProfileId);
+        await BookManager.GetBooksAsync(AppStateService.ProfileId);
         if(BookManager.Books.Any(b => b.ReadingStatus() == BookStatus.Reading))
         {
             BookManager.Filter = BookStatus.Reading;
