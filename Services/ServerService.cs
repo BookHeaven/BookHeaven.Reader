@@ -193,7 +193,7 @@ namespace BookHeaven.Reader.Services
 
 			try
 			{
-				var response = await _httpClient.PostAsJsonAsync(endpoint, progress);
+				var response = await _httpClient.PutAsJsonAsync(endpoint, progress);
 				if(!response.IsSuccessStatusCode)
 				{
 					var errorResponse = await response.Content.ReadAsStringAsync();
@@ -243,7 +243,7 @@ namespace BookHeaven.Reader.Services
 
 			try
 			{
-				var response = await _httpClient.PostAsJsonAsync(endpoint, settings);
+				var response = await _httpClient.PutAsJsonAsync(endpoint, settings);
 				if(!response.IsSuccessStatusCode)
 				{
 					var errorResponse = await response.Content.ReadAsStringAsync();
