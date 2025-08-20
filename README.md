@@ -17,7 +17,7 @@ It connects to the Server to download whatever books you want to read, it also c
 - No dictionary, no notes
 
 > [!NOTE]
-> If you haven't setup the Server yet, [check out the repository](https://github.com/HeasHeartfire/BookHeaven.Server) to get started.
+> If you haven't setup the Server yet, [check out the repository](https://github.com/BookHeaven/BookHeaven.Server) to get started.
 
 ## :sparkles: So, what are the main features?
 - Can be set as launcher, with access to a basic but functional app drawer.
