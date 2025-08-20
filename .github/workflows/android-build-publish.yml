@@ -39,11 +39,12 @@ jobs:
       - name: Check if tag version exists
         id: check-tag
         run: |
-            if git ls-remote --tags origin "v${{ steps.get-version.outputs.version }}" > /dev/null; then
-              echo "exists=true" >> $GITHUB_OUTPUT
-            else
-              echo "exists=false" >> $GITHUB_OUTPUT
-            fi
+          TAG_EXISTS=$(git ls-remote --tags origin "v${{ steps.get-version.outputs.version }}")
+          if [ -n "$TAG_EXISTS" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
       
   build-android:
     runs-on: windows-latest
