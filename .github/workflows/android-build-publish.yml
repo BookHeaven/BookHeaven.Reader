@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
-      exists: ${{ steps.check-image.outputs.exists }}
+      exists: ${{ steps.check-tag.outputs.exists }}
     
     steps:
       - name: Checkout
@@ -37,7 +37,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           
       - name: Check if tag version exists
-        id: check_image
+        id: check-tag
         run: |
             if git ls-remote --tags origin "v${{ steps.get-version.outputs.version }}" > /dev/null; then
               echo "exists=true" >> $GITHUB_OUTPUT
@@ -49,6 +49,8 @@ jobs:
     runs-on: windows-latest
     needs: check-version
     if: needs.check-version.outputs.exists == 'false'
+    env:
+      VERSION: ${{ needs.check-version.outputs.version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -92,14 +94,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Cache npm modules
-      uses: actions/cache@v3
-      with:
-        path: BookHeaven/BookHeaven.Reader/node_modules
-        key: ${{ runner.os }}-npm-${{ hashFiles('BookHeaven/BookHeaven.Reader/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-
-
     - name: Install npm packages
       working-directory: .\BookHeaven\BookHeaven.Reader
       run: npm ci
@@ -133,13 +127,13 @@ jobs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             sha: context.sha,
-            ref: `refs/tags/v${{ steps.extract_version.outputs.version }}`
+            ref: `refs/tags/v${{ env.VERSION }}`
           })
         
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v${{ steps.extract_version.outputs.version }}
+        tag_name: v${{ env.VERSION }}
         generate_release_notes: true
         make_latest: true
         files: |
