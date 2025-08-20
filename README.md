@@ -1,11 +1,14 @@
 <p align="center">
   <img src="wwwroot/logo.svg" width="120px" alt="" />
 </p>
+
 <h1 align="center">BookHeaven Reader</h1>
 
 BookHeaven Reader is part of the BookHeaven "ecosystem", which aims to provide a very convenient way to manage and read your ebook library.</br>
 It connects to the Server to download whatever books you want to read, it also can be set as the home launcher since it includes a basic app drawer for extra convenience.
+
 ---
+
 ## :warning: Disclaimer
 - This app is only for Android devices and optimized for e-ink displays
 - You might need to update the WebView implementation of your device (pretty easy, more on the troubleshooting section below)
