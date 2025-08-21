@@ -2,15 +2,12 @@
 using Microsoft.Extensions.Logging;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
-using BookHeaven.Domain.Features.Authors;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
 using BookHeaven.Domain.Features.Fonts;
+using BookHeaven.Domain.Features.Profiles;
 using BookHeaven.Domain.Features.ProfileSettingss;
-using BookHeaven.Domain.Features.Seriess;
 using BookHeaven.Domain.Shared;
-using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
 using MediatR;
 using Font = BookHeaven.Domain.Entities.Font;
 
@@ -27,6 +24,7 @@ namespace BookHeaven.Reader.Services
 		Task<Result> UpdateBookProgress(BookProgress progress);
 		Task<Result> UpdateProgressByProfile(Guid profileId);
 		Task<Result> UpdateProfileSettings(ProfileSettings settings);
+		Task<Result> UpdateLocalProfiles();
 		Task<Result> DownloadFonts();
 	}
 	public class ServerService(
@@ -258,6 +256,27 @@ namespace BookHeaven.Reader.Services
 			}
 		}
 
+		public async Task<Result> UpdateLocalProfiles()
+		{
+			var getRemoteProfiles = await GetAllProfiles();
+			if (getRemoteProfiles.IsFailure) return Result.Failure(getRemoteProfiles.Error);
+			
+			var getLocalProfiles = await sender.Send(new GetAllProfiles.Query());
+			if (getLocalProfiles.IsFailure) return Result.Failure(getLocalProfiles.Error);
+			foreach (var profile in getLocalProfiles.Value)
+			{
+				var remoteProfile = getRemoteProfiles.Value.FirstOrDefault(p => p.ProfileId == profile.ProfileId);
+				if (remoteProfile is null || remoteProfile.Name == profile.Name) continue;
+                    
+				await sender.Send(new UpdateProfileName.Command(profile.ProfileId, remoteProfile.Name));
+				if (profile.ProfileId == appStateService.ProfileId)
+				{
+					appStateService.OnProfileNameChanged?.Invoke(remoteProfile.Name);
+				}
+			}
+			return Result.Success();
+		}
+
 		public async Task<Result> DownloadFonts()
 		{
 			var endpoint = "api/fonts";
@@ -273,10 +292,10 @@ namespace BookHeaven.Reader.Services
 				foreach (var font in response)
 				{
 					var fontPath = font.FilePath();
-					var folderPath = font.FolderPath();
-					if (!Directory.Exists(folderPath))
+					var folder = Path.GetDirectoryName(fontPath);
+					if (!Directory.Exists(folder))
 					{
-						Directory.CreateDirectory(folderPath);
+						Directory.CreateDirectory(folder!);
 					}
 					
 					var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + font.Url());
