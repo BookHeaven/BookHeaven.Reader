@@ -86,3 +86,7 @@ Steps might vary for your device, but overall this is what you need to do:
     <td></td>
   </tr>
 </table>
+
+## :heart: Credits
+- Blazor.ContextMenu (https://github.com/stavroskasidis/BlazorContextMenu)
+- BlazorPanzoom (https://github.com/shaigem/BlazorPanzoom)
