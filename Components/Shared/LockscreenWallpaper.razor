@@ -21,15 +21,12 @@
 	
 	protected override void OnInitialized()
 	{
-		LifeCycleService.Paused += Show;
-		LifeCycleService.Resumed += Hide;
+		LifeCycleService.ScreenOff += Show;
+		LifeCycleService.ScreenOn += Hide;
 	}
 
 	private void Show()
 	{
-		#if WINDOWS
-		return;
-		#endif
 		_screenLocked = true;
 		InvokeAsync(StateHasChanged);
 	}
@@ -41,7 +38,7 @@
 
 	public void Dispose()
 	{
-		LifeCycleService.Paused -= Show;
-		LifeCycleService.Resumed -= Hide;
+		LifeCycleService.ScreenOff -= Show;
+		LifeCycleService.ScreenOn -= Hide;
 	}
 }

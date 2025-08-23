@@ -6,4 +6,7 @@ public class LifeCycleService
 	public Action? Paused;
 	public Action? Stopped;
 	public Action? Destroyed;
+	
+	public Action? ScreenOn;
+	public Action? ScreenOff;
 }

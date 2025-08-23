@@ -22,6 +22,18 @@ public class AppStateService
         set => Set(nameof(ProfileId), value);
     }
     
+    public bool UseAsLockscreen
+    {
+        get => Get<bool>(nameof(UseAsLockscreen));
+        set  {
+#if ANDROID
+            if (value) ScreenForegroundService.Start(Android.App.Application.Context);
+            else ScreenForegroundService.Stop(Android.App.Application.Context);
+#endif
+            Set(nameof(UseAsLockscreen), value);
+        }
+    }
+    
     private static void Set<T>(string key, T value)
     {
         Preferences.Set(key, value!.ToString());
@@ -34,6 +46,7 @@ public class AppStateService
         return type switch
         {
             _ when type == typeof(Guid) => (T)(object)Guid.Parse(value?.ToString() ?? Guid.Empty.ToString()),
+            _ when type == typeof(bool) => (T)(object)bool.Parse(value?.ToString() ?? "false"),
             _ => (T?)value
         };
     }

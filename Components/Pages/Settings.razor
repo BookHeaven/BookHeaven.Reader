@@ -18,6 +18,12 @@
             Change this only if the new url points to the exact same server instance.
         </span>
     </div>
+    <div class="mb-3 flex flex-col">
+        <CheckBox Label="Use as lockscreen" @bind-Checked="AppStateService.UseAsLockscreen" />
+        <span class="p-3">
+            This will show a custom wallpaper when your device goes to sleep, but it will only work if you have set a transparent lockscreen in your OS settings.
+        </span>
+    </div>
 </main>
 
 @code{

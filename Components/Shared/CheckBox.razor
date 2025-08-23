@@ -1,0 +1,15 @@
+﻿<label class="flex gap-2 items-center">
+	<input type="checkbox" @bind="Checked" @bind:after="OnCheckedChanged" />
+	<span>@Label</span>
+</label>
+
+@code {
+	[Parameter] public bool Checked { get; set; }
+	[Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+	[Parameter] public string? Label { get; set; }
+
+	private async Task OnCheckedChanged()
+	{
+		await CheckedChanged.InvokeAsync(Checked);
+	}
+}

@@ -36,6 +36,12 @@ public partial class App : Application
 			_window.Destroying += (sender, args) => _lifeCycleService.Destroyed?.Invoke();
 		}
 		
+#if ANDROID
+			var appStateService = IPlatformApplication.Current!.Services.GetService<AppStateService>()!;
+			if(appStateService.UseAsLockscreen) ScreenForegroundService.Start(Android.App.Application.Context);
+#endif
+		
+		
 		return _window;
 	}
 
