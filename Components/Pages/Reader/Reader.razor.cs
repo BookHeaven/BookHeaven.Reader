@@ -96,6 +96,7 @@ public partial class Reader : IAsyncDisposable
                 return;
             }
             _book = getBook.Value;
+            AppStateService.CurrentScreenSaverCoverPath = _book.CoverPath();
             
             var getBookProgress = await bookProgressTask;
             if (getBookProgress.IsFailure)
@@ -347,6 +348,7 @@ public partial class Reader : IAsyncDisposable
     
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        AppStateService.CurrentScreenSaverCoverPath = null;
         EpubReader.Dispose();
         ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= OnChapterChanged;

@@ -2,6 +2,9 @@ namespace BookHeaven.Reader.Services;
 
 public class AppStateService
 {
+    public string? CurrentScreenSaverCoverPath { get; set; }
+    
+    
     public Action<string>? OnProfileNameChanged;
     
     public string? ServerUrl
@@ -22,15 +25,15 @@ public class AppStateService
         set => Set(nameof(ProfileId), value);
     }
     
-    public bool UseAsLockscreen
+    public bool EnableStandbyCoverWorkaround
     {
-        get => Get<bool>(nameof(UseAsLockscreen));
+        get => Get<bool>(nameof(EnableStandbyCoverWorkaround));
         set  {
-#if ANDROID
+/*#if ANDROID
             if (value) ScreenForegroundService.Start(Android.App.Application.Context);
             else ScreenForegroundService.Stop(Android.App.Application.Context);
-#endif
-            Set(nameof(UseAsLockscreen), value);
+#endif*/
+            Set(nameof(EnableStandbyCoverWorkaround), value);
         }
     }
     

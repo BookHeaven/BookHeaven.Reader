@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo {
+            width: 200px;
+            margin-inline: auto;
+        }
+        p {
+            position: absolute;
+            bottom: 64px;
+            font-size: 24px;
+            color: #4B5563;
+            text-align: center;
+            width: 100%;
+        }
+        .cover {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <img class="logo" decoding="async" src="file:///android_asset/wwwroot/logo.svg" alt="" />
+    <p>BookHeaven</p>
+    <img class="cover" />
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const cover = params.get("cover");
+        
+        const body = document.querySelector("body");
+        const coverImg = document.querySelector(".cover");
+        const logo = document.querySelector(".logo");
+        const text = document.querySelector("p");
+        
+        if (cover) {
+            coverImg.src = "file:///" + cover;
+            console.log(coverImg.src);
+            body.style.backgroundColor = "#000000";
+            logo.style.display = "none";
+            text.style.display = "none";
+        }
+        else {
+            coverImg.style.display = "none";
+        }
+    </script>
+</body>
+</html>
