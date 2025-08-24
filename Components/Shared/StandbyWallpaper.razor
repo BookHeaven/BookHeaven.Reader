@@ -1,9 +1,9 @@
 ﻿@implements IDisposable
 @if (_screenLocked)
 {
-	<div class="fixed z-[9000] inset-0 flex flex-col items-center justify-center bg-white">
+	<div class="fixed z-[9000] inset-0 flex flex-col items-center justify-center @(string.IsNullOrEmpty(ImageSrc) ? "bg-white" : "bg-black")">
 		@if(!string.IsNullOrEmpty(ImageSrc)) {
-			<img decoding="async" class="w-full" src="@ImageSrc" alt=""/>
+			<img decoding="async" class="w-full h-full object-contain" src="@ImageSrc" alt=""/>
 		}
 		else {
 			<img decoding="async" class="w-[200px] mx-auto" src="/logo.svg" alt=""/>
@@ -14,6 +14,7 @@
 
 @code {
 	[Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
+	[Inject] private AppStateService AppStateService { get; set; } = null!;
 	
 	[Parameter] public string? ImageSrc { get; set; }
 
@@ -21,24 +22,28 @@
 	
 	protected override void OnInitialized()
 	{
-		LifeCycleService.ScreenOff += Show;
-		LifeCycleService.ScreenOn += Hide;
+		LifeCycleService.Paused += Show;
+		LifeCycleService.Resumed += Hide;
 	}
 
 	private void Show()
 	{
+		if(!AppStateService.EnableStandbyCoverWorkaround) return;
 		_screenLocked = true;
 		InvokeAsync(StateHasChanged);
+		
 	}
+	
 	private void Hide()
 	{
+		if(!AppStateService.EnableStandbyCoverWorkaround) return;
 		_screenLocked = false;
 		InvokeAsync(StateHasChanged);
 	}
 
 	public void Dispose()
 	{
-		LifeCycleService.ScreenOff -= Show;
-		LifeCycleService.ScreenOn -= Hide;
+		LifeCycleService.Paused -= Show;
+		LifeCycleService.Resumed -= Hide;
 	}
 }
