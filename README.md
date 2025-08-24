@@ -5,28 +5,28 @@
 <h1 align="center">BookHeaven Reader</h1>
 
 BookHeaven Reader is part of the BookHeaven "ecosystem", which aims to provide a very convenient way to manage and read your ebook library.</br>
-It connects to the Server to download whatever books you want to read, it also can be set as the home launcher since it includes a basic app drawer for extra convenience.
+It's an Android app optimized for e-ink displays that connects to your BookHeaven Server instance to download and read your ebooks.
 
 ---
 
 ## :warning: Disclaimer
-- This app is only for Android devices and optimized for e-ink displays
-- You might need to update the WebView implementation of your device (pretty easy, more on the troubleshooting section below)
-- It won't work as standalone (it needs to connect to a Server instance to get the books)
-- Portrait mode only, at least for now
-- No dictionary, no notes
+- You might need to update the WebView implementation of your device for the UI to render properly (pretty easy, more on the troubleshooting section below)
+- It won't work as standalone, it needs to connect to a Server instance to get the books (not planned, but might happen eventually)
+- Single page layout only (again, not planned, but might add better support for landscape eventually)
+- No dictionary, no notes nor highlights
+- Supports epub files only
 
 > [!NOTE]
 > If you haven't setup the Server yet, [check out the repository](https://github.com/BookHeaven/BookHeaven.Server) to get started.
 
 ## :sparkles: So, what are the main features?
-- Can be set as launcher, with access to a basic but functional app drawer.
-- Easily connect to your Server to download books
-- Date (start and end), elapsed reading time tracking
-- Sync progress to the Server
-- Very customizable (font size, line height, page margins, paragraph spacing, indent, etc)
-- Allows to choose from a few navigation layouts variations
-- Page navigation should work with physical buttons as well (Only tested with Meebook M7)
+- :rocket: Can replace your launcher since it includes a basic but functional app drawer.
+- :framed_picture: Can also be set as screensaver (Daydream) to show the cover of the book you are reading when the device enters standby mode.
+- :cloud: Easily connect to your Server to download books, sync progress and backup your settings (no internet connection required for regular use).
+- :clock12: It will track your reading progress (date started, last read, % read, elapsed time, etc)
+- :book: Very customizable (font size, line height, page margins, paragraph spacing, indent, etc)
+- :hand: Provides a few tactile navigation layouts to choose from and physical buttons should work as well (Only tested with Meebook M7)
+- :boom: The images can be zoomed in and panned! :boom:
 
 ## :globe_with_meridians: Supported UI Languages
 - English
