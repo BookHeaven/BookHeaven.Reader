@@ -7,6 +7,7 @@ using Android.Net;
 using Android.Graphics.Drawables;
 using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Entities;
+using BookHeaven.Reader.Helpers;
 using AppInfo = BookHeaven.Reader.Entities.AppInfo;
 
 namespace BookHeaven.Reader.Services;
@@ -84,7 +85,6 @@ public class AppsService : IAppsService
                 if (app.ActivityInfo?.IsEnabled == false) return;
                 var packageInfo = packageManager.GetPackageInfo(app.ActivityInfo?.PackageName!, 0)!;
                 Drawable? iconDrawable = null;
-                // Intentar obtener el icono del launcher (pack por defecto del sistema)
                 if (launcherApps != null)
                 {
                     try
@@ -94,7 +94,6 @@ public class AppsService : IAppsService
                     }
                     catch
                     {
-                        // Si falla, usar el icono nativo
                         iconDrawable = app.LoadIcon(packageManager);
                     }
                 }
@@ -102,7 +101,7 @@ public class AppsService : IAppsService
                 {
                     iconDrawable = app.LoadIcon(packageManager);
                 }
-                var iconBase64 = Helpers.ConvertDrawableToBase64(iconDrawable!);
+                var iconBase64 = ImageHelpers.ConvertDrawableToBase64(iconDrawable!);
                 var appInfo = new AppInfo
                 {
                     Name = app.LoadLabel(packageManager),
@@ -128,7 +127,7 @@ public class AppsService : IAppsService
                                 var iconDrawableShortcut = launcherApps.GetShortcutIconDrawable(shortcut, 0);
                                 if (iconDrawableShortcut != null)
                                 {
-                                    shortcutIconBase64 = Helpers.ConvertDrawableToBase64(iconDrawableShortcut);
+                                    shortcutIconBase64 = ImageHelpers.ConvertDrawableToBase64(iconDrawableShortcut);
                                 }
                                 appInfo.Shortcuts.Add(new AppShortcut
                                 {

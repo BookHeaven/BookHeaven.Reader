@@ -1,8 +1,8 @@
 ﻿using Android.Graphics;
 using Android.Graphics.Drawables;
 using Bitmap = Android.Graphics.Bitmap;
-
-public static class Helpers
+namespace BookHeaven.Reader.Helpers;
+public static class ImageHelpers
 {
 	public static string ConvertDrawableToBase64(Drawable drawable)
 		{
