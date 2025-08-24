@@ -1,18 +1,15 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using BookHeaven.Reader.BroadcastReceivers;
 
 namespace BookHeaven.Reader.Services;
 
-[Service]
+// Unused, but could be useful in the future
+[Service(Name = "dev.ggarrido.bookheaven."+nameof(ScreenForegroundService),Exported = false, ForegroundServiceType = ForegroundService.TypeNone)]
 public class ScreenForegroundService : Service
 {
-    public static class Action
-    {
-        public const string Start = "START";
-        public const string Stop = "STOP";
-    }
     
     private const string ChannelId = "screen_service_channel";
     private const int NotificationId = 1001;
@@ -27,8 +24,8 @@ public class ScreenForegroundService : Service
         context.StartForegroundService(intent);
     }
     
-    public static void Start(Context context) => Execute(context, Action.Start);
-    public static void Stop(Context context) => Execute(context, Action.Stop);
+    public static void Start(Context context) => Execute(context, "START");
+    public static void Stop(Context context) => Execute(context, "STOP");
 
     public override IBinder? OnBind(Intent? intent) => null;
 
@@ -44,16 +41,16 @@ public class ScreenForegroundService : Service
 
     public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
     {
-        if (intent?.Action == Action.Start)
-        {
-            StartForeground(NotificationId, BuildNotification());
-        }
-        else if (intent?.Action == Action.Stop)
+        if (intent?.Action == "STOP")
         {
             StopForeground(StopForegroundFlags.Remove);
             StopSelf();
         }
-        
+        else
+        {
+            StartForeground(NotificationId, BuildNotification());
+        }
+
         return StartCommandResult.NotSticky;
     }
 

@@ -4,6 +4,7 @@ using BookHeaven.Reader.Services;
 
 namespace BookHeaven.Reader.BroadcastReceivers;
 
+// Unused, but could be useful in the future
 [BroadcastReceiver(Enabled = true, Exported = false)]
 [IntentFilter([Intent.ActionScreenOn, Intent.ActionScreenOff])]
 public class ScreenEventsReceiver : BroadcastReceiver
