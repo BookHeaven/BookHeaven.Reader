@@ -52,36 +52,34 @@ Steps might vary for your device, but overall this is what you need to do:
 5. Profit
 
 ## :framed_picture: Screenshots
-<p>The screenshots have been taken from a computer screen. Obviously, don't expect to see colors on your e-ink device, unless it's super fancy.</p>
-<table>
+<table style="filter: grayscale(100%);">
   <tr>
     <td>
-      <img src="screenshots/local.png" alt="" />
+      <img src="https://bookheaven-web.pages.dev/img/reader-img.png" alt="" />
     </td>
     <td>
-      <img src="screenshots/remote.png" alt="" />
+        <img src="https://bookheaven-web.pages.dev/img/reader-remote.png" alt="" />
     </td>
     <td>
-      <img src="screenshots/app_drawer.png" alt="" />
+      <img src="https://bookheaven-web.pages.dev/img/reader-book.png" alt="" />
     </td>
   </tr>
   <tr>
     <td>
-      <img src="screenshots/reader.png" alt="" />
+      <img src="https://bookheaven-web.pages.dev/img/reader-index.png" alt="" />
     </td>
     <td>
-      <img src="screenshots/overlay.png" alt="" />
+        <img src="https://bookheaven-web.pages.dev/img/reader-text-settings.png" alt="" />
     </td>
     <td>
-      <img src="screenshots/overlay_index.png" alt="" />
+        <img src="https://bookheaven-web.pages.dev/img/reader-page-settings.png" alt="" />
     </td>
   </tr>
   <tr>
     <td>
-      <img src="screenshots/overlay_text_settings.png" alt="" />
+      <img src="https://bookheaven-web.pages.dev/img/reader-apps.png" alt="" />
     </td>
     <td>
-      <img src="screenshots/overlay_page_settings.png" alt="" />
     </td>
     <td></td>
   </tr>
