@@ -17,7 +17,7 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 - Supports epub files only
 
 > [!NOTE]
-> If you haven't setup the Server yet, [check out the repository](https://github.com/BookHeaven/BookHeaven.Server) to get started.
+> If you haven't setup the Server yet, [check out this quick guide](https://bookheaven.ggarrido.dev/getting-started) to get started!
 
 ## :sparkles: So, what are the main features?
 - :rocket: Can replace your launcher since it includes a basic but functional app drawer.
