@@ -1,0 +1,29 @@
+﻿@using BookHeaven.Reader.Functions
+<div class="border-solid border-t-2 border-black bg-white p-5" @onclick:stopPropagation="true">
+	<CheckBox Label="Enable color temperature adjustment" @bind-Checked="AppStateService.EnableColorTemperatureAdjustment"/>
+	<p class="italic">This is only useful for non e-ink displays</p>
+	@if (AppStateService.EnableColorTemperatureAdjustment)
+	{
+		<div class="flex items-center justify-center my-3">
+			@foreach (var temp in TemperaturesInKelvin)
+			{
+				<span 
+					@onclick="() => { if(AppStateService.ColorTemperatureInKelvin != temp) AppStateService.ColorTemperatureInKelvin = temp; }"
+					class="size-12 @(temp == AppStateService.ColorTemperatureInKelvin ? "border border-black" : "")" 
+					style="background-color: @ReaderFunctions.KelvinToRgb(temp,1)"></span>
+			}
+		</div>
+		<RangeSlider 
+			Label="Opacity"
+			Min="0.1m"
+			Max="1"
+			Increment="0.1m"
+			@bind-Value="AppStateService.ColorTemperatureOpacity"/>
+	}
+</div>
+
+@code {
+	[Inject] private AppStateService AppStateService { get; set; } = null!;
+	
+	private int[] TemperaturesInKelvin { get; } = [2000, 2500, 3000, 4000, 5000, 6500, 8000, 10000];
+}

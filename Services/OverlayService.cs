@@ -11,6 +11,7 @@ public class OverlayService
         None,
         FontSettings,
         PageSettings,
+        TemperatureSettings,
     }
     public OverlayPanel CurrentOverlayPanel { get; set; } = OverlayPanel.None;
     

@@ -1,0 +1,21 @@
+﻿@using BookHeaven.Reader.Functions
+@implements IDisposable
+
+@if(!AppStateService.EnableColorTemperatureAdjustment) return;
+<div class="fixed z-[99999999] inset-0 pointer-events-none mix-blend-multiply" style="background-color: @ReaderFunctions.KelvinToRgb(AppStateService.ColorTemperatureInKelvin, (double)AppStateService.ColorTemperatureOpacity);"></div>
+
+@code {
+	[Inject] private AppStateService AppStateService { get; set; } = null!;
+	
+	protected override void OnInitialized()
+	{
+		AppStateService.OnTemperatureSettingsChanged += Refresh;
+	}
+	
+	private void Refresh() => InvokeAsync(StateHasChanged);
+
+	public void Dispose()
+	{
+		AppStateService.OnTemperatureSettingsChanged -= Refresh;
+	}
+}

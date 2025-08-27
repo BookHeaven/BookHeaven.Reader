@@ -7,6 +7,8 @@ public class AppStateService
     
     public Action<string>? OnProfileNameChanged;
     
+    public Action? OnTemperatureSettingsChanged;
+    
     public string? ServerUrl
     {
         get => Get<string>(nameof(ServerUrl));
@@ -37,6 +39,37 @@ public class AppStateService
         }
     }
     
+    public bool EnableColorTemperatureAdjustment
+    {
+        get => Get<bool>(nameof(EnableColorTemperatureAdjustment));
+        set
+        {
+            Set(nameof(EnableColorTemperatureAdjustment), value);
+            OnTemperatureSettingsChanged?.Invoke();
+        }
+    }
+
+    public int ColorTemperatureInKelvin
+    {
+        get => Get<int?>(nameof(ColorTemperatureInKelvin)) ?? 5000;
+        set
+        {
+            Set(nameof(ColorTemperatureInKelvin), value);
+            OnTemperatureSettingsChanged?.Invoke();
+        }
+    }
+
+    public decimal ColorTemperatureOpacity
+    {
+        get => Get<decimal?>(nameof(ColorTemperatureOpacity)) ?? 0.1m;
+        set
+        {
+            Set(nameof(ColorTemperatureOpacity), value);
+            OnTemperatureSettingsChanged?.Invoke();
+        }
+    }
+
+
     private static void Set<T>(string key, T value)
     {
         Preferences.Set(key, value!.ToString());

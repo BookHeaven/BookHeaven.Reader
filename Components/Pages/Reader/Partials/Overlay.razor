@@ -21,6 +21,10 @@
         {
             <PageSettings/>
         }
+        @if (OverlayService.CurrentOverlayPanel == OverlayService.OverlayPanel.TemperatureSettings)
+        {
+            <ColorTemperatureSettings/>
+        }
         <div class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
             <div class="flex items-center gap-3 px-2">
                 <Button OnClick="@ReaderService.PreviousChapter">
@@ -36,6 +40,9 @@
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-list"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg>
                 </Button>
                 <span class="flex-1">@ChapterTitle</span>
+                <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.TemperatureSettings))">
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-contrast"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 3.34a10 10 0 1 1 -15 8.66l.005 -.324a10 10 0 0 1 14.995 -8.336m-9 1.732a8 8 0 0 0 4.001 14.928l-.001 -16a8 8 0 0 0 -4 1.072" /></svg>
+                </Button>
                 <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.FontSettings))">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-text-size"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7v-2h13v2" /><path d="M10 5v14" /><path d="M12 19h-4" /><path d="M15 13v-1h6v1" /><path d="M18 12v7" /><path d="M17 19h2" /></svg>
                 </Button>
