@@ -33,7 +33,7 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 - Spanish
 
 ## :hammer_and_wrench: Troubleshooting
-### The UI looks weird, what's going on?
+### Updating the Webview
 The app is web based and it uses technologies that might bee too modern for the included WebView implementation of your Android device.
 Luckily, it's very likely that you'll be able to replace it with an updated one from the Play Store.
 Steps might vary for your device, but overall this is what you need to do:
