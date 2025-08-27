@@ -44,13 +44,16 @@ public class AppStateService
 
     private static T? Get<T>(string key)
     {
-        object? value = Preferences.Get(key, null);
+        var value = Preferences.Get(key, null);
+        if(value == null) return default;
         var type = typeof(T);
-        return type switch
+        
+        var converter = System.ComponentModel.TypeDescriptor.GetConverter(type);
+        if (converter.CanConvertFrom(typeof(string)))
         {
-            _ when type == typeof(Guid) => (T)(object)Guid.Parse(value?.ToString() ?? Guid.Empty.ToString()),
-            _ when type == typeof(bool) => (T)(object)bool.Parse(value?.ToString() ?? "false"),
-            _ => (T?)value
-        };
+            return (T?)converter.ConvertFromString(value);
+        }
+        
+        return default;
     }
 }
