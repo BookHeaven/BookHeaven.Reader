@@ -1,7 +1,7 @@
 ﻿@implements IDisposable
-<div @ref="_containerRef" class="w-full flex items-center justify-center">
-    <span @ref="_textRef">@DisplayText</span>
-    <span @ref="_pageRef" class="ms-1">(@(ReaderService.CurrentPage + 1) / @(ReaderService.TotalPages + 1))</span>
+<div @ref="_containerRef" class="flex-1 flex items-center justify-center mx-2">
+    <span @ref="_textRef" class="text-nowrap">@DisplayText</span>
+    <span @ref="_pageRef" class="ms-1 text-nowrap">(@(ReaderService.CurrentPage + 1) / @(ReaderService.TotalPages + 1))</span>
 </div>
 
 @code {
@@ -17,6 +17,7 @@
     private string DisplayText { get; set; } = string.Empty;
     
     private string _currentTitle = string.Empty;
+    private (double containerWidth, double paginationWith, double availableWith) _currentDimensions;
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -35,12 +36,13 @@
         if (_module is null) return;
         try
         {
-            if(_currentTitle == Title) return;
-            _currentTitle = Title;
-
             var containerWidth = await _module.InvokeAsync<double>("getElementWidth", _containerRef);
             var paginationWidth = await _module.InvokeAsync<double>("getElementWidth", _pageRef);
             var availableWidth = containerWidth - paginationWidth - 4; // 4px spacing fallback for .ms-1
+            
+            if((containerWidth, paginationWidth, availableWidth) == _currentDimensions && _currentTitle == Title) return;
+            _currentTitle = Title;
+            _currentDimensions = (containerWidth, paginationWidth, availableWidth);
 
             var fullTextWidth = await _module.InvokeAsync<double>("measureTextWidth", _textRef, Title);
 
