@@ -38,6 +38,10 @@
                     if(_state == PageState.Error)
                     {
                         <p class="mt-2 font-bold">@Translations.CONNECTION_FAILED</p>
+                        if(!string.IsNullOrWhiteSpace(_errorMessage))
+                        {
+                            <p class="text-sm italic">@_errorMessage</p>
+                        }
                     }
                     break;
                 case PageState.Connecting:
@@ -89,6 +93,7 @@
         Success
     }
     private PageState _state = PageState.Discovery;
+    private string _errorMessage = string.Empty;
 
     private List<Profile> _profiles = [];
     
@@ -130,9 +135,11 @@
         _state = PageState.Connecting;
         StateHasChanged();
         await Task.Delay(FakeDelay);
-        if ((await ServerService.CanConnect()).IsFailure)
+        var canConnect = await ServerService.CanConnect();
+        if (canConnect.IsFailure)
         {
             _state = PageState.Error;
+            _errorMessage = canConnect.Error.Description;
             return;
         }
         _state = PageState.Success;

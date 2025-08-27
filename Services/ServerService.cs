@@ -38,7 +38,7 @@ namespace BookHeaven.Reader.Services
 		{
 			if(Connectivity.Current.NetworkAccess == NetworkAccess.None)
 			{
-				return Result.Failure(new Error("No internet connection"));
+				return new Error("No internet connection");
 			}
 			
 			var url = appStateService.ServerUrl;
@@ -61,12 +61,12 @@ namespace BookHeaven.Reader.Services
 				var response = await _httpClient.GetAsync("api/ping");
 				return response.IsSuccessStatusCode 
 					? Result.Success()
-					: Result.Failure(new Error("Failed to connect to server"));;
+					: new Error("Server did not respond to ping: " + response.ReasonPhrase);;
 			}
 			catch (Exception ex)
 			{
-				logger.LogError(ex, "Failed to connect to server");
-				return new Error("Failed to connect to server");
+				logger.LogError(ex, "Server couldn't be reached");
+				return new Error(ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : ""));
 			}
 		}
 
