@@ -61,7 +61,7 @@ public class AppStateService
 
     public decimal ColorTemperatureOpacity
     {
-        get => Get<decimal?>(nameof(ColorTemperatureOpacity)) ?? 0.1m;
+        get => Get<decimal?>(nameof(ColorTemperatureOpacity)) ?? 1;
         set
         {
             Set(nameof(ColorTemperatureOpacity), value);
