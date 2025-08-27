@@ -1,7 +1,7 @@
 ﻿<div class="settings border-solid border-t-2 border-black bg-white" @onclick:stopPropagation="true">
     <NavigationSettings/>
-    <TextSetting Label="@Translations.VERTICAL_MARGIN" Min="0" Max="10" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.VerticalMargin" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.SelectedLayout))" />
-    <TextSetting Label="@Translations.HORIZONTAL_MARGIN" Min="0" Max="10" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.HorizontalMargin" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.HorizontalMargin))"  />
+    <RangeSlider Label="@Translations.VERTICAL_MARGIN" Min="0" Max="10" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.VerticalMargin" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.SelectedLayout))" />
+    <RangeSlider Label="@Translations.HORIZONTAL_MARGIN" Min="0" Max="10" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.HorizontalMargin" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.HorizontalMargin))"  />
 </div>
 
 @code {
