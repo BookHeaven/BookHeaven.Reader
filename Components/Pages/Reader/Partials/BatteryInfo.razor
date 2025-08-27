@@ -1,4 +1,6 @@
-﻿<div class="flex items-center">
+﻿@if (_batteryState is BatteryState.Unknown or BatteryState.NotPresent) return;
+
+<div class="flex items-center">
     @switch (_batteryState)
     {
         case BatteryState.Charging:
