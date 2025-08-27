@@ -19,7 +19,7 @@
 
     private long _timeStamp;
     
-    private List<NavigationButton> Buttons => ReaderNavigation.GetLayoutForType((NavigationLayoutType)ProfileSettingsService.ProfileSettings.SelectedLayout);
+    private List<NavigationButton> Buttons => ReaderFunctions.GetLayoutForType((NavigationLayoutType)ProfileSettingsService.ProfileSettings.SelectedLayout);
 
     private bool _cancelNavigation;
     

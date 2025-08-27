@@ -4,7 +4,7 @@
     {
         <div class="grid grid-cols-3 grid-rows-3 w-[100px] h-[100px] hover:cursor-pointer @((ProfileSettingsService.ProfileSettings.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
             @{
-                var buttons = ReaderNavigation.GetLayoutForType(type);
+                var buttons = ReaderFunctions.GetLayoutForType(type);
             }
 
             @for(var i = 0; i < buttons.Count; i++)
