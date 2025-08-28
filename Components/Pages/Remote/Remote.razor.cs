@@ -1,6 +1,5 @@
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Features.Books;
-using BookHeaven.Domain.Features.Profiles;
 using BookHeaven.Reader.Services;
 using MediatR;
 using Microsoft.AspNetCore.Components;
@@ -18,6 +17,7 @@ public partial class Remote
 
     private List<Book>? _books;
     private bool _canConnect = true;
+    private string _connectError = string.Empty;
     private List<Guid>? _deviceBooks = [];
     private List<Book>? _filteredBooks;
     private List<Book> CurrentPageBooks => _filteredBooks?.Skip((_currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList() ?? [];
@@ -40,8 +40,14 @@ public partial class Remote
 
     private async Task GetData()
     {
-        _canConnect = (await ServerService.CanConnect()).IsSuccess;
-        if (!_canConnect) return;
+        _connectError = string.Empty;
+        var canConnect = await ServerService.CanConnect();
+        if (canConnect.IsFailure)
+        {
+            _canConnect = false;
+            _connectError = canConnect.Error.Description;
+            return;
+        }
 
         _ = ServerService.UpdateLocalProfiles();
         _ = ServerService.DownloadFonts();
@@ -50,6 +56,7 @@ public partial class Remote
         if (getBooks.IsFailure)
         {
             _canConnect = false;
+            _connectError = getBooks.Error.Description;
             return;
         }
         _books = getBooks.Value.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
