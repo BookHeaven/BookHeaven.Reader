@@ -1,8 +1,10 @@
 ﻿<div class="absolute -translate-y-1/2 top-1/2 inset-x-0 text-center flex flex-col px-5">
     <p class="text-xl">@(Content ?? "Loading...")</p>
-    @if (ExtraInfo != null)
+    @if (Description != null)
     {
-        <p class="mt-2">@ExtraInfo</p>
+        <div class="mt-2">
+            @Description
+        </div>
     }
     @if (ButtonContent != null)
     {
@@ -13,7 +15,7 @@
 
 @code {
     [Parameter] public string? Content { get; set; } = null;
-    [Parameter] public string? ExtraInfo { get; set; } = null;
+    [Parameter] public RenderFragment? Description { get; set; }
     [Parameter] public RenderFragment? ButtonContent { get; set; }
 
     [Parameter] public EventCallback OnButtonClick { get; set; }
