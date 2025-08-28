@@ -28,6 +28,9 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 - :hand: Provides a few tactile navigation layouts to choose from and physical buttons should work as well (Only tested with Meebook M7)
 - :boom: The images can be zoomed in and panned! :boom:
 
+## :exclamation: Requirements
+- Android 10+
+
 ## :globe_with_meridians: Supported UI Languages
 - English
 - Spanish
