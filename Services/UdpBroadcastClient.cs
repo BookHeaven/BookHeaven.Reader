@@ -92,7 +92,7 @@ public class UdpBroadcastClient
                 return serverUrl;
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return new Error("Unknown error while connecting the to server");
         }
