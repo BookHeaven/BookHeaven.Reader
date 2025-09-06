@@ -61,7 +61,7 @@ namespace BookHeaven.Reader.Services
 				var response = await _httpClient.GetAsync("api/ping");
 				return response.IsSuccessStatusCode 
 					? Result.Success()
-					: new Error("Server did not respond to ping: " + response.ReasonPhrase);;
+					: new Error("Server did not respond to ping: " + response.ReasonPhrase);
 			}
 			catch (Exception ex)
 			{
