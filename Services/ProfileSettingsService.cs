@@ -4,7 +4,7 @@ using MediatR;
 
 namespace BookHeaven.Reader.Services;
 
-public class ProfileSettingsService : IDisposable
+public partial class ProfileSettingsService : IDisposable
 {
     private readonly AppStateService _appStateService;
     private readonly ISender _sender;
