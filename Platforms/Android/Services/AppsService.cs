@@ -39,6 +39,7 @@ public class AppsService : IAppsService
     {
         var launcherApps = (LauncherApps)Android.App.Application.Context.GetSystemService(Context.LauncherAppsService)!;
         var userHandle = Process.MyUserHandle();
+        if(userHandle is null) return;
         launcherApps.StartShortcut(packageName, shortcutId, null, null, userHandle);
     }
 
