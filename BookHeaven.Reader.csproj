@@ -93,7 +93,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(UseNuget)' == 'true'">
     <PackageReference Include="BookHeaven.Domain" Version="1.0.19" />
-    <PackageReference Include="BookHeaven.EpubManager" Version="1.0.13" />
+    <PackageReference Include="BookHeaven.EpubManager" Version="1.0.14" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\Localization\Translations.resx">
