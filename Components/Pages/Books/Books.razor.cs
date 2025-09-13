@@ -1,3 +1,4 @@
+using BookHeaven.Domain.Abstractions;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Enums;
 using BookHeaven.Domain.Extensions;
@@ -13,6 +14,7 @@ namespace BookHeaven.Reader.Components.Pages.Books;
 
 public partial class Books
 {
+    [Inject] private IAlertService AlertService { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private BookManager BookManager { get; set; } = null!;
@@ -43,5 +45,22 @@ public partial class Books
         }
         _initialized = true;
         StateHasChanged();
+    }
+
+    private async Task DeleteBook(Book book)
+    {
+        var result = await AlertService.ShowConfirmationAsync("Delete book", $"Are you sure you want to delete this book?{Environment.NewLine}{Environment.NewLine}This will remove the book from your device along with any progress you have.{Environment.NewLine}It will not be removed from your server.");
+        if (!result) return;
+        try
+        {
+            await BookManager.DeleteBookAsync(book);
+        }
+        catch (Exception ex)
+        {
+            await AlertService.ShowAlertAsync("Error deleting book", ex.Message);
+            return;
+        }
+        
+        await AlertService.ShowToastAsync(Domain.Localization.Translations.BOOK_DELETED);
     }
 }
