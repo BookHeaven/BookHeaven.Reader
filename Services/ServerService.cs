@@ -141,20 +141,25 @@ namespace BookHeaven.Reader.Services
 		{
 			try
 			{
+				var coverUrl = new Uri(_httpClient.BaseAddress!,book.CoverUrl());
+				var epubUrl = new Uri(_httpClient.BaseAddress!,book.EpubUrl());
+
+				Result saveBook;
 				var getBook = await sender.Send(new GetBook.Query(book.BookId));
 				if (getBook.IsSuccess)
 				{
 					//If the book is already downloaded, we remove the local cache
 					Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
-					await sender.Send(new UpdateBook.Command(book));
+					saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
 				}
 				else
 				{
-					await sender.Send(new AddBook.Command(book));
+					saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
 				}
-
-				await DownloadFile(book.EpubUrl(), book.BookId);
-				await DownloadFile(book.CoverUrl(), book.BookId);
+				if (saveBook.IsFailure)
+				{
+					return new Error("Failed to download book from server");
+				}
 				
 				var getProgress = await GetBookProgress(profileId, book.BookId);
 				if (getProgress.IsFailure)
@@ -204,16 +209,6 @@ namespace BookHeaven.Reader.Services
 				logger.LogError(ex, "Failed to update book progress from server");
 				return new Error("Failed to update book progress from server");
 			}
-		}
-
-
-		private async Task DownloadFile(string url, Guid id)
-		{
-			var extension = url.Split('.').Last();
-			var path = extension == "epub" ? MauiProgram.BooksPath : MauiProgram.CoversPath;
-
-			var fileBytes = await _httpClient.GetByteArrayAsync(url[1..]);
-			await File.WriteAllBytesAsync(Path.Combine(path, $"{id}.{extension}"), fileBytes);
 		}
 
 		public async Task<Result> UpdateProgressByProfile(Guid profileId)
