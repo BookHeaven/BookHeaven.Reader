@@ -26,9 +26,14 @@ public partial class RemoteBook
     {
         Downloading = true;
         StateHasChanged();
-        await ServerService.DownloadBook(book, AppStateService.ProfileId);
+        var download = await ServerService.DownloadBook(book, AppStateService.ProfileId);
         Downloading = false;
         StateHasChanged();
+        if (download.IsFailure)
+        {
+            await Toast.Make(download.Error.Description).Show();
+            return;
+        }
         await Toast.Make(Translations.DOWNLOAD_SUCCESS).Show();
         await OnBookDownloaded.InvokeAsync();
     }
