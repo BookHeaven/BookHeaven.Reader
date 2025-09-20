@@ -29,6 +29,16 @@ public static class ReaderFunctions
                 buttons.AddRange([NavigationButton.Previous, NavigationButton.Overlay, NavigationButton.Next]);
                 buttons.AddRange([NavigationButton.Previous, NavigationButton.Next, NavigationButton.Next]);
                 break;
+            case NavigationLayoutType.Type5:
+                buttons = [NavigationButton.None, NavigationButton.Overlay, NavigationButton.None];
+                buttons.AddRange([NavigationButton.None, NavigationButton.Overlay, NavigationButton.None]);
+                buttons.AddRange([NavigationButton.None, NavigationButton.Overlay, NavigationButton.None]);
+                break;
+            case NavigationLayoutType.Type6:
+                buttons = [NavigationButton.None, NavigationButton.None, NavigationButton.None];
+                buttons.AddRange([NavigationButton.None, NavigationButton.None, NavigationButton.None]);
+                buttons.AddRange([NavigationButton.None, NavigationButton.Overlay, NavigationButton.None]);
+                break;
         }
 
         return buttons;

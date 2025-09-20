@@ -46,9 +46,10 @@
     {
         if (!_cancelNavigation)
         {
-            //button == NavigationButton.Next ? ReaderService.NextPage() : ReaderService.PreviousPage();
             switch (button)
             {
+                case NavigationButton.None:
+                    break;
                 case NavigationButton.Next:
                     ReaderService.NextPage();
                     break;

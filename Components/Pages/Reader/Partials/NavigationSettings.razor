@@ -1,18 +1,21 @@
 @using BookHeaven.Reader.Functions
-<div class="col-span-2 flex justify-center gap-4 p-3">
+<div class="col-span-2 flex justify-center flex-wrap gap-4 p-3">
     @foreach (NavigationLayoutType type in Enum.GetValues(typeof(NavigationLayoutType)))
     {
-        <div class="grid grid-cols-3 grid-rows-3 w-[100px] h-[100px] hover:cursor-pointer @((ProfileSettingsService.ProfileSettings.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
+        <div class="grid grid-cols-3 grid-rows-3 size-[100px] hover:cursor-pointer @((ProfileSettingsService.ProfileSettings.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
             @{
                 var buttons = ReaderFunctions.GetLayoutForType(type);
             }
 
             @for(var i = 0; i < buttons.Count; i++)
             {
-                var showIcon = i is 3 or 4 or 5;
+                var showIcon = i is 3 or 4 or 5 || buttons.Count(b => b == buttons[i]) == 1;
                 var color = "";
                 switch (buttons[i])
                 {
+                    case NavigationButton.None:
+                        color = "bg-neutral-700";
+                        break;
                     case NavigationButton.Next:
                         color = "bg-neutral-300";
                         break;

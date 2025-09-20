@@ -4,7 +4,8 @@ public enum NavigationButton
 {
 	Previous,
 	Next,
-	Overlay
+	Overlay,
+	None
 }
 
 public enum NavigationLayoutType
@@ -12,5 +13,7 @@ public enum NavigationLayoutType
 	Type1,
 	Type2,
 	Type3,
-	Type4
+	Type4,
+	Type5,
+	Type6
 }
