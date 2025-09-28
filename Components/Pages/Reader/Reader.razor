@@ -59,13 +59,29 @@
 		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",:scope > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",:scope > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",:scope > .chapter.next .{Next.ParagraphClassName}" : "")}") {
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
-		
-		@_epubBook?.Content.CustomCss
+
+		:scope sup {
+			font-size: 0.6em;
+			line-height: normal;
+			font-weight: bold;
+		}
+
+		:scope .drop-cap {
+			orphans: 2;
+			&::first-letter {
+				initial-letter: 2;
+				margin-inline-end: 0.3em;
+			}
+
+			& + p {
+				clear: both;
+			}
+		}
 	}
 	@@scope(#viewer .current) {
 		@if (_styles.Count > 0)
 		{
-			foreach (var style in _styles.Where(style => Current?.Styles.Any(s => s.Contains(style.Name)) == true))
+			foreach (var style in _styles.Where(style => Current?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
@@ -74,7 +90,7 @@
 	@@scope(#viewer .prev) {
 		@if (_styles.Count > 0)
 		{
-			foreach (var style in _styles.Where(style => Previous?.Styles.Any(s => s.Contains(style.Name)) == true))
+			foreach (var style in _styles.Where(style => Previous?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
@@ -83,7 +99,7 @@
 	@@scope(#viewer .next) {
 		@if (_styles.Count > 0)
 		{
-			foreach (var style in _styles.Where(style => Next?.Styles.Any(s => s.Contains(style.Name)) == true))
+			foreach (var style in _styles.Where(style => Next?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
@@ -108,8 +124,8 @@
 	ChapterTitle="@ChapterTitle"/>
 
 <TableOfContents
-	Chapters="@_epubBook?.Content.TableOfContents"
-	CurrentChapterId="@Current?.Id"/>
+	Chapters="@_ebook?.Content.TableOfContents"
+	CurrentChapterId="@Current?.Identifier"/>
 
 
 <div class="flex h-screen flex-col">
@@ -117,19 +133,19 @@
 		<div class="chapter current">
 			@if (Current?.IsContentProcessed == true)
 			{
-				@((MarkupString)Current.TextContent)
+				@((MarkupString)Current.Content)
 			}
 		</div>
 		<div class="chapter prev invisible">
 			@if (Previous?.IsContentProcessed == true)
 			{
-				@((MarkupString)Previous.TextContent)
+				@((MarkupString)Previous.Content)
 			}
 		</div>
 		<div class="chapter next invisible">
 			@if (Next?.IsContentProcessed == true)
 			{
-				@((MarkupString)Next.TextContent)
+				@((MarkupString)Next.Content)
 			}
 		</div>
 	</div>

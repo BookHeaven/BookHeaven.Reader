@@ -1,4 +1,4 @@
-﻿@using BookHeaven.EpubManager.Epub.Entities
+﻿@using BookHeaven.EpubManager.Entities
 @implements IDisposable
 @if (!OverlayService.IsTocVisible)
 {   
@@ -9,7 +9,7 @@
         <div class="ms-2 text-center font-bold">@Translations.INDEX</div>
         @foreach (var chapter in Chapters)
         {
-            <TableOfContentsEntry EpubChapter="@chapter" CurrentChapterId="@CurrentChapterId" />
+            <TableOfContentsEntry Entry="@chapter" CurrentChapterId="@CurrentChapterId" />
         }
     </div>
 </div>
@@ -17,7 +17,7 @@
 @code {
     [Inject] OverlayService OverlayService { get; set; } = null!;
     
-    [Parameter] public IReadOnlyList<EpubChapter> Chapters { get; set; } = [];
+    [Parameter] public IReadOnlyList<TocEntry> Chapters { get; set; } = [];
     [Parameter] public string? CurrentChapterId { get; set; }
     //[Parameter] public EventCallback<string> OnChapterSelected { get; set; }
 

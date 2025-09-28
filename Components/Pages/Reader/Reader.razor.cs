@@ -1,16 +1,14 @@
-using System.ComponentModel;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
+using BookHeaven.EpubManager.Abstractions;
+using BookHeaven.EpubManager.Entities;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
-using BookHeaven.EpubManager.Epub.Entities;
-using BookHeaven.EpubManager.Epub.Services;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Style = BookHeaven.EpubManager.Epub.Entities.Style;
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
@@ -20,7 +18,7 @@ public partial class Reader : IAsyncDisposable
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
-    [Inject] private IEpubReader EpubReader { get; set; } = null!;
+    [Inject] private IEbookReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
     [Inject] private ProfileSettingsService ProfileSettingsService { get; set; } = null!;
@@ -37,22 +35,22 @@ public partial class Reader : IAsyncDisposable
     private Book? _book;
     private bool _bookLoading = true;
     private BookProgress _bookProgress = null!;
-    private EpubBook? _epubBook;
+    private Ebook? _ebook;
     private bool _refreshTotalPages;
-    private IReadOnlyList<Style> _styles = [];
+    private IReadOnlyList<Stylesheet> _styles = [];
 
     private int _totalWords;
 
     //private SpineItem? _current, _previous, _next;
-    private SpineItem? Current => _epubBook?.Content.Spine.ElementAtOrDefault(ReaderService.CurrentChapter);
-	private SpineItem? Next => _epubBook?.Content.Spine.ElementAtOrDefault(ReaderService.CurrentChapter + 1);
-	private SpineItem? Previous => _epubBook?.Content.Spine.ElementAtOrDefault(ReaderService.CurrentChapter - 1);
-    private EpubChapter? CurrentChapter => _epubBook?.Content.GetChapterFromTableOfContents(Current?.Id);
+    private Chapter? Current => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter);
+	private Chapter? Next => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter + 1);
+	private Chapter? Previous => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter - 1);
+    private TocEntry? CurrentChapter => _ebook?.Content.GetChapterFromTableOfContents(Current?.Identifier);
     private string ChapterTitle => CurrentChapter?.Title ?? Current?.Title ?? string.Empty;
     
-	private decimal Progress => _epubBook != null && Current != null && _totalWords != 0
-        ? (_epubBook.Content.GetWordCount(ReaderService.CurrentChapter) +
-           Current.GetWordsPerPage(ReaderService.TotalPages + 1) *
+	private decimal Progress => _ebook != null && Current != null && _totalWords != 0
+        ? (_ebook.Content.GetWordCount(ReaderService.CurrentChapter) +
+           Current.WordsPerPage(ReaderService.TotalPages + 1) *
            (ReaderService.CurrentPage + 1)) / (decimal)_totalWords * 100
         : 0;
 
@@ -170,14 +168,14 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        _epubBook = await EpubReader.ReadAllAsync(_book!.EpubPath());
-        if (_totalWords == 0) _totalWords = _epubBook.Content.GetWordCount();
+        _ebook = await EpubReader.ReadAllAsync(_book!.EpubPath());
+        if (_totalWords == 0) _totalWords = _ebook.Content.GetWordCount();
         if (_styles.Count == 0)
         {
-            _styles = _epubBook.Content.Styles;
+            _styles = _ebook.Content.Stylesheets;
             //_ = WriteToCache(CacheKey.Styles, _styles);
         }
-        ReaderService.TotalChapters = _epubBook.Content.Spine.Count;
+        ReaderService.TotalChapters = _ebook.Content.Chapters.Count;
 
         /*if(_current != null && _current.Id == Current?.Id)
         {
@@ -267,7 +265,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Current.TextContent = await EpubReader.ApplyHtmlProcessingAsync(Current.TextContent);
+                Current.Content = await EpubReader.ApplyHtmlProcessingAsync(Current.Content);
                 Current.IsContentProcessed = true;
             }));
         }
@@ -275,7 +273,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Previous.TextContent = await EpubReader.ApplyHtmlProcessingAsync(Previous.TextContent);
+                Previous.Content = await EpubReader.ApplyHtmlProcessingAsync(Previous.Content);
                 Previous.IsContentProcessed = true;
             }));
         }
@@ -283,7 +281,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Next.TextContent = await EpubReader.ApplyHtmlProcessingAsync(Next.TextContent);
+                Next.Content = await EpubReader.ApplyHtmlProcessingAsync(Next.Content);
                 Next.IsContentProcessed = true;
             }));
         }
@@ -297,7 +295,7 @@ public partial class Reader : IAsyncDisposable
 
     private void OnChapterSelected(string itemId)
     {
-        ReaderService.NavigateTo(0, _epubBook!.Content.Spine.FindIndex(x => x.Id == itemId));
+        ReaderService.NavigateTo(0, _ebook!.Content.Chapters.FindIndex(x => x.Identifier == itemId));
     }
 
     [JSInvokable("OnKeyDown")]
@@ -339,7 +337,7 @@ public partial class Reader : IAsyncDisposable
             _bookProgress.ElapsedTime += DateTimeOffset.UtcNow - _entryTime - _totalSuspendedTime;
             _bookProgress.LastRead = DateTimeOffset.Now;
             
-            if (ReaderService.CurrentChapter == _epubBook!.Content.Spine.Count - 1 &&
+            if (ReaderService.CurrentChapter == _ebook!.Content.Chapters.Count - 1 &&
                 ReaderService.CurrentPage == ReaderService.TotalPages) _bookProgress.EndDate = DateTimeOffset.Now;
         }
         

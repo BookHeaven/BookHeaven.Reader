@@ -1,10 +1,11 @@
 ﻿@using System.Diagnostics
+@using BookHeaven.EpubManager.Entities
 @using BookHeaven.EpubManager.Epub.Entities
 @implements IAsyncDisposable
-@if (EpubChapter.Title != null)
+@if (Entry.Title != null)
 {
-    <span id="@EpubChapter.ItemId" class="flex items-center scroll-mt-40 w-full">
-        @if (EpubChapter.Chapters.Count > 0)
+    <span id="@Entry.Id" class="flex items-center scroll-mt-40 w-full">
+        @if (Entry.Entries.Count > 0)
         {
             <Button OnClick="@ToggleCollapse">
                 @if (_collapsed)
@@ -17,19 +18,19 @@
                 }
             </Button>
         }
-        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => ReaderService.OnChapterSelected?.Invoke(EpubChapter.ItemId!))">@EpubChapter.Title</Button>
+        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => ReaderService.OnChapterSelected?.Invoke(Entry.Id!))">@Entry.Title</Button>
     </span>
 }
 
-@if (EpubChapter.Chapters.Count > 0)
+@if (Entry.Entries.Count > 0)
 {
-    if (!_collapsed || EpubChapter.Title == null)
+    if (!_collapsed || Entry.Title == null)
     {
         <ul class="ms-5 list-none">
-            @foreach (var chapter in EpubChapter.Chapters)
+            @foreach (var chapter in Entry.Entries)
             {
                 <li>
-                    <TableOfContentsEntry EpubChapter="chapter" CurrentChapterId="@CurrentChapterId" />
+                    <TableOfContentsEntry Entry="chapter" CurrentChapterId="@CurrentChapterId" />
                 </li>
             }
         </ul>
@@ -40,7 +41,7 @@
     [Inject] IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] ReaderService ReaderService { get; set; } = null!;
     
-    [Parameter] public EpubChapter EpubChapter { get; set; } = null!;
+    [Parameter] public TocEntry Entry { get; set; } = null!;
 
     [Parameter] public string? CurrentChapterId { get; set; }
 
@@ -55,17 +56,17 @@
 
     protected override void OnInitialized()
     {
-        if (EpubChapter.Chapters.Count > 0) _collapsed = !EpubChapter.ContainsChapter(CurrentChapterId!);
+        if (Entry.Entries.Count > 0) _collapsed = !Entry.ContainsEntry(CurrentChapterId!);
     }
     
     protected override void OnParametersSet()
     {
-        if (EpubChapter.ItemId != null) _isSelected = CurrentChapterId == EpubChapter.ItemId;
+        if (Entry.Id != null) _isSelected = CurrentChapterId == Entry.Id;
 
-        if (_isSelected && _lastSelectedChapterId != EpubChapter.ItemId)
+        if (_isSelected && _lastSelectedChapterId != Entry.Id)
         {
             _shouldScroll = true;
-            _lastSelectedChapterId = EpubChapter.ItemId;
+            _lastSelectedChapterId = Entry.Id;
         }
     }
     
