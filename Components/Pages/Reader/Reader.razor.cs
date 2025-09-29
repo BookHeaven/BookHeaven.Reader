@@ -90,7 +90,7 @@ public partial class Reader : IAsyncDisposable
             var getBook = await bookTask;
             if (getBook.IsFailure)
             {
-                await Toast.Make(getBook.Error.Description!).Show();
+                await Toast.Make(getBook.Error.Description).Show();
                 return;
             }
             _book = getBook.Value;
@@ -99,7 +99,7 @@ public partial class Reader : IAsyncDisposable
             var getBookProgress = await bookProgressTask;
             if (getBookProgress.IsFailure)
             {
-                await Toast.Make(getBookProgress.Error.Description!).Show();
+                await Toast.Make(getBookProgress.Error.Description).Show();
                 return;
             }
 
@@ -295,7 +295,7 @@ public partial class Reader : IAsyncDisposable
 
     private void OnChapterSelected(string itemId)
     {
-        ReaderService.NavigateTo(0, _ebook!.Content.Chapters.FindIndex(x => x.Identifier == itemId));
+        ReaderService.NavigateTo(0, _ebook!.Content.Chapters.Where(x => x.Identifier == itemId).Index().First().Index);
     }
 
     [JSInvokable("OnKeyDown")]
