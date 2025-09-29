@@ -142,7 +142,7 @@ namespace BookHeaven.Reader.Services
 			try
 			{
 				var coverUrl = new Uri(_httpClient.BaseAddress!,book.CoverUrl());
-				var epubUrl = new Uri(_httpClient.BaseAddress!,book.EpubUrl());
+				var epubUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
 
 				Result saveBook;
 				var getBook = await sender.Send(new GetBook.Query(book.BookId));
