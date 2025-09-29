@@ -154,7 +154,7 @@ namespace BookHeaven.Reader.Services
 				}
 				else
 				{
-					saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
+					saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), epubUrl.ToString(), false));
 				}
 				if (saveBook.IsFailure)
 				{
@@ -168,14 +168,13 @@ namespace BookHeaven.Reader.Services
 				}
 				
 				var progress = getProgress.Value;
-				var getCurrentProgress = await sender.Send(new GetBookProgressByProfile.Query(book.BookId, profileId));
+				var getLocalProgress = await sender.Send(new GetBookProgressByProfile.Query(book.BookId, profileId));
 
-				if (getCurrentProgress.IsFailure && progress != null)
+				if (getLocalProgress.IsFailure && progress != null)
 				{
 					await sender.Send(new AddBookProgress.Command(progress));
 				}
-				else if (getCurrentProgress.IsSuccess && progress != null &&
-				         progress.LastRead >= getCurrentProgress.Value.LastRead)
+				else if (getLocalProgress.IsSuccess && progress != null && (getLocalProgress.Value.LastRead is null || progress.LastRead >= getLocalProgress.Value.LastRead))
 				{
 					progress.BookWordCount = 0;
 					await sender.Send(new UpdateBookProgress.Command(progress));
