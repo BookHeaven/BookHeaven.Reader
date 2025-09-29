@@ -2,8 +2,10 @@ using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
+using BookHeaven.EpubManager;
 using BookHeaven.EpubManager.Abstractions;
 using BookHeaven.EpubManager.Entities;
+using BookHeaven.EpubManager.Enums;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
 using MediatR;
@@ -15,13 +17,16 @@ namespace BookHeaven.Reader.Components.Pages.Reader;
 public partial class Reader : IAsyncDisposable
 {
     [Parameter] public Guid Id { get; set; }
+    
+    [Inject] private EbookManagerProvider EbookManagerProvider { get; set; } = null!;
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
-    [Inject] private IEbookReader EpubReader { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private ReaderService ReaderService { get; set; } = null!;
     [Inject] private ProfileSettingsService ProfileSettingsService { get; set; } = null!;
+
+    private IEbookReader EbookReader { get; set; } = null!;
 
     private DateTimeOffset _entryTime;
     private DateTimeOffset _suspendStartTime;
@@ -168,7 +173,9 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        _ebook = await EpubReader.ReadAllAsync(_book!.EpubPath());
+        EbookReader = EbookManagerProvider.GetReader(Format.Epub) ?? throw new Exception("Reader not found for provided format");
+        
+        _ebook = await EbookReader.ReadAllAsync(_book!.EpubPath());
         if (_totalWords == 0) _totalWords = _ebook.Content.GetWordCount();
         if (_styles.Count == 0)
         {
@@ -265,7 +272,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Current.Content = await EpubReader.ApplyHtmlProcessingAsync(Current.Content);
+                Current.Content = await EbookReader.ApplyHtmlProcessingAsync(Current.Content);
                 Current.IsContentProcessed = true;
             }));
         }
@@ -273,7 +280,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Previous.Content = await EpubReader.ApplyHtmlProcessingAsync(Previous.Content);
+                Previous.Content = await EbookReader.ApplyHtmlProcessingAsync(Previous.Content);
                 Previous.IsContentProcessed = true;
             }));
         }
@@ -281,7 +288,7 @@ public partial class Reader : IAsyncDisposable
         {
             tasks.Add(Task.Run(async () =>
             {
-                Next.Content = await EpubReader.ApplyHtmlProcessingAsync(Next.Content);
+                Next.Content = await EbookReader.ApplyHtmlProcessingAsync(Next.Content);
                 Next.IsContentProcessed = true;
             }));
         }
@@ -347,7 +354,7 @@ public partial class Reader : IAsyncDisposable
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         AppStateService.CurrentScreenSaverCoverPath = null;
-        EpubReader.Dispose();
+        EbookReader.Dispose();
         ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= OnChapterChanged;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
