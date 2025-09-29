@@ -18,6 +18,7 @@ public partial class Books
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private BookManager BookManager { get; set; } = null!;
+    [Inject] private ISender Sender { get; set; } = null!;
 
     private Book? _selectedBook;
 
@@ -53,7 +54,7 @@ public partial class Books
         if (!result) return;
         try
         {
-            await BookManager.DeleteBookAsync(book);
+            await Sender.Send(new DeleteBook.Command(book.BookId));
         }
         catch (Exception ex)
         {
