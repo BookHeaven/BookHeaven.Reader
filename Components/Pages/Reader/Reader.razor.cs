@@ -173,7 +173,7 @@ public partial class Reader : IAsyncDisposable
 
     private async Task LoadEpubBook()
     {
-        EbookReader = EbookManagerProvider.GetReader(Format.Epub) ?? throw new Exception("Reader not found for provided format");
+        EbookReader = EbookManagerProvider.GetReader((Format)_book!.Format);
         
         _ebook = await EbookReader.ReadAllAsync(_book!.EbookPath());
         if (_totalWords == 0) _totalWords = _ebook.Content.GetWordCount();
