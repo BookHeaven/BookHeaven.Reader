@@ -128,7 +128,7 @@ public partial class Reader : IAsyncDisposable
                 await LoadEpubBook();
             else
                 _ = LoadEpubBook();*/
-            await LoadEpubBook();
+            await LoadEbook();
             _bookLoading = false;
             if (_bookProgress.ElapsedTime != TimeSpan.Zero)
             {
@@ -171,7 +171,7 @@ public partial class Reader : IAsyncDisposable
         await UpdateProgress();
     }
 
-    private async Task LoadEpubBook()
+    private async Task LoadEbook()
     {
         EbookReader = EbookManagerProvider.GetReader((Format)_book!.Format);
         
