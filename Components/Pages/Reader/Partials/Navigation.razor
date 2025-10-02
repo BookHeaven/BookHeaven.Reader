@@ -72,7 +72,7 @@
     private async Task PointerUp(MouseEventArgs e)
     {
         _cancelNavigation = false;
-        if (Stopwatch.GetElapsedTime(_timeStamp).Milliseconds > 400)
+        if (Stopwatch.GetElapsedTime(_timeStamp).TotalMilliseconds > 400)
         {
             _cancelNavigation = true;
             var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
