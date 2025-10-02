@@ -33,7 +33,7 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 
 ## :globe_with_meridians: Supported UI Languages
 - English
-- Spanish
+- Spanish (features might release without translation for a while, but I'll try to keep up)
 
 ## :hammer_and_wrench: Troubleshooting
 ### Updating the Webview
