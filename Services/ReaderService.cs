@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-using BookHeaven.Domain.Entities;
-using BookHeaven.Domain.Features.ProfileSettingss;
-using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace BookHeaven.Reader.Services;
 
