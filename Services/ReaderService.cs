@@ -32,7 +32,7 @@ public partial class ReaderService(ILogger<ReaderService> logger)
     {
         CurrentChapter = chapter;
         CurrentPage = page;
-        logger.LogInformation($"Navigated to chapter {chapter} and page {page}");
+        logger.LogDebug($"Navigated to chapter {chapter} and page {page}");
 
         
         OnChapterChanged?.Invoke();
