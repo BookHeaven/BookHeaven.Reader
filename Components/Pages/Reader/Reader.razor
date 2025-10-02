@@ -121,7 +121,8 @@
 <Overlay
 	Progress="@Progress"
 	BookTitle="@_book?.Title"
-	ChapterTitle="@ChapterTitle"/>
+	ChapterTitle="@ChapterTitle"
+	IsTocEmpty="_ebook?.Content.TableOfContents.Count == 0"/>
 
 <TableOfContents
 	Chapters="@_ebook?.Content.TableOfContents"

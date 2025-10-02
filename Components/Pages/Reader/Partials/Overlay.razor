@@ -26,19 +26,25 @@
             <ColorTemperatureSettings/>
         }
         <div class="border-solid border-t-2 w-full border-black bg-white" @onclick:stopPropagation="true">
+            @if (!IsTocEmpty)
+            {
+                <div class="flex items-center gap-3 px-2">
+                    <Button OnClick="@ReaderService.PreviousChapter">
+                        <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-7 icon icon-tabler icons-tabler-outline icon-tabler-chevrons-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 7l-5 5l5 5" /><path d="M17 7l-5 5l5 5" /></svg>
+                    </Button>
+                    <ProgressBar Value="@Progress"/>
+                    <Button OnClick="@ReaderService.NextChapter">
+                        <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-7 icon icon-tabler icons-tabler-outline icon-tabler-chevrons-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7l5 5l-5 5" /><path d="M13 7l5 5l-5 5" /></svg>
+                    </Button>
+                </div>
+            }
             <div class="flex items-center gap-3 px-2">
-                <Button OnClick="@ReaderService.PreviousChapter">
-                    <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-7 icon icon-tabler icons-tabler-outline icon-tabler-chevrons-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 7l-5 5l5 5" /><path d="M17 7l-5 5l5 5" /></svg>
-                </Button>
-                <ProgressBar Value="@Progress"/>
-                <Button OnClick="@ReaderService.NextChapter">
-                    <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="size-7 icon icon-tabler icons-tabler-outline icon-tabler-chevrons-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7l5 5l-5 5" /><path d="M13 7l5 5l-5 5" /></svg>
-                </Button>
-            </div>
-            <div class="flex items-center gap-3 px-2">
-                <Button OnClick="@OverlayService.ToggleToc">
-                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-list"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg>
-                </Button>
+                @if (!IsTocEmpty)
+                {
+                    <Button OnClick="@OverlayService.ToggleToc">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-list"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg>
+                    </Button>
+                }
                 <span class="flex-1">@ChapterTitle</span>
                 <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.TemperatureSettings))">
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-contrast"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 3.34a10 10 0 1 1 -15 8.66l.005 -.324a10 10 0 0 1 14.995 -8.336m-9 1.732a8 8 0 0 0 4.001 14.928l-.001 -16a8 8 0 0 0 -4 1.072" /></svg>
@@ -61,6 +67,7 @@
     [Parameter] public string? BookTitle { get; set; }
     [Parameter] public string? ChapterTitle { get; set; }
     [Parameter] public decimal Progress { get; set; }
+    [Parameter] public bool IsTocEmpty { get; set; }
 
     protected override void OnInitialized()
     {
