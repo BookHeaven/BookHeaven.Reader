@@ -48,13 +48,13 @@ public partial class Books
         StateHasChanged();
     }
 
-    private async Task DeleteBook(Book book)
+    private async Task DeleteBook(Guid bookId)
     {
         var result = await AlertService.ShowConfirmationAsync("Delete book", $"Are you sure you want to delete this book?{Environment.NewLine}{Environment.NewLine}This will remove the book from your device along with any progress you have.{Environment.NewLine}It will not be removed from your server.");
         if (!result) return;
         try
         {
-            await Sender.Send(new DeleteBook.Command(book.BookId));
+            await Sender.Send(new DeleteBook.Command(bookId));
         }
         catch (Exception ex)
         {
@@ -63,5 +63,6 @@ public partial class Books
         }
         
         await AlertService.ShowToastAsync(Domain.Localization.Translations.BOOK_DELETED);
+        BookManager.RemoveBook(bookId);
     }
 }
