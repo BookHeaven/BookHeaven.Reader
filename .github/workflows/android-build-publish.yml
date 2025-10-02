@@ -75,12 +75,12 @@ jobs:
         New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Reader -Force
         Get-ChildItem -Path . -Exclude BookHeaven | Move-Item -Destination BookHeaven\BookHeaven.Reader -Force
         
-    - name: Clone EpubManager
+    - name: Clone EbookManager
       shell: pwsh
       run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.EpubManager.git temp\BookHeaven.EpubManager
-        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.EpubManager -Force
-        Get-ChildItem -Path temp\BookHeaven.EpubManager | Move-Item -Destination BookHeaven\BookHeaven.EpubManager -Force
+        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.EbookManager.git temp\BookHeaven.EbookManager
+        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.EbookManager -Force
+        Get-ChildItem -Path temp\BookHeaven.EbookManager | Move-Item -Destination BookHeaven\BookHeaven.EbookManager -Force
         
     - name: Clone BookHeaven.Domain
       shell: pwsh
