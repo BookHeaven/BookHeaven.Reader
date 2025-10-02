@@ -44,7 +44,7 @@ public partial class Reader : IAsyncDisposable
     private bool _refreshTotalPages;
     private IReadOnlyList<Stylesheet> _styles = [];
 
-    private int _totalWords;
+    private int _totalWeight;
 
     //private SpineItem? _current, _previous, _next;
     private Chapter? Current => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter);
@@ -53,10 +53,10 @@ public partial class Reader : IAsyncDisposable
     private TocEntry? CurrentChapter => _ebook?.Content.GetChapterFromTableOfContents(Current?.Identifier);
     private string ChapterTitle => CurrentChapter?.Title ?? Current?.Title ?? string.Empty;
     
-	private decimal Progress => _ebook != null && Current != null && _totalWords != 0
-        ? (_ebook.Content.GetWordCount(ReaderService.CurrentChapter) +
-           Current.WordsPerPage(ReaderService.TotalPages + 1) *
-           (ReaderService.CurrentPage + 1)) / (decimal)_totalWords * 100
+	private decimal Progress => _ebook != null && Current != null && _totalWeight != 0
+        ? (_ebook.Content.GetTotalWeight(ReaderService.CurrentChapter) +
+           Current.WeightPerPage(ReaderService.TotalPages + 1) *
+           (ReaderService.CurrentPage + 1)) / (decimal)_totalWeight * 100
         : 0;
 
     protected override async Task OnInitializedAsync()
@@ -128,15 +128,14 @@ public partial class Reader : IAsyncDisposable
                 await LoadEpubBook();
             else
                 _ = LoadEpubBook();*/
+            if(_bookProgress.BookWordCount != 0)
+            {
+                _totalWeight = _bookProgress.BookWordCount;
+            }
+            
             await LoadEbook();
-            _bookLoading = false;
             if (_bookProgress.ElapsedTime != TimeSpan.Zero)
             {
-                if(_bookProgress.BookWordCount != 0)
-                {
-                    _totalWords = _bookProgress.BookWordCount;
-                }
-                
                 ReaderService.SetTotalPages(_bookProgress.PageCount, _bookProgress.PageCountPrev, _bookProgress.PageCountNext);
                 ReaderService.NavigateTo(_bookProgress.Page, _bookProgress.Chapter);
                 
@@ -146,6 +145,7 @@ public partial class Reader : IAsyncDisposable
                 _bookProgress.StartDate = DateTimeOffset.Now;
                 ReaderService.NavigateTo(0,0);
             }
+            _bookLoading = false;
         }
     }
     
@@ -176,7 +176,7 @@ public partial class Reader : IAsyncDisposable
         EbookReader = EbookManagerProvider.GetReader((Format)_book!.Format);
         
         _ebook = await EbookReader.ReadAllAsync(_book!.EbookPath());
-        if (_totalWords == 0) _totalWords = _ebook.Content.GetWordCount();
+        _totalWeight = _ebook.Content.GetTotalWeight();
         if (_styles.Count == 0)
         {
             _styles = _ebook.Content.Stylesheets;
@@ -204,7 +204,6 @@ public partial class Reader : IAsyncDisposable
 			Next.IsContentProcessed = _next.IsContentProcessed;
             _next = null;
 		}*/
-		StateHasChanged();
     }
 
     /*private async Task LoadFromCache()
@@ -333,7 +332,7 @@ public partial class Reader : IAsyncDisposable
         
         _bookProgress.Chapter = ReaderService.CurrentChapter;
         _bookProgress.Page = ReaderService.CurrentPage;
-        _bookProgress.BookWordCount = _totalWords;
+        _bookProgress.BookWordCount = _totalWeight;
         _bookProgress.PageCount = ReaderService.TotalPages;
         _bookProgress.PageCountPrev = ReaderService.TotalPagesPrev;
         _bookProgress.PageCountNext = ReaderService.TotalPagesNext;
