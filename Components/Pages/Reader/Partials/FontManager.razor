@@ -1,6 +1,6 @@
-﻿@using System.ComponentModel
-@using BookHeaven.Domain.Features.Fonts
+﻿@using BookHeaven.Domain.Features.Fonts
 @implements IDisposable
+@if(_fonts.Count == 0) return;
 <style>
 	@foreach (var font in _fonts)
 	{
