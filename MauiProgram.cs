@@ -29,7 +29,7 @@ public static class MauiProgram
 			.UseMauiCommunityToolkit();
 
 		builder.Services.AddDomain(BooksPath, CoversPath, FontsPath, FileSystem.AppDataDirectory);
-		builder.Services.AddEbookManager();
+		builder.Services.AddEbookManager(CachePath);
 			
 			
 		builder.Services.AddSingleton<AppStateService>();
