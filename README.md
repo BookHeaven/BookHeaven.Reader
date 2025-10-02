@@ -14,7 +14,7 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 - It won't work as standalone, it needs to connect to a Server instance to get the books (not planned, but might happen eventually)
 - Single page layout only (again, not planned, but might add better support for landscape eventually)
 - No dictionary, no notes nor highlights
-- Supports epub files only
+- Supports epub and PDF files only
 
 > [!NOTE]
 > If you haven't setup the Server yet, [check out this quick guide](https://bookheaven.ggarrido.dev/getting-started) to get started!
