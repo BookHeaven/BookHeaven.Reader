@@ -301,7 +301,9 @@ public partial class Reader : IAsyncDisposable
 
     private void OnChapterSelected(string itemId)
     {
-        ReaderService.NavigateTo(0, _ebook!.Content.Chapters.Where(x => x.Identifier == itemId).Index().First().Index);
+        var chapter = _ebook!.Content.Chapters.Index().FirstOrDefault(i => i.Item.Identifier == itemId);
+        if(chapter.Item is null) return;
+        ReaderService.NavigateTo(0, chapter.Index);
     }
 
     [JSInvokable("OnKeyDown")]
