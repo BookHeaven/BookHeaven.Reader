@@ -1,9 +1,7 @@
-﻿<div class="flex bg-white rounded overflow-hidden">
-    <div class="max-w-[40%] overflow-hidden">
-        <img class="mx-auto" decoding="async" src="@(_serverUrl + Book.CoverUrl())" alt=""/>
-    </div>
-    <div class="flex w-full xs:flex-col justify-between">
-        <div class="flex flex-col gap-1 mt-2 mx-3">
+﻿<div class="grid grid-cols-[1fr_4fr] xs:grid-cols-[2.2fr_3fr] grid-rows-1 bg-white rounded overflow-hidden">
+    <img class="self-center" decoding="async" src="@(_serverUrl + Book.CoverUrl())" alt=""/>
+    <div class="flex xs:flex-col justify-between">
+        <div class="flex flex-col gap-1 my-2 mx-3">
             <p class="text-balance text-sm font-bold leading-4">@Book.Title</p>
             @if (Book.Series != null)
             {
@@ -12,7 +10,7 @@
             <p class="text-xs">@Book.Author?.Name</p>
         </div>
         <div class="flex justify-end">
-            <Button OnClick="@(async () => await Download(Book))" Disabled="@Downloading" Class="text-xs m-1">
+            <Button OnClick="@(async () => await Download(Book))" Disabled="@Downloading" Class="text-xs">
                 @if (Downloading)
                 {
                     <span class="flex items-center h-7">
