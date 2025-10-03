@@ -13,7 +13,7 @@ public static class MauiProgram
 {
 	public static readonly string BooksPath = Path.Combine(FileSystem.AppDataDirectory, "books");
 	public static readonly string CoversPath = Path.Combine(FileSystem.AppDataDirectory, "covers");
-	public static readonly string CachePath = Path.Combine(FileSystem.AppDataDirectory, "cache");
+	public static readonly string CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
 	public static readonly string FontsPath = Path.Combine(FileSystem.AppDataDirectory, "fonts");
 		
 	public static MauiApp CreateMauiApp()
