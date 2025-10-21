@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using BookHeaven.Reader.Interfaces;
 using System.Drawing;
-using System.IO;
 using AppInfo = BookHeaven.Reader.Entities.AppInfo;
 
 namespace BookHeaven.Reader.Services;
