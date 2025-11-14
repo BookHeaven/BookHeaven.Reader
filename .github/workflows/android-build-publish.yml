@@ -54,17 +54,20 @@ jobs:
       VERSION: ${{ needs.check-version.outputs.version }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
           fetch-depth: 0
           
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
         
+    - name: Install workload
+      run: dotnet workload install maui-android
+        
     - name: Setup node js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v5
       with:
         node-version: latest
         cache: 'npm'
