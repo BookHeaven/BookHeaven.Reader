@@ -8,12 +8,12 @@ public class AlertService : IAlertService
 {
     public async Task ShowAlertAsync(string title, string message, string cancel = "OK")
     {
-        await Application.Current!.Windows[0].Page!.DisplayAlert(title, message, cancel);
+        await Application.Current!.Windows[0].Page!.DisplayAlertAsync(title, message, cancel);
     }
 
     public async Task<bool> ShowConfirmationAsync(string title, string message, string accept = "Yes", string cancel = "No")
     {
-        return await Application.Current!.Windows[0].Page!.DisplayAlert(title, message, accept, cancel);
+        return await Application.Current!.Windows[0].Page!.DisplayAlertAsync(title, message, accept, cancel);
     }
 
     public async Task<string> ShowPromptAsync(string title, string message, string accept = "Yes", string cancel = "No")
