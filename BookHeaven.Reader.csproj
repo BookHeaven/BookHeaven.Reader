@@ -1,116 +1,113 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
-    <PropertyGroup>
-        <TargetFrameworks>net10.0-android</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
-        <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-        <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
-        <!-- Note for MacCatalyst:
+  <PropertyGroup>
+    <TargetFrameworks>net10.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+    <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+    <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
+    <!-- Note for MacCatalyst:
                         The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
                         When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
                         The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
                         either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-        <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
-        <OutputType>Exe</OutputType>
-        <RootNamespace>BookHeaven.Reader</RootNamespace>
-        <UseMaui>true</UseMaui>
-        <SingleProject>true</SingleProject>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <EnableDefaultCssItems>false</EnableDefaultCssItems>
-        <Nullable>enable</Nullable>
-        <!-- Display name -->
-        <ApplicationTitle>BookHeaven</ApplicationTitle>
-        <!-- App Identifier -->
-        <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
-        <!-- Versions -->
-        <ApplicationDisplayVersion>$(GitVersion_MajorMinorPatch)</ApplicationDisplayVersion>
-        <ApplicationVersion>$(GitVersion_BuildNumber)</ApplicationVersion>
-        <!--		<WindowsPackageType>None</WindowsPackageType>-->
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-        <IsPackable>false</IsPackable>
-        <NeutralLanguage>en</NeutralLanguage>
-        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-        <LangVersion>default</LangVersion>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(TargetFramework)|$(Platform)'=='net10.0-android|AnyCPU'">
-        <RunAOTCompilation>False</RunAOTCompilation>
-        <PublishTrimmed>False</PublishTrimmed>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)'=='Debug' and '$(TargetFramework)'=='net10.0-android'">
-        <RuntimeIdentifiers>android-x86;android-x64;android-arm;android-arm64</RuntimeIdentifiers>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)'=='Release' and '$(TargetFramework)'=='net10.0-android'">
-        <RuntimeIdentifiers>android-x86;android-x64;android-arm;android-arm64</RuntimeIdentifiers>
-    </PropertyGroup>
-    <ItemGroup>
-        <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" Include="Resources\AppIcon\appiconfg.svg" />
-        <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" ForegroundScale="0.50" Color="#0a2d55" />
-        <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\mysplashscreen.svg" BaseSize="250,250" Color="#FFFFFF" />
-        <!-- Images -->
-        <MauiImage Include="Resources\Images\*" />
-        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
-        <!-- Custom Fonts -->
-        <MauiFont Include="Resources\Fonts\*" />
-        <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Remove="progress-badge.ai" />
-        <None Remove="Resources\Splash\mysplashscreen.svg" />
-        <None Remove="screenshots\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Blazor.ContextMenu" Version="2.1.0" />
-        <PackageReference Include="BlazorPanzoom" Version="0.2.1" />
-        <PackageReference Include="CommunityToolkit.Maui" Version="13.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.10" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
-        <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.10" />
-        <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Update="Platforms\Windows\Services\AppsService.cs">
-            <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
-        </Compile>
-        <Compile Update="Resources\Localization\Translations.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Translations.resx</DependentUpon>
-        </Compile>
-        <Compile Remove="screenshots\**" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(UseNuget)' != 'true'">
-        <ProjectReference Include="..\BookHeaven.EbookManager\BookHeaven.EbookManager.csproj" />
-        <ProjectReference Include="..\BookHeaven.Domain\BookHeaven.Domain.csproj" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(UseNuget)' == 'true'">
-        <PackageReference Include="BookHeaven.Domain" Version="1.1.2" />
-        <PackageReference Include="BookHeaven.EbookManager" Version="1.1.4" />
-    </ItemGroup>
-    <ItemGroup>
-        <EmbeddedResource Update="Resources\Localization\Translations.resx">
-            <Generator>PublicResXFileCodeGenerator</Generator>
-            <LastGenOutput>Translations.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-        <EmbeddedResource Update="Resources\Localization\Translations.es.resx">
-            <Generator>PublicResXFileCodeGenerator</Generator>
-        </EmbeddedResource>
-        <EmbeddedResource Remove="screenshots\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <MauiXaml Remove="screenshots\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Remove="screenshots\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <AndroidAarLibrary Remove="screenshots\**" />
-    </ItemGroup>
+    <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BookHeaven.Reader</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCssItems>false</EnableDefaultCssItems>
+    <Nullable>enable</Nullable>
+    <!-- Display name -->
+    <ApplicationTitle>BookHeaven</ApplicationTitle>
+    <!-- App Identifier -->
+    <ApplicationId>dev.ggarrido.bookheaven</ApplicationId>
+    <!-- Versions -->
+    <ApplicationDisplayVersion>$(GitVersion_MajorMinorPatch)</ApplicationDisplayVersion>
+    <ApplicationVersion>$(GitVersion_BuildNumber)</ApplicationVersion>
+    <!--		<WindowsPackageType>None</WindowsPackageType>-->
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    <IsPackable>false</IsPackable>
+    <NeutralLanguage>en</NeutralLanguage>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <LangVersion>default</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)|$(Platform)'=='net10.0-android|AnyCPU'">
+    <RunAOTCompilation>False</RunAOTCompilation>
+    <PublishTrimmed>False</PublishTrimmed>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-android'">
+    <RuntimeIdentifiers>android-x86;android-x64;android-arm;android-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <ItemGroup>
+    <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" Include="Resources\AppIcon\appiconfg.svg" />
+    <!-- App Icon -->
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" ForegroundScale="0.50" Color="#0a2d55" />
+    <!-- Splash Screen -->
+    <MauiSplashScreen Include="Resources\Splash\mysplashscreen.svg" BaseSize="250,250" Color="#FFFFFF" />
+    <!-- Images -->
+    <MauiImage Include="Resources\Images\*" />
+    <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+    <!-- Custom Fonts -->
+    <MauiFont Include="Resources\Fonts\*" />
+    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="progress-badge.ai" />
+    <None Remove="Resources\Splash\mysplashscreen.svg" />
+    <None Remove="screenshots\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Blazor.ContextMenu" Version="2.1.0" />
+    <PackageReference Include="BlazorPanzoom" Version="0.2.1" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="13.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.10" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Platforms\Windows\Services\AppsService.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+    <Compile Update="Resources\Localization\Translations.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Translations.resx</DependentUpon>
+    </Compile>
+    <Compile Remove="screenshots\**" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseNuget)' != 'true'">
+    <ProjectReference Include="..\BookHeaven.EbookManager\BookHeaven.EbookManager.csproj" />
+    <ProjectReference Include="..\BookHeaven.Domain\BookHeaven.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseNuget)' == 'true'">
+    <PackageReference Include="BookHeaven.Domain" Version="1.1.3" />
+    <PackageReference Include="BookHeaven.EbookManager" Version="1.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Localization\Translations.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Translations.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Localization\Translations.es.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Remove="screenshots\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <MauiXaml Remove="screenshots\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="screenshots\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAarLibrary Remove="screenshots\**" />
+  </ItemGroup>
 </Project>
