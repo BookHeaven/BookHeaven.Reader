@@ -5,7 +5,8 @@
             xmlns:components="clr-namespace:BookHeaven.Reader.Components"
     xmlns:blazorweb="clr-namespace:Microsoft.AspNetCore.Components.Web;assembly=Microsoft.AspNetCore.Components.Web"
     x:Class="BookHeaven.Reader.MainPage"
-             BackgroundColor="{DynamicResource PageBackgroundColor}">
+             BackgroundColor="{DynamicResource PageBackgroundColor}"
+             SafeAreaEdges="{OnPlatform Android=Container, Default=None}">
 
     <local:CustomBlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html" StartPath="/setup">
         <BlazorWebView.RootComponents>
