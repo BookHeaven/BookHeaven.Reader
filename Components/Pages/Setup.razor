@@ -33,7 +33,7 @@
                 case PageState.Error:
                 case PageState.Manual:
                     <p>@Translations.ENTER_SERVER_URL</p>
-                    <input type="text" class="mt-2 w-full p-2 border border-black rounded" @bind="@AppStateService.ServerUrl" placeholder="https://yourbookheaven.com"/>
+                    <input type="text" class="mt-2 w-full p-2 border border-black rounded" @bind="@AppStateService.ServerUrl" @bind:event="oninput" placeholder="https://yourbookheaven.com"/>
                     <Button Class="mx-auto mt-6" OnClick="@Connect" Kind="Button.ButtonType.Secondary">@Translations.CONTINUE</Button>
                     if(_state == PageState.Error)
                     {
