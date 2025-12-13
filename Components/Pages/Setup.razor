@@ -96,8 +96,6 @@
     private string _errorMessage = string.Empty;
 
     private List<Profile> _profiles = [];
-    
-    private const int FakeDelay = 2000;
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,7 +114,6 @@
         _state = PageState.Discovery;
         StateHasChanged();
         var getServerUrl = await UdpBroadcastClient.StartAsync();
-        await Task.Delay(FakeDelay);
         if (getServerUrl.IsSuccess)
         {
             AppStateService.ServerUrl = getServerUrl.Value;
@@ -134,7 +131,6 @@
     {
         _state = PageState.Connecting;
         StateHasChanged();
-        await Task.Delay(FakeDelay);
         var canConnect = await ServerService.CanConnect();
         if (canConnect.IsFailure)
         {
