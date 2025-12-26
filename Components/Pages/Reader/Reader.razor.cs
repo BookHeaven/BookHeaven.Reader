@@ -46,7 +46,6 @@ public partial class Reader : IAsyncDisposable
 
     private int _totalWeight;
 
-    //private SpineItem? _current, _previous, _next;
     private Chapter? Current => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter);
 	private Chapter? Next => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter + 1);
 	private Chapter? Previous => _ebook?.Content.Chapters.ElementAtOrDefault(ReaderService.CurrentChapter - 1);
@@ -122,12 +121,7 @@ public partial class Reader : IAsyncDisposable
                 LifeCycleService.Paused += OnPaused;
                 LifeCycleService.Destroyed += OnDestroy;
             }
-
-            /*await LoadFromCache();
-            if (Current == null)
-                await LoadEpubBook();
-            else
-                _ = LoadEpubBook();*/
+            
             if(_bookProgress.BookWordCount != 0)
             {
                 _totalWeight = _bookProgress.BookWordCount;
@@ -180,82 +174,9 @@ public partial class Reader : IAsyncDisposable
         if (_styles.Count == 0)
         {
             _styles = _ebook.Content.Stylesheets;
-            //_ = WriteToCache(CacheKey.Styles, _styles);
         }
         ReaderService.TotalChapters = _ebook.Content.Chapters.Count;
-
-        /*if(_current != null && _current.Id == Current?.Id)
-        {
-            Current!.TextContent = _current.TextContent;
-			Current.IsContentProcessed = _current.IsContentProcessed;
-            _current = null;
-		}
-
-		if (_previous != null && _previous.Id == Previous?.Id)
-		{
-			Previous!.TextContent = _previous.TextContent;
-			Previous.IsContentProcessed = _previous.IsContentProcessed;
-            _previous = null;
-		}
-
-		if (_next != null && _next.Id == Next?.Id)
-		{
-			Next!.TextContent = _next.TextContent;
-			Next.IsContentProcessed = _next.IsContentProcessed;
-            _next = null;
-		}*/
     }
-
-    /*private async Task LoadFromCache()
-    {
-        try
-        {
-            var getStyles = LoadFromCache<IReadOnlyList<Style>>(CacheKey.Styles);
-            var getChapters = LoadFromCache<List<SpineItem?>>(CacheKey.Progress);
-            await Task.WhenAll(getStyles, getChapters);
-            
-            _styles = await getStyles ?? [];
-            var chapters = await getChapters;
-            if (chapters != null)
-            {
-                /*_current = chapters[0]!;
-                _previous = chapters[1];
-                _next = chapters[2];#1#
-            }
-            StateHasChanged();
-        }
-        catch (Exception)
-        {
-            await Toast.Make("Error loading cache").Show();
-        }
-        
-    }*/
-
-    /*private async Task UpdateChapterCache()
-    {
-        if (Current == null) return;
-        List<SpineItem?> chapters = [Current, Previous, Next];
-        await WriteToCache(CacheKey.Progress, chapters);
-    }*/
-
-    /*private async Task<T?> LoadFromCache<T>(CacheKey key)
-    {
-        try
-        {
-            var json = await File.ReadAllTextAsync(_book!.GetCachePath(key));
-            return JsonSerializer.Deserialize<T>(json)!;
-        }
-        catch (FileNotFoundException)
-        {
-            return default;
-        }
-    }*/
-
-    /*private async Task WriteToCache<T>(CacheKey key, T item)
-    {
-        var json = JsonSerializer.Serialize(item);
-        await File.WriteAllTextAsync(_book!.GetCachePath(key), json);
-    }*/
 
     private void OnProfileSettingsChanged(string? propertyName)
     {
@@ -292,8 +213,6 @@ public partial class Reader : IAsyncDisposable
             }));
         }
         if (tasks.Count > 0) await Task.WhenAll(tasks);
-        
-        //_ = UpdateChapterCache();
         
         _refreshTotalPages = true;
         await InvokeAsync(StateHasChanged);
