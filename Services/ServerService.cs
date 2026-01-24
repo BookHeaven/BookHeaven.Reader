@@ -11,306 +11,305 @@ using BookHeaven.Domain.Shared;
 using MediatR;
 using Font = BookHeaven.Domain.Entities.Font;
 
-namespace BookHeaven.Reader.Services
+namespace BookHeaven.Reader.Services;
+
+public interface IServerService
 {
-	public interface IServerService
+	Task<Result> CanConnect();
+	Task<Result<List<Book>>> GetAllBooks();
+	Task<Result<List<Author>>> GetAllAuthors();
+	Task<Result<List<Profile>>> GetAllProfiles();
+	Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId);
+	Task<Result> DownloadBook(Book book, Guid profileId);
+	Task<Result> UpdateBookProgress(BookProgress progress);
+	Task<Result> UpdateProgressByProfile(Guid profileId);
+	Task<Result> UpdateProfileSettings(ProfileSettings settings);
+	Task<Result> UpdateLocalProfiles();
+	Task<Result> DownloadFonts();
+}
+public class ServerService(
+	ISender sender,
+	AppStateService appStateService, 
+	ILogger<ServerService> logger) : IServerService
+{
+	private HttpClient _httpClient = new();
+
+	public async Task<Result> CanConnect()
 	{
-		Task<Result> CanConnect();
-		Task<Result<List<Book>>> GetAllBooks();
-		Task<Result<List<Author>>> GetAllAuthors();
-		Task<Result<List<Profile>>> GetAllProfiles();
-		Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId);
-		Task<Result> DownloadBook(Book book, Guid profileId);
-		Task<Result> UpdateBookProgress(BookProgress progress);
-		Task<Result> UpdateProgressByProfile(Guid profileId);
-		Task<Result> UpdateProfileSettings(ProfileSettings settings);
-		Task<Result> UpdateLocalProfiles();
-		Task<Result> DownloadFonts();
+		if(Connectivity.Current.NetworkAccess == NetworkAccess.None)
+		{
+			return new Error("No internet connection");
+		}
+			
+		var url = appStateService.ServerUrl;
+
+		if (string.IsNullOrEmpty(url))
+		{
+			return new Error("Server URL is not set");
+		}
+			
+		if(_httpClient.BaseAddress == null)
+		{
+			_httpClient = new HttpClient
+			{
+				BaseAddress = new Uri(url)
+			};
+		}
+
+		try
+		{
+			var response = await _httpClient.GetAsync("api/ping");
+			return response.IsSuccessStatusCode 
+				? Result.Success()
+				: new Error("Server did not respond to ping: " + response.ReasonPhrase);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Server couldn't be reached");
+			return new Error(ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : ""));
+		}
 	}
-	public class ServerService(
-		ISender sender,
-		AppStateService appStateService, 
-		ILogger<ServerService> logger) : IServerService
+
+	public async Task<Result<List<Book>>> GetAllBooks()
 	{
-		private HttpClient _httpClient = new();
+		var endpoint = "api/books";
 
-		public async Task<Result> CanConnect()
+		try
 		{
-			if(Connectivity.Current.NetworkAccess == NetworkAccess.None)
-			{
-				return new Error("No internet connection");
-			}
-			
-			var url = appStateService.ServerUrl;
+			var response = await _httpClient.GetFromJsonAsync<List<Book>?>(endpoint);
 
-			if (string.IsNullOrEmpty(url))
-			{
-				return new Error("Server URL is not set");
-			}
-			
-			if(_httpClient.BaseAddress == null)
-			{
-				_httpClient = new HttpClient
-				{
-					BaseAddress = new Uri(url)
-				};
-			}
-
-			try
-			{
-				var response = await _httpClient.GetAsync("api/ping");
-				return response.IsSuccessStatusCode 
-					? Result.Success()
-					: new Error("Server did not respond to ping: " + response.ReasonPhrase);
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Server couldn't be reached");
-				return new Error(ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : ""));
-			}
+			return response ?? [];
 		}
-
-		public async Task<Result<List<Book>>> GetAllBooks()
+		catch (Exception ex)
 		{
-			var endpoint = "api/books";
-
-			try
-			{
-				var response = await _httpClient.GetFromJsonAsync<List<Book>?>(endpoint);
-
-				return response ?? [];
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Failed to get books from server");
-				return new Error("Failed to get books from server");
-			}
+			logger.LogError(ex, "Failed to get books from server");
+			return new Error("Failed to get books from server");
 		}
+	}
 
-		public async Task<Result<List<Author>>> GetAllAuthors()
+	public async Task<Result<List<Author>>> GetAllAuthors()
+	{
+		var endpoint = "api/authors";
+
+		try
 		{
-			var endpoint = "api/authors";
+			var response = await _httpClient.GetFromJsonAsync<List<Author>>(endpoint);
 
-			try
-			{
-				var response = await _httpClient.GetFromJsonAsync<List<Author>>(endpoint);
-
-				return response ?? [];
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Failed to get authors from server");
-				return new Error("Failed to get authors from server");
-			}
+			return response ?? [];
 		}
-
-		public async Task<Result<List<Profile>>> GetAllProfiles()
+		catch (Exception ex)
 		{
-			var endpoint = "api/profiles";
-
-			try
-			{
-				var response = await _httpClient.GetFromJsonAsync<List<Profile>>(endpoint);
-
-				return response ?? [];
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Failed to get profiles from server");
-				return new Error("Failed to get profiles from server");
-			}
+			logger.LogError(ex, "Failed to get authors from server");
+			return new Error("Failed to get authors from server");
 		}
+	}
 
-		public async Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId)
+	public async Task<Result<List<Profile>>> GetAllProfiles()
+	{
+		var endpoint = "api/profiles";
+
+		try
 		{
-			var endpoint = $"api/profiles/{profileId}/{bookId}";
-			try
-			{
-				var response = await _httpClient.GetFromJsonAsync<BookProgress>(endpoint);
+			var response = await _httpClient.GetFromJsonAsync<List<Profile>>(endpoint);
 
-				return response;
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Failed to get book progress from server");
-				return new Error("Failed to get book progress from server");
-			}
+			return response ?? [];
 		}
-
-		public async Task<Result> DownloadBook(Book book, Guid profileId)
+		catch (Exception ex)
 		{
-			try
+			logger.LogError(ex, "Failed to get profiles from server");
+			return new Error("Failed to get profiles from server");
+		}
+	}
+
+	public async Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId)
+	{
+		var endpoint = $"api/profiles/{profileId}/{bookId}";
+		try
+		{
+			var response = await _httpClient.GetFromJsonAsync<BookProgress>(endpoint);
+
+			return response;
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to get book progress from server");
+			return new Error("Failed to get book progress from server");
+		}
+	}
+
+	public async Task<Result> DownloadBook(Book book, Guid profileId)
+	{
+		try
+		{
+			var coverUrl = new Uri(_httpClient.BaseAddress!,book.CoverUrl());
+			var epubUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
+
+			Result saveBook;
+			var getBook = await sender.Send(new GetBook.Query(book.BookId));
+			if (getBook.IsSuccess)
 			{
-				var coverUrl = new Uri(_httpClient.BaseAddress!,book.CoverUrl());
-				var epubUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
-
-				Result saveBook;
-				var getBook = await sender.Send(new GetBook.Query(book.BookId));
-				if (getBook.IsSuccess)
-				{
-					//If the book is already downloaded, we remove the local cache
-					Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
-					saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
-				}
-				else
-				{
-					saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), epubUrl.ToString(), false));
-				}
-				if (saveBook.IsFailure)
-				{
-					return new Error("Failed to download book from server");
-				}
-				
-				var getProgress = await GetBookProgress(profileId, book.BookId);
-				if (getProgress.IsFailure)
-				{
-					return new Error("Failed to get book progress from server");
-				}
-				
-				var progress = getProgress.Value;
-				var getLocalProgress = await sender.Send(new GetBookProgressByProfile.Query(book.BookId, profileId));
-
-				if (getLocalProgress.IsFailure && progress != null)
-				{
-					await sender.Send(new AddBookProgress.Command(progress));
-				}
-				else if (getLocalProgress.IsSuccess && progress != null && (getLocalProgress.Value.LastRead is null || progress.LastRead >= getLocalProgress.Value.LastRead))
-				{
-					progress.BookWordCount = 0;
-					await sender.Send(new UpdateBookProgress.Command(progress));
-				}
-				
-				return Result.Success();
+				//If the book is already downloaded, we remove the local cache
+				Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
+				saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
 			}
-			catch (Exception ex)
+			else
 			{
-				logger.LogError(ex, "Failed to download book from server");
+				saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), epubUrl.ToString(), false));
+			}
+			if (saveBook.IsFailure)
+			{
 				return new Error("Failed to download book from server");
 			}
-		}
-
-		public async Task<Result> UpdateBookProgress(BookProgress progress)
-		{
-			var endpoint = "api/progress/update";
-
-			try
+				
+			var getProgress = await GetBookProgress(profileId, book.BookId);
+			if (getProgress.IsFailure)
 			{
-				var response = await _httpClient.PutAsJsonAsync(endpoint, progress);
-				if(!response.IsSuccessStatusCode)
-				{
-					var errorResponse = await response.Content.ReadAsStringAsync();
-					return new Error("Failed to update book progress from server");
-				}
-				return Result.Success();
+				return new Error("Failed to get book progress from server");
 			}
-			catch (Exception ex)
+				
+			var progress = getProgress.Value;
+			var getLocalProgress = await sender.Send(new GetBookProgressByProfile.Query(book.BookId, profileId));
+
+			if (getLocalProgress.IsFailure && progress != null)
 			{
-				logger.LogError(ex, "Failed to update book progress from server");
+				await sender.Send(new AddBookProgress.Command(progress));
+			}
+			else if (getLocalProgress.IsSuccess && progress != null && (getLocalProgress.Value.LastRead is null || progress.LastRead >= getLocalProgress.Value.LastRead))
+			{
+				progress.BookWordCount = 0;
+				await sender.Send(new UpdateBookProgress.Command(progress));
+			}
+				
+			return Result.Success();
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to download book from server");
+			return new Error("Failed to download book from server");
+		}
+	}
+
+	public async Task<Result> UpdateBookProgress(BookProgress progress)
+	{
+		var endpoint = "api/progress/update";
+
+		try
+		{
+			var response = await _httpClient.PutAsJsonAsync(endpoint, progress);
+			if(!response.IsSuccessStatusCode)
+			{
+				var errorResponse = await response.Content.ReadAsStringAsync();
 				return new Error("Failed to update book progress from server");
 			}
-		}
-
-		public async Task<Result> UpdateProgressByProfile(Guid profileId)
-		{
-			var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
-			if (getProgresses.IsFailure)
-			{
-				return getProgresses.Error;
-			}
-			
-			foreach (var progress in getProgresses.Value)
-			{
-				var updateProgress = await UpdateBookProgress(progress);
-				if (updateProgress.IsFailure)
-				{
-					return updateProgress.Error;
-				}
-			}
 			return Result.Success();
 		}
-		
-		public async Task<Result> UpdateProfileSettings(ProfileSettings settings)
+		catch (Exception ex)
 		{
-			var endpoint = "api/profile/settings/update";
+			logger.LogError(ex, "Failed to update book progress from server");
+			return new Error("Failed to update book progress from server");
+		}
+	}
 
-			try
+	public async Task<Result> UpdateProgressByProfile(Guid profileId)
+	{
+		var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
+		if (getProgresses.IsFailure)
+		{
+			return getProgresses.Error;
+		}
+			
+		foreach (var progress in getProgresses.Value)
+		{
+			var updateProgress = await UpdateBookProgress(progress);
+			if (updateProgress.IsFailure)
 			{
-				var response = await _httpClient.PutAsJsonAsync(endpoint, settings);
-				if(!response.IsSuccessStatusCode)
-				{
-					var errorResponse = await response.Content.ReadAsStringAsync();
-					return new Error("Failed to backup profile settings to server");
-				}
-				return Result.Success();
+				return updateProgress.Error;
 			}
-			catch (Exception ex)
+		}
+		return Result.Success();
+	}
+		
+	public async Task<Result> UpdateProfileSettings(ProfileSettings settings)
+	{
+		var endpoint = "api/profile/settings/update";
+
+		try
+		{
+			var response = await _httpClient.PutAsJsonAsync(endpoint, settings);
+			if(!response.IsSuccessStatusCode)
 			{
-				logger.LogError(ex, "Failed to backup profile settings to server");
+				var errorResponse = await response.Content.ReadAsStringAsync();
 				return new Error("Failed to backup profile settings to server");
 			}
+			return Result.Success();
 		}
-
-		public async Task<Result> UpdateLocalProfiles()
+		catch (Exception ex)
 		{
-			var getRemoteProfiles = await GetAllProfiles();
-			if (getRemoteProfiles.IsFailure) return Result.Failure(getRemoteProfiles.Error);
+			logger.LogError(ex, "Failed to backup profile settings to server");
+			return new Error("Failed to backup profile settings to server");
+		}
+	}
+
+	public async Task<Result> UpdateLocalProfiles()
+	{
+		var getRemoteProfiles = await GetAllProfiles();
+		if (getRemoteProfiles.IsFailure) return Result.Failure(getRemoteProfiles.Error);
 			
-			var getLocalProfiles = await sender.Send(new GetAllProfiles.Query());
-			if (getLocalProfiles.IsFailure) return Result.Failure(getLocalProfiles.Error);
-			foreach (var profile in getLocalProfiles.Value)
-			{
-				var remoteProfile = getRemoteProfiles.Value.FirstOrDefault(p => p.ProfileId == profile.ProfileId);
-				if (remoteProfile is null || remoteProfile.Name == profile.Name) continue;
+		var getLocalProfiles = await sender.Send(new GetAllProfiles.Query());
+		if (getLocalProfiles.IsFailure) return Result.Failure(getLocalProfiles.Error);
+		foreach (var profile in getLocalProfiles.Value)
+		{
+			var remoteProfile = getRemoteProfiles.Value.FirstOrDefault(p => p.ProfileId == profile.ProfileId);
+			if (remoteProfile is null || remoteProfile.Name == profile.Name) continue;
                     
-				await sender.Send(new UpdateProfileName.Command(profile.ProfileId, remoteProfile.Name));
-				if (profile.ProfileId == appStateService.ProfileId)
+			await sender.Send(new UpdateProfileName.Command(profile.ProfileId, remoteProfile.Name));
+			if (profile.ProfileId == appStateService.ProfileId)
+			{
+				appStateService.OnProfileNameChanged?.Invoke(remoteProfile.Name);
+			}
+		}
+		return Result.Success();
+	}
+
+	public async Task<Result> DownloadFonts()
+	{
+		var endpoint = "api/fonts";
+		try
+		{
+			var response = await _httpClient.GetFromJsonAsync<List<Font>>(endpoint);
+
+			if (response == null)
+			{
+				throw new Exception("Failed to get fonts from server");
+			}
+
+			foreach (var font in response)
+			{
+				var fontPath = font.FilePath();
+				var folder = Path.GetDirectoryName(fontPath);
+				if (!Directory.Exists(folder))
 				{
-					appStateService.OnProfileNameChanged?.Invoke(remoteProfile.Name);
+					Directory.CreateDirectory(folder!);
 				}
+					
+				var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + font.Url());
+				await File.WriteAllBytesAsync(fontPath, fileBytes);
+
+				await sender.Send(new AddFont.Command(font));
+			}
+				
+			var getProfileSettings = await sender.Send(new GetProfileSettings.Query(appStateService.ProfileId));
+			if (getProfileSettings.IsSuccess)
+			{
+				getProfileSettings.Value.SelectedFont = response.FirstOrDefault()?.Family ?? string.Empty;
+				await sender.Send(new UpdateProfileSettings.Command(getProfileSettings.Value));
 			}
 			return Result.Success();
 		}
-
-		public async Task<Result> DownloadFonts()
+		catch (Exception ex)
 		{
-			var endpoint = "api/fonts";
-			try
-			{
-				var response = await _httpClient.GetFromJsonAsync<List<Font>>(endpoint);
-
-				if (response == null)
-				{
-					throw new Exception("Failed to get fonts from server");
-				}
-
-				foreach (var font in response)
-				{
-					var fontPath = font.FilePath();
-					var folder = Path.GetDirectoryName(fontPath);
-					if (!Directory.Exists(folder))
-					{
-						Directory.CreateDirectory(folder!);
-					}
-					
-					var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + font.Url());
-					await File.WriteAllBytesAsync(fontPath, fileBytes);
-
-					await sender.Send(new AddFont.Command(font));
-				}
-				
-				var getProfileSettings = await sender.Send(new GetProfileSettings.Query(appStateService.ProfileId));
-				if (getProfileSettings.IsSuccess)
-				{
-					getProfileSettings.Value.SelectedFont = response.FirstOrDefault()?.Family ?? string.Empty;
-					await sender.Send(new UpdateProfileSettings.Command(getProfileSettings.Value));
-				}
-				return Result.Success();
-			}
-			catch (Exception ex)
-			{
-				logger.LogError(ex, "Failed to download fonts from server");
-				return new Error("Failed to download fonts from server");
-			}
+			logger.LogError(ex, "Failed to download fonts from server");
+			return new Error("Failed to download fonts from server");
 		}
 	}
 }
