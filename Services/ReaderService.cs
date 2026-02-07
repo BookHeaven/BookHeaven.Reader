@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿namespace BookHeaven.Reader.Services;
 
-namespace BookHeaven.Reader.Services;
-
-public partial class ReaderService(ILogger<ReaderService> logger)
+public class ReaderService
 {
     public int CurrentChapter { get; private set; }
     public int CurrentPage { get; private set; }
@@ -28,7 +26,6 @@ public partial class ReaderService(ILogger<ReaderService> logger)
     {
         CurrentChapter = chapter;
         CurrentPage = page;
-        logger.LogDebug($"Navigated to chapter {chapter} and page {page}");
 
         
         OnChapterChanged?.Invoke();
