@@ -4,13 +4,18 @@
 @layout EmptyLayout
 <!--suppress CssUnresolvedCustomProperty -->
 <style>
+	:root {
+		--info-bar-height: 24px;
+	}
+	
 	body {
 		margin: 0 !important;
 		overflow: hidden;
 	}
-	
+
 	@@scope (#viewer) {
 		:scope {
+			--column-count: 1;
 			--chapter-page: @ReaderService.CurrentPage;
 			--font-size: @ProfileSettingsService.ProfileSettings.FontSize.ToString("0.00", CultureInfo.InvariantCulture);
 			--line-height: @ProfileSettingsService.ProfileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
@@ -20,10 +25,18 @@
 			--word-spacing: @ProfileSettingsService.ProfileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
 			--margin-vertical: @ProfileSettingsService.ProfileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--margin-horizontal: @ProfileSettingsService.ProfileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-			--page-height: calc((100vh - 24px) - ((var(--margin-vertical) * 1rem)*2));
-			--page-width: calc((100vw - 4px) - ((var(--margin-horizontal) * 1rem)*2));
-			--column-gap: 4px;
+			--column-gap: 6px;
+			--page-height: calc((100vh - var(--info-bar-height)) - ((var(--margin-vertical) * 1rem)*2));
+			--page-width: calc(100vw - ((var(--margin-horizontal) * 1rem)*2));
+			
+			@@media (min-width: 800px) {
+				--column-count: 2;
+				--column-gap: 50px;
+				--page-width: calc(((100vw - var(--column-gap)) - ((var(--margin-horizontal) * 1rem)*2)) / 2);
+			}
+			
 			margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
+			
 
 			& > .chapter {
 				height: var(--page-height);
@@ -32,13 +45,20 @@
 				letter-spacing: calc(var(--letter-spacing) * 1px);
 				column-fill: auto;
 				column-gap: var(--column-gap);
-				padding: 0 2px;
+				padding: 0;
 				orphans: 1;
 				widows: 1;
-				
+
 
 				&.current {
-					transform: translateX(calc((var(--page-width) + var(--column-gap)) * var(--chapter-page) * -1));
+					transform: translateX(
+						calc(
+							(var(--page-width) + var(--column-gap)) 
+							* var(--chapter-page)
+							* var(--column-count)
+							* -1
+						)
+					);
 				}
 
 				& p {
@@ -151,7 +171,7 @@
 		</div>
 	</div>
 
-	<div class="relative mt-auto flex h-[24px] gap-2 mx-2">
+	<div class="relative mt-auto flex h-(--info-bar-height) gap-2 mx-2">
 		@if (!_bookLoading)
 		{
 			<Clock/>
