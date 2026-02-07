@@ -35,16 +35,6 @@ public partial class App : Application
 			_window.Stopped += (sender, args) => _lifeCycleService.Stopped?.Invoke();
 			_window.Destroying += (sender, args) => _lifeCycleService.Destroyed?.Invoke();
 		}
-		
-/*#if ANDROID
-			var appStateService = IPlatformApplication.Current!.Services.GetService<AppStateService>()!;
-			if(appStateService.UseAsLockscreen) ScreenForegroundService.Start(Android.App.Application.Context);
-			
-			Android.Provider.Settings.Secure.PutString(Android.App.Application.Context.ContentResolver, "screensaver_components", "dev.ggarrido.bookheaven/bookheaven.ScreenSaverService");
-			Android.Provider.Settings.Secure.PutString(Android.App.Application.Context.ContentResolver, "screensaver_default_component", "dev.ggarrido.bookheaven/bookheaven.ScreenSaverService");
-#endif*/
-		
-		
 		return _window;
 	}
 
