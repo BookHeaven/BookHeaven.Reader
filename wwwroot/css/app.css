@@ -74,9 +74,9 @@ html, body {
     font-family: 'Montserrat';
 }
 
-body {
+/*body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+}*/
     
 .status-bar-safe-area {
     display: none;

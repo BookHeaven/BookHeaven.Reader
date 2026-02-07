@@ -1,12 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:BookHeaven.Reader"
-            xmlns:components="clr-namespace:BookHeaven.Reader.Components"
-    xmlns:blazorweb="clr-namespace:Microsoft.AspNetCore.Components.Web;assembly=Microsoft.AspNetCore.Components.Web"
+<ContentPage 
     x:Class="BookHeaven.Reader.MainPage"
-             BackgroundColor="{DynamicResource PageBackgroundColor}"
-             SafeAreaEdges="{OnPlatform Android=Container, Default=None}">
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:BookHeaven.Reader"
+    xmlns:components="clr-namespace:BookHeaven.Reader.Components"
+    xmlns:blazorweb="clr-namespace:Microsoft.AspNetCore.Components.Web;assembly=Microsoft.AspNetCore.Components.Web"
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+    SafeAreaEdges="Container">
 
     <local:CustomBlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html" StartPath="/setup">
         <BlazorWebView.RootComponents>
