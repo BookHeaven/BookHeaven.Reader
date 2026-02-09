@@ -9,7 +9,7 @@
         }
     </select>
     <RangeSlider Label="@Translations.FONT_SIZE" Min="10" Max="32" @bind-Value="ProfileSettingsService.ProfileSettings.FontSize" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
-    <RangeSlider Label="Letter Spacing" Min="0" Max="2" Increment="0.1m" @bind-Value="ProfileSettingsService.ProfileSettings.LetterSpacing" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)" />
+    <RangeSlider Label="@Translations.LETTER_SPACING" Min="0" Max="2" Increment="0.1m" @bind-Value="ProfileSettingsService.ProfileSettings.LetterSpacing" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)" />
     @* <TextSetting Label="Word Spacing" Min="0" Max="5" Increment="0.25" @bind-Value="ReaderService.ProfileSettings.WordSpacing" /> *@
     <RangeSlider Label="@Translations.LINE_HEIGHT" Min="-0.5m" Max="1" Increment="0.1m" @bind-Value="ProfileSettingsService.ProfileSettings.LineHeight" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
     <RangeSlider Label="@Translations.TEXT_INDENT" Min="0" Max="3" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.TextIndent" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>

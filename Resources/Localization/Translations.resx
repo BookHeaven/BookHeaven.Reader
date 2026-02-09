@@ -201,4 +201,10 @@
     <data name="LAST_READ" xml:space="preserve">
         <value>Last read</value>
     </data>
+    <data name="PAGE_GAP" xml:space="preserve">
+        <value>Page gap</value>
+    </data>
+    <data name="LETTER_SPACING" xml:space="preserve">
+        <value>Letter spacing</value>
+    </data>
 </root>

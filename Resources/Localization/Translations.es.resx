@@ -194,4 +194,10 @@
     <data name="LAST_READ" xml:space="preserve">
         <value>Última lectura</value>
     </data>
+    <data name="PAGE_GAP" xml:space="preserve">
+        <value>Espacio entre páginas</value>
+    </data>
+    <data name="LETTER_SPACING" xml:space="preserve">
+        <value>Espacio entre letras</value>
+    </data>
 </root>

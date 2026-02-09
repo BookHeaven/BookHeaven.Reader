@@ -348,6 +348,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Letter spacing.
+        /// </summary>
+        public static string LETTER_SPACING {
+            get {
+                return ResourceManager.GetString("LETTER_SPACING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Line Height.
         /// </summary>
         public static string LINE_HEIGHT {
@@ -443,6 +452,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string OPEN {
             get {
                 return ResourceManager.GetString("OPEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Page gap.
+        /// </summary>
+        public static string PAGE_GAP {
+            get {
+                return ResourceManager.GetString("PAGE_GAP", resourceCulture);
             }
         }
         
