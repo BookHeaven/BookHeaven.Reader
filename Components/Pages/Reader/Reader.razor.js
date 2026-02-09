@@ -19,16 +19,12 @@ export function SetDotNetReference(dotnet) {
 }
 
 export async function GetPageCount() {
-    let pageWidth = page.offsetWidth;
-
-    /*let pagesPrev = (pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : null);
-    let pages = Math.round(parseFloat((page.scrollWidth / pageWidth).toFixed(1)));
-    let pagesNext = (pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : null);*/
+    let pageWidth = page.offsetWidth + parseFloat(getComputedStyle(page).getPropertyValue('--page-gap'));
 
     const [pagesPrev, pages, pagesNext] = await Promise.all([
-        pagePrev.childElementCount > 0 ? Math.round(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : 1,
-        Math.round(parseFloat((page.scrollWidth / pageWidth).toFixed(1))),
-        pageNext.childElementCount > 0 ? Math.round(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : 1
+        pagePrev.childElementCount > 0 ? Math.ceil(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : 1,
+        Math.ceil(parseFloat((page.scrollWidth / pageWidth).toFixed(1))),
+        pageNext.childElementCount > 0 ? Math.ceil(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : 1
     ]);
 
     return [pagesPrev - 1, pages - 1, pagesNext - 1];
