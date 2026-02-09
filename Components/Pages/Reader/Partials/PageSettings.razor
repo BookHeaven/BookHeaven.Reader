@@ -2,6 +2,7 @@
     <NavigationSettings/>
     <RangeSlider Label="@Translations.VERTICAL_MARGIN" Min="0" Max="10" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.VerticalMargin" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.SelectedLayout))" />
     <RangeSlider Label="@Translations.HORIZONTAL_MARGIN" Min="0" Max="10" Increment="0.5m" @bind-Value="ProfileSettingsService.ProfileSettings.HorizontalMargin" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(nameof(ProfileSettings.HorizontalMargin))"  />
+    <RangeSlider Label="@Translations.PAGE_GAP" Min="0" Max="500" Increment="10" @bind-Value="ProfileSettingsService.ProfileSettings.PageGap" @bind-Value:after="() => ProfileSettingsService.OnProfileSettingsChanged?.Invoke(null)"/>
 </div>
 
 @code {
