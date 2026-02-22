@@ -18,20 +18,24 @@ public static class MauiProgram
 		
 	public static MauiApp CreateMauiApp()
 	{
-		Directory.CreateDirectory(BooksPath);
-		Directory.CreateDirectory(CoversPath);
-		Directory.CreateDirectory(CachePath);
-		Directory.CreateDirectory(FontsPath);
 
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
 			.UseMauiCommunityToolkit();
 
-		builder.Services.AddDomain(BooksPath, CoversPath, FontsPath, FileSystem.AppDataDirectory);
-		builder.Services.AddEbookManager(CachePath);
-			
-			
+		builder.Services.AddDomain(options =>
+		{
+			options.BooksPath = BooksPath;
+			options.CoversPath = CoversPath;
+			options.FontsPath = FontsPath;
+			options.DatabasePath = FileSystem.AppDataDirectory;
+		});
+		builder.Services.AddEbookManager(options =>
+		{
+			options.CachePath = CachePath;
+		});
+		
 		builder.Services.AddSingleton<AppStateService>();
 		builder.Services.AddSingleton<LifeCycleService>();
 		builder.Services.AddSingleton<UdpBroadcastClient>();
