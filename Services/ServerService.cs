@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using BookHeaven.Domain;
 using Microsoft.Extensions.Logging;
 using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Extensions;
@@ -149,7 +150,7 @@ public class ServerService(
 			if (getBook.IsSuccess)
 			{
 				//If the book is already downloaded, we remove the local cache
-				Directory.EnumerateFiles(MauiProgram.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
+				Directory.EnumerateFiles(DomainGlobals.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
 				saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
 			}
 			else

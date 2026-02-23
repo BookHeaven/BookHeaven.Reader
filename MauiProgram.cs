@@ -11,11 +11,6 @@ namespace BookHeaven.Reader;
 
 public static class MauiProgram
 {
-	public static readonly string BooksPath = Path.Combine(FileSystem.AppDataDirectory, "books");
-	public static readonly string CoversPath = Path.Combine(FileSystem.AppDataDirectory, "covers");
-	public static readonly string CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
-	public static readonly string FontsPath = Path.Combine(FileSystem.AppDataDirectory, "fonts");
-		
 	public static MauiApp CreateMauiApp()
 	{
 
@@ -26,14 +21,14 @@ public static class MauiProgram
 
 		builder.Services.AddDomain(options =>
 		{
-			options.BooksPath = BooksPath;
-			options.CoversPath = CoversPath;
-			options.FontsPath = FontsPath;
+			options.BooksPath = Path.Combine(FileSystem.AppDataDirectory, "books");
+			options.CoversPath = Path.Combine(FileSystem.AppDataDirectory, "covers");
+			options.FontsPath = Path.Combine(FileSystem.AppDataDirectory, "fonts");
 			options.DatabasePath = FileSystem.AppDataDirectory;
 		});
 		builder.Services.AddEbookManager(options =>
 		{
-			options.CachePath = CachePath;
+			options.CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
 		});
 		
 		builder.Services.AddSingleton<AppStateService>();
