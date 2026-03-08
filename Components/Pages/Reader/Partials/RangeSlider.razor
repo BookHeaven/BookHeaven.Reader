@@ -18,6 +18,19 @@
     [Parameter] public decimal Value { get; set; }
     [Parameter] public EventCallback<decimal> ValueChanged { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        if(Value < Min)
+        {
+            Value = Min;
+        }
+        else if(Value > Max)
+        {
+            Value = Max;
+        }
+        await ValueChanged.InvokeAsync(Value);
+    }
+
     private async Task AddAmount(decimal amount)
     {
         if ((amount > 0 && Value + amount <= Max) || (amount < 0 && Value + amount >= Min))
