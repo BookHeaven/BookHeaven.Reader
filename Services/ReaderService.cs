@@ -19,6 +19,10 @@ public class ReaderService
         TotalPagesPrev = totalPagesPrev ?? 0;
         TotalPagesNext = totalPagesNext ?? 0;
         TotalPages = totalPages;
+        if (CurrentPage > totalPages)
+        {
+            CurrentPage = totalPages;
+        }
         OnTotalPagesChanged?.Invoke();
     }
     
