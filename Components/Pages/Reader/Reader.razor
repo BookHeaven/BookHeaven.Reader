@@ -74,6 +74,7 @@
 			break-inside: avoid !important;
 			max-width: 100%;
 			max-height: var(--page-height) !important;
+			float: none !important;
 		}
 
 		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",:scope > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",:scope > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",:scope > .chapter.next .{Next.ParagraphClassName}" : "")}") {
