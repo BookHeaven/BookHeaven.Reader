@@ -86,7 +86,7 @@ public partial class Reader : IAsyncDisposable
                 activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
     #endif
 
-            var bookTask = Sender.Send(new GetBook.Query(Id));
+            var bookTask = Sender.Send(new GetBook.Query {BookId = Id});
             var bookProgressTask = Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
 
             await Task.WhenAll(bookTask, bookProgressTask);

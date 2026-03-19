@@ -146,7 +146,7 @@ public class ServerService(
 			var epubUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
 
 			Result saveBook;
-			var getBook = await sender.Send(new GetBook.Query(book.BookId));
+			var getBook = await sender.Send(new GetBook.Query {BookId = book.BookId});
 			if (getBook.IsSuccess)
 			{
 				//If the book is already downloaded, we remove the local cache
