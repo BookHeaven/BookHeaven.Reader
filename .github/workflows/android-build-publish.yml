@@ -142,6 +142,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ env.VERSION }}
+        body_path: ./BookHeaven/BookHeaven.Reader/ReleaseNotes.md
         generate_release_notes: true
         make_latest: true
         files: |
