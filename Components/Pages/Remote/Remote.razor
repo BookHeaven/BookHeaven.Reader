@@ -21,12 +21,12 @@
 }
 <div class="flex h-full flex-col bg-[lightgray]">
     <div class="my-2 mx-3">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-2">
             <RadioButtonGroup @bind-SelectedOption="_selectedFilter" @bind-SelectedOption:after="FilterChanged">
                 <RadioButton Option="@Filters.Missing" Label="@Translations.BY_MISSING" />
                 <RadioButton Option="@Filters.All" Label="@Domain.Localization.Translations.ALL_M"/>
             </RadioButtonGroup>
-            @* <SearchBar /> *@
+             @* <SearchBar /> *@
         </div>
     </div>
     <div class="flex-1 overflow-hidden">
