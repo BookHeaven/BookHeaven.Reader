@@ -9,7 +9,7 @@ using BookHeaven.Domain.Features.Fonts;
 using BookHeaven.Domain.Features.Profiles;
 using BookHeaven.Domain.Features.ProfileSettingss;
 using BookHeaven.Domain.Shared;
-using MediatR;
+using Mediator;
 using Font = BookHeaven.Domain.Entities.Font;
 
 namespace BookHeaven.Reader.Services;

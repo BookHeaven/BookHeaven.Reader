@@ -7,7 +7,7 @@ using BookHeaven.Domain.Services;
 using BookHeaven.Reader.Extensions;
 using BookHeaven.Reader.Resources.Localization;
 using BookHeaven.Reader.Services;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Books;

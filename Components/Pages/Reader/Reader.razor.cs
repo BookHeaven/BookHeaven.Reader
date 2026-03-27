@@ -8,7 +8,7 @@ using BookHeaven.EbookManager.Entities;
 using BookHeaven.EbookManager.Enums;
 using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -86,12 +86,7 @@ public partial class Reader : IAsyncDisposable
                 activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
     #endif
 
-            var bookTask = Sender.Send(new GetBook.Query {BookId = Id});
-            var bookProgressTask = Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
-
-            await Task.WhenAll(bookTask, bookProgressTask);
-
-            var getBook = await bookTask;
+            var getBook = await Sender.Send(new GetBook.Query {BookId = Id});
             if (getBook.IsFailure)
             {
                 await Toast.Make(getBook.Error.Description).Show();
@@ -100,7 +95,7 @@ public partial class Reader : IAsyncDisposable
             _book = getBook.Value;
             AppStateService.CurrentScreenSaverCoverPath = _book.CoverPath();
             
-            var getBookProgress = await bookProgressTask;
+            var getBookProgress = await Sender.Send(new GetBookProgressByProfile.Query(Id, AppStateService.ProfileId));
             if (getBookProgress.IsFailure)
             {
                 await Toast.Make(getBookProgress.Error.Description).Show();
