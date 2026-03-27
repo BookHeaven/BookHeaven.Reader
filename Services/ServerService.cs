@@ -1,15 +1,12 @@
 ﻿using System.Net.Http.Json;
 using BookHeaven.Domain;
 using Microsoft.Extensions.Logging;
-using BookHeaven.Domain.Entities;
-using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
 using BookHeaven.Domain.Features.Fonts;
 using BookHeaven.Domain.Features.Profiles;
 using BookHeaven.Domain.Features.ProfileSettingss;
 using BookHeaven.Domain.Shared;
-using Mediator;
 using Font = BookHeaven.Domain.Entities.Font;
 
 namespace BookHeaven.Reader.Services;

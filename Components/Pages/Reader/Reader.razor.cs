@@ -1,14 +1,10 @@
-using BookHeaven.Domain.Entities;
-using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Features.BooksProgress;
 using BookHeaven.EbookManager;
 using BookHeaven.EbookManager.Abstractions;
 using BookHeaven.EbookManager.Entities;
 using BookHeaven.EbookManager.Enums;
-using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
-using Mediator;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 

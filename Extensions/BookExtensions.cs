@@ -1,5 +1,4 @@
-﻿using BookHeaven.Domain.Entities;
-using BookHeaven.EbookManager;
+﻿using BookHeaven.EbookManager;
 using BookHeaven.Reader.Enums;
 
 namespace BookHeaven.Reader.Extensions;

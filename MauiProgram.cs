@@ -1,8 +1,6 @@
 ﻿using BlazorPanzoom;
 using BookHeaven.Domain;
 using BookHeaven.Domain.Abstractions;
-using BookHeaven.Reader.Interfaces;
-using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui;
 using BookHeaven.EbookManager;
 using Microsoft.Extensions.Logging;

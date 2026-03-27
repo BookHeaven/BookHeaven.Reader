@@ -1,6 +1,5 @@
 ﻿using Android.App;
 using Android.Content;
-using BookHeaven.Reader.Services;
 
 namespace BookHeaven.Reader.BroadcastReceivers;
 

@@ -1,13 +1,7 @@
 using BookHeaven.Domain.Abstractions;
-using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Enums;
-using BookHeaven.Domain.Extensions;
 using BookHeaven.Domain.Features.Books;
 using BookHeaven.Domain.Services;
-using BookHeaven.Reader.Extensions;
-using BookHeaven.Reader.Resources.Localization;
-using BookHeaven.Reader.Services;
-using Mediator;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Books;

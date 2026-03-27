@@ -1,7 +1,4 @@
-﻿using BookHeaven.Domain.Entities;
-using BookHeaven.Reader.Resources.Localization;
-using BookHeaven.Reader.Services;
-using CommunityToolkit.Maui.Alerts;
+﻿using CommunityToolkit.Maui.Alerts;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote.Partials;

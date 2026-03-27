@@ -5,7 +5,6 @@ using Android.Provider;
 using Android.OS;
 using Android.Net;
 using Android.Graphics.Drawables;
-using BookHeaven.Reader.Interfaces;
 using BookHeaven.Reader.Entities;
 using BookHeaven.Reader.Helpers;
 using AppInfo = BookHeaven.Reader.Entities.AppInfo;

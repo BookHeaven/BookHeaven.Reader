@@ -1,6 +1,4 @@
-﻿using BookHeaven.Domain.Entities;
-using BookHeaven.Domain.Features.ProfileSettingss;
-using Mediator;
+﻿using BookHeaven.Domain.Features.ProfileSettingss;
 
 namespace BookHeaven.Reader.Services;
 

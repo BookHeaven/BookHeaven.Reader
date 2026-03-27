@@ -1,6 +1,4 @@
-﻿using BookHeaven.Reader.Interfaces;
-using BookHeaven.Reader.Services;
-using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
+﻿using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
 using Application = Microsoft.Maui.Controls.Application;
 
 namespace BookHeaven.Reader;

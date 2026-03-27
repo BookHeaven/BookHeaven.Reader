@@ -1,7 +1,4 @@
-using BookHeaven.Domain.Entities;
 using BookHeaven.Domain.Features.Books;
-using BookHeaven.Reader.Services;
-using Mediator;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote;

@@ -1,9 +1,6 @@
 using BookHeaven.Domain.Features.ProfileSettingss;
-using BookHeaven.Reader.Resources.Localization;
-using BookHeaven.Reader.Services;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
-using Mediator;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Layout;
