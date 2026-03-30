@@ -64,6 +64,9 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.0.x
+        source-url: https://nuget.pkg.github.com/BookHeaven/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.PAT_TOKEN }}
         
     - name: Install workload
       run: dotnet workload install maui-android
@@ -74,44 +77,41 @@ jobs:
         node-version: latest
         cache: 'npm'
     
-    - name: Move to BookHeaven directory
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Reader -Force
-        Get-ChildItem -Path . -Exclude BookHeaven | Move-Item -Destination BookHeaven\BookHeaven.Reader -Force
+#    - name: Move to BookHeaven directory
+#      shell: pwsh
+#      run: |
+#        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Reader -Force
+#        Get-ChildItem -Path . -Exclude BookHeaven | Move-Item -Destination BookHeaven\BookHeaven.Reader -Force
         
-    - name: Clone EbookManager
-      shell: pwsh
-      run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.EbookManager.git temp\BookHeaven.EbookManager
-        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.EbookManager -Force
-        Get-ChildItem -Path temp\BookHeaven.EbookManager | Move-Item -Destination BookHeaven\BookHeaven.EbookManager -Force
-        
-    - name: Clone BookHeaven.Domain
-      shell: pwsh
-      run: |
-        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.Domain.git temp\BookHeaven.Domain
-        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
-        Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
+#    - name: Clone EbookManager
+#      shell: pwsh
+#      run: |
+#        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.EbookManager.git temp\BookHeaven.EbookManager
+#        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.EbookManager -Force
+#        Get-ChildItem -Path temp\BookHeaven.EbookManager | Move-Item -Destination BookHeaven\BookHeaven.EbookManager -Force
+#        
+#    - name: Clone BookHeaven.Domain
+#      shell: pwsh
+#      run: |
+#        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.Domain.git temp\BookHeaven.Domain
+#        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
+#        Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
         
     - name: Cache NuGet packages
       uses: actions/cache@v3
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('BookHeaven/BookHeaven.Reader/**/*.csproj') }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('BookHeaven.Reader.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
 
     - name: Install npm packages
-      working-directory: .\BookHeaven\BookHeaven.Reader
       run: npm ci
 
     - name: Build tailwindcss
-      working-directory: .\BookHeaven\BookHeaven.Reader
       run: npm run tailwindcss:build
     
     - name: Restore dependencies
-      working-directory: .\BookHeaven\BookHeaven.Reader
       run: dotnet restore
 
     - name: Setup keystore file
@@ -122,9 +122,8 @@ jobs:
         encodedString: ${{ secrets.KEYSTORE_BASE64 }}
     
     - name: Publish
-      working-directory: .\BookHeaven
       run: |
-          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f ${{ env.DOTNET_ANDROID_VERSION }} /p:RuntimeIdentifiers=android-arm;android-arm64 /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
+          dotnet publish .\BookHeaven.Reader.csproj -c Release -f ${{ env.DOTNET_ANDROID_VERSION }} /p:RuntimeIdentifiers=android-arm;android-arm64 /p:UseNuget=true /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
     
     - name: Create Tag
       uses: actions/github-script@v7
@@ -142,9 +141,9 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ env.VERSION }}
-        body_path: ./BookHeaven/BookHeaven.Reader/ReleaseNotes.md
+        body_path: ./ReleaseNotes.md
         generate_release_notes: true
         make_latest: true
         files: |
-            ./BookHeaven/BookHeaven.Reader/bin/Release/${{ env.DOTNET_ANDROID_VERSION }}/publish/dev.ggarrido.bookheaven-Signed.apk
-            ./BookHeaven/BookHeaven.Reader/bin/Release/${{ env.DOTNET_ANDROID_VERSION }}/publish/dev.ggarrido.bookheaven-Signed.aab
+            ./bin/Release/${{ env.DOTNET_ANDROID_VERSION }}/publish/dev.ggarrido.bookheaven-Signed.apk
+            ./bin/Release/${{ env.DOTNET_ANDROID_VERSION }}/publish/dev.ggarrido.bookheaven-Signed.aab
