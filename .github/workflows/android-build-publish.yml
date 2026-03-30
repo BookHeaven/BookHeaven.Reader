@@ -124,7 +124,7 @@ jobs:
     - name: Publish
       working-directory: .\BookHeaven
       run: |
-          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f ${{ env.DOTNET_ANDROID_VERSION }} /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
+          dotnet publish .\BookHeaven.Reader\BookHeaven.Reader.csproj -c Release -f ${{ env.DOTNET_ANDROID_VERSION }} /p:RuntimeIdentifiers=android-arm;android-arm64 /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
     
     - name: Create Tag
       uses: actions/github-script@v7
