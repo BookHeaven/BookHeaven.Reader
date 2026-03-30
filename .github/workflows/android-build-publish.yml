@@ -76,26 +76,6 @@ jobs:
       with:
         node-version: latest
         cache: 'npm'
-    
-#    - name: Move to BookHeaven directory
-#      shell: pwsh
-#      run: |
-#        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Reader -Force
-#        Get-ChildItem -Path . -Exclude BookHeaven | Move-Item -Destination BookHeaven\BookHeaven.Reader -Force
-        
-#    - name: Clone EbookManager
-#      shell: pwsh
-#      run: |
-#        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.EbookManager.git temp\BookHeaven.EbookManager
-#        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.EbookManager -Force
-#        Get-ChildItem -Path temp\BookHeaven.EbookManager | Move-Item -Destination BookHeaven\BookHeaven.EbookManager -Force
-#        
-#    - name: Clone BookHeaven.Domain
-#      shell: pwsh
-#      run: |
-#        git clone https://${{ secrets.PAT_TOKEN }}@github.com/BookHeaven/BookHeaven.Domain.git temp\BookHeaven.Domain
-#        New-Item -ItemType Directory -Path BookHeaven\BookHeaven.Domain -Force
-#        Get-ChildItem -Path temp\BookHeaven.Domain | Move-Item -Destination BookHeaven\BookHeaven.Domain -Force
         
     - name: Cache NuGet packages
       uses: actions/cache@v3
@@ -112,7 +92,7 @@ jobs:
       run: npm run tailwindcss:build
     
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore /p:UseNuget=true
 
     - name: Setup keystore file
       id: decode_keystore
