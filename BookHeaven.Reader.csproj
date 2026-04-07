@@ -41,8 +41,11 @@
     <RunAOTCompilation>False</RunAOTCompilation>
     <PublishTrimmed>False</PublishTrimmed>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='net10.0-android'">
+  <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(IsPublishing)' != 'true'">
     <RuntimeIdentifiers>android-x86;android-x64;android-arm;android-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(IsPublishing)' == 'true'">
+    <RuntimeIdentifiers>android-arm;android-arm64</RuntimeIdentifiers>
   </PropertyGroup>
   <ItemGroup>
     <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" Include="Resources\AppIcon\appiconfg.svg" />
