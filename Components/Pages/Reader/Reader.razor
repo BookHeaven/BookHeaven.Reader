@@ -29,7 +29,7 @@
 			--page-height: calc((100vh - var(--info-bar-height)) - ((var(--margin-vertical) * 1rem)*2));
 			--page-width: calc(100vw - ((var(--margin-horizontal) * 1rem)*2));
 			
-			@@media (min-width: 800px) {
+			@@media (min-width: 800px) and (orientation: landscape) {
 				--column-count: 2;
 				--page-gap: @ProfileSettingsService.ProfileSettings.PageGap.ToString("0.00", CultureInfo.InvariantCulture);
 				--page-width: calc(((100vw - (var(--page-gap) * 1px)) - ((var(--margin-horizontal) * 1rem)*2)) / 2);
@@ -147,7 +147,7 @@
 	IsTocEmpty="_ebook?.Content.TableOfContents.Count == 0"/>
 
 <TableOfContents
-	Chapters="@_ebook?.Content.TableOfContents"
+	Chapters="@_ebook?.Content.TableOfContents!"
 	CurrentChapterId="@Current?.Identifier"/>
 
 
