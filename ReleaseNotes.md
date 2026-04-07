@@ -1,2 +1,2 @@
 ﻿# Fixes
-- Make the two column layout work only in landscape orientation ([#3](https://github.com/BookHeaven/BookHeaven.Reader/issues/3))
+- Make the two column layout apply only to landscape orientation by default ([#3](https://github.com/BookHeaven/BookHeaven.Reader/issues/3))
