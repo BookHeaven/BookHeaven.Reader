@@ -78,7 +78,7 @@ jobs:
         cache: 'npm'
         
     - name: Cache NuGet packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
         key: ${{ runner.os }}-nuget-${{ hashFiles('BookHeaven.Reader.csproj') }}
