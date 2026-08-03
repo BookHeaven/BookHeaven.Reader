@@ -49,6 +49,19 @@ public static class MauiProgram
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
-		return builder.Build();
+		
+		var app = builder.Build();
+
+		using (var scope = app.Services.CreateScope())
+		{
+			var appStateService = scope.ServiceProvider.GetRequiredService<AppStateService>();
+
+			if (appStateService.DeviceId == Guid.Empty)
+			{
+				appStateService.DeviceId = Guid.NewGuid();
+			}
+		}
+		
+		return app;
 	}
 }
