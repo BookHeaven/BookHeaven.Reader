@@ -4,10 +4,15 @@ public class AppStateService
 {
     public string? CurrentScreenSaverCoverPath { get; set; }
     
-    
     public Action<string>? OnProfileNameChanged;
     
     public Action? OnTemperatureSettingsChanged;
+    
+    public Guid DeviceId
+    {
+        get => Get<Guid>(nameof(DeviceId));
+        set => Set(nameof(DeviceId), value);
+    }
     
     public string? ServerUrl
     {
