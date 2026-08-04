@@ -3,7 +3,6 @@ using BookHeaven.Domain;
 using BookHeaven.Domain.Abstractions;
 using CommunityToolkit.Maui;
 using BookHeaven.EbookManager;
-using Microsoft.Extensions.Logging;
 
 namespace BookHeaven.Reader;
 
