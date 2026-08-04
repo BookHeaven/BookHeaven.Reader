@@ -139,7 +139,7 @@ public class ServerService(
 	{
 		try
 		{
-			var coverUrl = new Uri(_httpClient.BaseAddress!,book.CoverUrl());
+			var coverUrl = new Uri(_httpClient.BaseAddress!,"/covers/" + book.BookId + ".jpg");
 			var epubUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
 
 			Result saveBook;
