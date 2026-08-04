@@ -27,11 +27,16 @@
             ReaderService.OnPageChanged += RefreshUi;
             ReaderService.OnChapterChanged += RefreshUi;
             ReaderService.OnTotalPagesChanged += RefreshUi;
-            RefreshUi();
+            await ProcessTitle();
         }
     }
-    
-    private async void RefreshUi()
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ProcessTitle();
+    }
+
+    private async Task ProcessTitle()
     {
         if (_module is null) return;
         try
@@ -62,6 +67,11 @@
         {
             await InvokeAsync(StateHasChanged);
         }
+    }
+
+    private void RefreshUi()
+    {
+        InvokeAsync(StateHasChanged);
     }
     
     public void Dispose()
