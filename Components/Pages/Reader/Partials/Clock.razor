@@ -6,22 +6,32 @@
 
 @code {
     string _clock = DateTime.Now.ToString("HH:mm");
-    readonly Timer _clockTimer = new() { Interval = 1000 };
+    readonly Timer _clockTimer = new() { Interval = 1000, AutoReset = false };
+    
+    private readonly double _interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
     
     protected override void OnInitialized()
     {
         _clockTimer.Elapsed += OnTimerTick;
+        var now = DateTime.Now;
+        var msToNextMinute = (60 - now.Second) * 1000 - now.Millisecond;
+        if (msToNextMinute <= 0) msToNextMinute = 1000;
+        _clockTimer.Interval = msToNextMinute;
         _clockTimer.Start();
     }
 
     private void OnTimerTick(object? sender, EventArgs e)
     {
-        var time = DateTime.Now.ToString("HH:mm");
-        if (time == _clock)
-            return;
-        
-        _clock = time;
+        _clock = DateTime.Now.ToString("HH:mm");
         InvokeAsync(StateHasChanged);
+
+        // After first tick (alignment), switch to 60s repeating updates
+        if (_clockTimer.Interval != _interval)
+        {
+            _clockTimer.Interval = _interval;
+            _clockTimer.AutoReset = true;
+            _clockTimer.Start();
+        }
     }
 
     public void Dispose()
