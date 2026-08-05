@@ -1,2 +1,2 @@
 ﻿# Fixes
-- Fixed an issue when downloading books that was causing the placeholder image to be downloaded instead of the book's cover.
+- Fixed an issue that would cause the system clock to not update
