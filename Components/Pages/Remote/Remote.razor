@@ -22,11 +22,11 @@
 <div class="flex h-full flex-col bg-[lightgray]">
     <div class="my-2 mx-3">
         <div class="flex items-center justify-between gap-2">
-            <RadioButtonGroup @bind-SelectedOption="_selectedFilter" @bind-SelectedOption:after="FilterChanged">
-                <RadioButton Option="@Filters.Missing" Label="@Translations.BY_MISSING" />
-                <RadioButton Option="@Filters.All" Label="@Domain.Localization.Translations.ALL_M"/>
+            <RadioButtonGroup @bind-SelectedOption="_selectedBookStatus" @bind-SelectedOption:after="FilterBooks">
+                <RadioButton Option="@BookStatus.Missing" Label="@Translations.BY_MISSING" />
+                <RadioButton Option="@BookStatus.All" Label="@Domain.Localization.Translations.ALL_M"/>
             </RadioButtonGroup>
-             @* <SearchBar /> *@
+             <SearchBar @bind-Filter="_filter" @bind-Filter:after="FilterBooks" />
         </div>
     </div>
     <div class="flex-1 overflow-hidden">
@@ -34,7 +34,7 @@
         {
             <Message Content="@Translations.LOADING"/>
         }
-        else if (_filteredBooks.Count == 0)
+        else if (!_filteredBooks.Any())
         {
             <Message Content="@Translations.BOOKS_NO_FILTER_MATCH"/>
         }
@@ -43,7 +43,7 @@
             <div class="grid h-full grid-cols-1 grid-rows-6 gap-2 px-2 xs:grid-cols-2 xs:grid-rows-3">
                 @foreach (var book in CurrentPageBooks)
                 {
-                    <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="FilterBooks"/>
+                    <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="HandleBookDownloaded"/>
                 }
             </div>
         }
@@ -52,7 +52,7 @@
     {
         <div class="flex justify-center">
             <Pagination
-                ItemCount="@_filteredBooks?.Count"
+                ItemCount="@_filteredBooks?.Count()"
                 ItemsPerPage="ItemsPerPage"
                 @bind-CurrentPage="_currentPage" />
         </div>

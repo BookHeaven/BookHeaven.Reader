@@ -9,7 +9,7 @@ public partial class RemoteBook
     [Parameter] public IServerService ServerService { get; set; } = null!;
     [Parameter] public Book Book { get; set; } = null!;
     
-    [Parameter] public EventCallback OnBookDownloaded { get; set; }
+    [Parameter] public EventCallback<Guid> OnBookDownloaded { get; set; }
     
     private string _serverUrl = null!;
     private bool Downloading { get; set; }
@@ -32,6 +32,6 @@ public partial class RemoteBook
             return;
         }
         await Toast.Make(Translations.DOWNLOAD_SUCCESS).Show();
-        await OnBookDownloaded.InvokeAsync();
+        await OnBookDownloaded.InvokeAsync(book.BookId);
     }
 }

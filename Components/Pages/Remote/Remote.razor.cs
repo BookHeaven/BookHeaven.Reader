@@ -15,19 +15,15 @@ public partial class Remote
     private List<Book>? _books;
     private bool _canConnect = true;
     private string _connectError = string.Empty;
-    private List<Guid>? _deviceBooks = [];
-    private List<Book>? _filteredBooks;
+    private HashSet<Guid>? _deviceBooks = [];
+    private IEnumerable<Book>? _filteredBooks;
     private List<Book> CurrentPageBooks => _filteredBooks?.Skip((_currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList() ?? [];
-    private Filters _selectedFilter = Filters.Missing;
+    private BookStatus _selectedBookStatus = BookStatus.Missing;
+    private string _filter = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         await GetData();
-        /*var getFonts = await Sender.Send(new GetAllFonts.Query());
-        if (getFonts is { IsSuccess: true, Value.Count: 0 })
-        {
-            _ = ServerService.DownloadFonts();
-        }*/
     }
 
     private async Task OnReconnectButtonClick()
@@ -57,31 +53,36 @@ public partial class Remote
             return;
         }
         _books = getBooks.Value.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
-        await FilterBooks();
+        await GetDownloadedBooks();
+        FilterBooks();
     }
 
-    private async Task FilterChanged()
+    private void FilterBooks()
     {
-        await FilterBooks();
-    }
-
-    private async Task FilterBooks()
-    {
-        switch (_selectedFilter)
+        switch (_selectedBookStatus)
         {
-            case Filters.All:
+            case BookStatus.All:
                 _filteredBooks = _books;
                 break;
-            case Filters.Missing:
+            case BookStatus.Missing:
             {
-                await GetDownloadedBooks();
-                _filteredBooks = _books?.Where(x => _deviceBooks?.Contains(x.BookId) == false).OrderBy(x => x.Author?.Name)
-                    .ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
+                _filteredBooks = _books?.Where(x => _deviceBooks?.Contains(x.BookId) == false);
                 break;
             }
             default:
                 throw new ArgumentOutOfRangeException();
         }
+        
+        if(!string.IsNullOrEmpty(_filter))
+        {
+            _filteredBooks = _filteredBooks?
+                .Where(x => x.Title?.Contains(_filter, StringComparison.OrdinalIgnoreCase) == true 
+                            || x.Author?.Name?.Contains(_filter, StringComparison.OrdinalIgnoreCase) == true
+                            || x.Series?.Name?.Contains(_filter, StringComparison.OrdinalIgnoreCase) == true);
+        }
+
+        _filteredBooks = _filteredBooks?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
+        
         _currentPage = 1;
     }
 
@@ -90,11 +91,17 @@ public partial class Remote
         var getBooks = await Sender.Send(new GetAllBooks.Query());
         if (getBooks.IsSuccess)
         {
-            _deviceBooks = getBooks.Value.Select(x => x.BookId).ToList();
+            _deviceBooks = getBooks.Value.Select(x => x.BookId).ToHashSet();
         }
     }
 
-    private enum Filters
+    private void HandleBookDownloaded(Guid bookId)
+    {
+        _deviceBooks?.Add(bookId);
+        FilterBooks();
+    }
+
+    private enum BookStatus
     {
         All,
         Missing
