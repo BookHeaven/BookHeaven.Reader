@@ -1,44 +1,51 @@
-﻿@using System.Timers
-@implements IDisposable
+﻿@implements IDisposable
 <div>
     @_clock
 </div>
 
 @code {
     string _clock = DateTime.Now.ToString("HH:mm");
-    readonly Timer _clockTimer = new() { Interval = 1000, AutoReset = false };
-    
-    private readonly double _interval = TimeSpan.FromMinutes(1).TotalMilliseconds;
-    
-    protected override void OnInitialized()
+    PeriodicTimer? _clockTimer;
+    CancellationTokenSource? _timerCts;
+
+    protected override async Task OnInitializedAsync()
     {
-        _clockTimer.Elapsed += OnTimerTick;
         var now = DateTime.Now;
         var msToNextMinute = (60 - now.Second) * 1000 - now.Millisecond;
         if (msToNextMinute <= 0) msToNextMinute = 1000;
-        _clockTimer.Interval = msToNextMinute;
-        _clockTimer.Start();
+        await Task.Delay(msToNextMinute);
+        _clock = DateTime.Now.ToString("HH:mm");
+        StateHasChanged();
+
+        
+        _ = RunTimerAsync();
     }
 
-    private void OnTimerTick(object? sender, EventArgs e)
+    private async Task RunTimerAsync()
     {
-        _clock = DateTime.Now.ToString("HH:mm");
-        InvokeAsync(StateHasChanged);
+        _timerCts = new CancellationTokenSource();
+        _clockTimer = new PeriodicTimer(TimeSpan.FromMinutes(1));
 
-        // After first tick (alignment), switch to 60s repeating updates
-        if (_clockTimer.Interval != _interval)
+        try
         {
-            _clockTimer.Interval = _interval;
-            _clockTimer.AutoReset = true;
-            _clockTimer.Start();
+            while (await _clockTimer.WaitForNextTickAsync(_timerCts.Token))
+            {
+                await InvokeAsync(() =>
+                {
+                    _clock = DateTime.Now.ToString("HH:mm");
+                    StateHasChanged();
+                });
+            }
         }
+        catch (OperationCanceledException) { }
+        catch (ObjectDisposedException) { }
     }
 
     public void Dispose()
     {
-        _clockTimer.Elapsed -= OnTimerTick;
-        _clockTimer.Stop();
-        _clockTimer.Dispose();
+        _timerCts?.Cancel();
+        _timerCts?.Dispose();
+        _clockTimer?.Dispose();
         GC.SuppressFinalize(this);
     }
 }
