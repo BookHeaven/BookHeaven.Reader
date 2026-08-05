@@ -1,44 +1,32 @@
-﻿@implements IDisposable
+﻿@using System.Timers
+@implements IDisposable
 <div>
     @_clock
 </div>
 
 @code {
     string _clock = DateTime.Now.ToString("HH:mm");
-    IDispatcherTimer? _clockTimer;
+    readonly Timer _clockTimer = new() { Interval = 1000 };
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var now = DateTime.Now;
-        var msToNextMinute = (60 - now.Second) * 1000 - now.Millisecond;
-        if (msToNextMinute <= 0) msToNextMinute = 1000;
-        await Task.Delay(msToNextMinute);
-        _clock = DateTime.Now.ToString("HH:mm");
-        StateHasChanged(); 
-        RunTimer();
+        _clockTimer.Elapsed += OnTimerTick;
+        _clockTimer.Start();
     }
 
-    private void RunTimer()
+    private void OnTimerTick(object? sender, EventArgs e)
     {
-        _clockTimer = Application.Current?.Dispatcher.CreateTimer();
+        var time = DateTime.Now.ToString("HH:mm");
+        if (time == _clock)
+            return;
         
-        if(_clockTimer is null) return;
-        
-        _clockTimer.Interval = TimeSpan.FromMinutes(1);
-        _clockTimer.Tick += (s, e) =>
-        {
-            InvokeAsync(() =>
-            {
-                _clock = DateTime.Now.ToString("HH:mm");
-                StateHasChanged();
-            });
-        };
-        _clockTimer.Start();
+        _clock = time;
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        _clockTimer?.Stop();
+        _clockTimer.Dispose();
         GC.SuppressFinalize(this);
     }
 }
