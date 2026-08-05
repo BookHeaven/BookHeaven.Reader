@@ -5,8 +5,7 @@
 
 @code {
     string _clock = DateTime.Now.ToString("HH:mm");
-    PeriodicTimer? _clockTimer;
-    CancellationTokenSource? _timerCts;
+    IDispatcherTimer? _clockTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -15,37 +14,31 @@
         if (msToNextMinute <= 0) msToNextMinute = 1000;
         await Task.Delay(msToNextMinute);
         _clock = DateTime.Now.ToString("HH:mm");
-        StateHasChanged();
-
-        
-        _ = RunTimerAsync();
+        StateHasChanged(); 
+        RunTimer();
     }
 
-    private async Task RunTimerAsync()
+    private void RunTimer()
     {
-        _timerCts = new CancellationTokenSource();
-        _clockTimer = new PeriodicTimer(TimeSpan.FromMinutes(1));
-
-        try
+        _clockTimer = Application.Current?.Dispatcher.CreateTimer();
+        
+        if(_clockTimer is null) return;
+        
+        _clockTimer.Interval = TimeSpan.FromMinutes(1);
+        _clockTimer.Tick += (s, e) =>
         {
-            while (await _clockTimer.WaitForNextTickAsync(_timerCts.Token))
+            InvokeAsync(() =>
             {
-                await InvokeAsync(() =>
-                {
-                    _clock = DateTime.Now.ToString("HH:mm");
-                    StateHasChanged();
-                });
-            }
-        }
-        catch (OperationCanceledException) { }
-        catch (ObjectDisposedException) { }
+                _clock = DateTime.Now.ToString("HH:mm");
+                StateHasChanged();
+            });
+        };
+        _clockTimer.Start();
     }
 
     public void Dispose()
     {
-        _timerCts?.Cancel();
-        _timerCts?.Dispose();
-        _clockTimer?.Dispose();
+        _clockTimer?.Stop();
         GC.SuppressFinalize(this);
     }
 }
