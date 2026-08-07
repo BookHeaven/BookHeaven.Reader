@@ -17,7 +17,6 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 ## :warning: Disclaimer
 - You might need to update the WebView implementation of your device for the UI to render properly (pretty easy, more on the troubleshooting section below)
 - It won't work as standalone, it needs to connect to a Server instance to get the books (not planned, but might happen eventually)
-- Single page layout only (again, not planned, but might add better support for landscape eventually)
 - No dictionary, no notes nor highlights
 - Supports epub and PDF files only
 
