@@ -1,2 +1,2 @@
-﻿# Fixes
-- Restore previous system clock implementation since the current one just refuses to work with the published apk, despite working in the test environment with a physical device. I love programming.
+﻿# Features
+- Added a search bar to the server tab.
