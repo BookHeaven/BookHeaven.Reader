@@ -4,6 +4,11 @@
 
 <h1 align="center">BookHeaven Reader</h1>
 
+<p align="center">
+  <img alt="Reader Version" src="https://img.shields.io/github/v/release/bookheaven/bookheaven.reader?style=for-the-badge&label=Version&color=green">
+  <img alt="GitHub Downloads" src="https://img.shields.io/github/downloads/bookheaven/bookheaven.reader/total?style=for-the-badge&label=Downloads&color=blue">
+</p>
+
 BookHeaven Reader is part of the BookHeaven "ecosystem", which aims to provide a very convenient way to manage and read your ebook library.</br>
 It's an Android app optimized for e-ink displays that connects to your BookHeaven Server instance to download and read your ebooks.
 
