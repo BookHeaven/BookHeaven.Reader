@@ -15,6 +15,7 @@
 
 	@@scope (#viewer) {
 		:scope {
+			container-type: size;
 			--column-count: 1;
 			--chapter-page: @ReaderService.CurrentPage;
 			--font-size: @ProfileSettingsService.ProfileSettings.FontSize.ToString("0.00", CultureInfo.InvariantCulture);
@@ -26,13 +27,13 @@
 			--margin-vertical: @ProfileSettingsService.ProfileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--margin-horizontal: @ProfileSettingsService.ProfileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--page-gap: 6;
-			--page-height: calc((100vh - var(--info-bar-height)) - ((var(--margin-vertical) * 1rem)*2));
-			--page-width: calc(100vw - ((var(--margin-horizontal) * 1rem)*2));
+			--page-height: 100cqh;
+			--page-width: 100cqw;
 			
 			@@media (min-width: 800px) and (orientation: landscape) {
 				--column-count: 2;
 				--page-gap: @ProfileSettingsService.ProfileSettings.PageGap.ToString("0.00", CultureInfo.InvariantCulture);
-				--page-width: calc(((100vw - (var(--page-gap) * 1px)) - ((var(--margin-horizontal) * 1rem)*2)) / 2);
+				--page-width: calc((100cqw - (var(--page-gap) * 1px)) / 2);
 			}
 			
 			margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
