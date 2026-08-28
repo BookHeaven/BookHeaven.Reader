@@ -16,6 +16,7 @@ env:
   DOTNET_NOLOGO: true                     # Disable the .NET logo
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true # Disable the .NET first time experience
   DOTNET_CLI_TELEMETRY_OPTOUT: true       # Disable sending .NET CLI telemetry
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
 jobs:
   check-version:
@@ -64,6 +65,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v6
       with:
+        cache: true
         dotnet-version: 10.x
         source-url: https://nuget.pkg.github.com/BookHeaven/index.json
       env:
@@ -77,14 +79,6 @@ jobs:
       with:
         node-version: latest
         cache: 'npm'
-        
-    - name: Cache NuGet packages
-      uses: actions/cache@v6
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('BookHeaven.Reader.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
 
     - name: Install npm packages
       run: npm ci
@@ -93,7 +87,7 @@ jobs:
       run: npm run tailwindcss:build
     
     - name: Restore dependencies
-      run: dotnet restore /p:UseNuget=true
+      run: dotnet restore /p:UseNuget=true --locked-mode
 
     - name: Setup keystore file
       id: decode_keystore
