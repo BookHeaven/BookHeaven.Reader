@@ -1,14 +1,13 @@
-﻿@implements IDisposable
+﻿@using BookHeaven.Core.Features.Reader.Abstractions
+@implements IDisposable
 <div @ref="_containerRef" class="flex-1 flex items-center justify-center mx-2">
     <span @ref="_textRef" class="text-nowrap">@DisplayText</span>
-    <span @ref="_pageRef" class="ms-1 text-nowrap">(@ReaderService.CurrentPage / @ReaderService.TotalPages)</span>
+    <span @ref="_pageRef" class="ms-1 text-nowrap">(@ReaderService.State?.PageNumber / @ReaderService.State?.TotalPages)</span>
 </div>
 
 @code {
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
-    [Inject] private ReaderService ReaderService { get; set; } = null!;
-    
-    [Parameter] public string Title { get; set; } = string.Empty;
+    [Inject] private IReaderService ReaderService { get; set; } = null!;
 
     private ElementReference _containerRef;
     private ElementReference _textRef;
@@ -25,15 +24,15 @@
         {
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/ChapterTitle.razor.js");
             ReaderService.OnPageChanged += RefreshUi;
-            ReaderService.OnChapterChanged += RefreshUi;
+            ReaderService.OnChapterChanged += UpdateTitle;
             ReaderService.OnTotalPagesChanged += RefreshUi;
             await ProcessTitle();
         }
     }
 
-    protected override async Task OnParametersSetAsync()
+    private void UpdateTitle()
     {
-        await ProcessTitle();
+        _ = ProcessTitle();
     }
 
     private async Task ProcessTitle()
@@ -45,22 +44,22 @@
             var paginationWidth = await _module.InvokeAsync<double>("getElementWidth", _pageRef);
             var availableWidth = containerWidth - paginationWidth - 4; // 4px spacing fallback for .ms-1
             
-            if((containerWidth, paginationWidth, availableWidth) == _currentDimensions && _currentTitle == Title) return;
-            _currentTitle = Title;
+            if((containerWidth, paginationWidth, availableWidth) == _currentDimensions && _currentTitle == ReaderService.State?.ChapterTitle) return;
+            _currentTitle = ReaderService.State?.ChapterTitle ?? string.Empty;
             _currentDimensions = (containerWidth, paginationWidth, availableWidth);
 
-            var fullTextWidth = await _module.InvokeAsync<double>("measureTextWidth", _textRef, Title);
+            var fullTextWidth = await _module.InvokeAsync<double>("measureTextWidth", _textRef, _currentTitle);
 
             if (fullTextWidth <= availableWidth)
             {
-                DisplayText = Title;
+                DisplayText = _currentTitle;
             }
             else
             {
-                var avgCharWidth = fullTextWidth / Title.Length;
+                var avgCharWidth = fullTextWidth / (_currentTitle.Length == 0 ? 1 : _currentTitle.Length);
                 var maxChars = Math.Max(4, (int)(availableWidth / avgCharWidth));
                 var half = (maxChars - 1) / 2;
-                DisplayText = Title[..half] + "…" + Title[^half..];
+                DisplayText = _currentTitle[..half] + "…" + _currentTitle[^half..];
             }
         }
         finally
@@ -77,7 +76,7 @@
     public void Dispose()
     {
         ReaderService.OnPageChanged -= RefreshUi;
-        ReaderService.OnChapterChanged -= RefreshUi;
+        ReaderService.OnChapterChanged -= UpdateTitle;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
         _module?.DisposeAsync();
     }

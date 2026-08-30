@@ -1,10 +1,11 @@
 ﻿@inject NavigationManager NavigationManager
+@using BookHeaven.Core.Features.Reader.Abstractions
 @implements IDisposable
 @if (!OverlayService.IsOverlayVisible)
 {
     return;
 }
-<div class="absolute inset-0 z-[1000] flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
+<div class="absolute inset-0 z-1000 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
     <div class="border-bottom mb-auto flex w-full items-center gap-3 border-b-2 border-solid border-black bg-white" @onclick:stopPropagation="true">
         <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
             <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
@@ -66,7 +67,7 @@
 @code {
 
     [Inject] private OverlayService OverlayService { get; set; } = null!;
-    [Inject] private ReaderService ReaderService { get; set; } = null!;
+    [Inject] private IReaderService ReaderService { get; set; } = null!;
     [Parameter] public string? BookTitle { get; set; }
     [Parameter] public string? ChapterTitle { get; set; }
     [Parameter] public decimal Progress { get; set; }

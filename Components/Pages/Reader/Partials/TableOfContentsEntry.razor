@@ -1,11 +1,12 @@
-﻿@using BookHeaven.EbookManager.Entities
+﻿@using BookHeaven.Core.Features.Reader.Abstractions
+@using BookHeaven.EbookManager.Entities
 @implements IAsyncDisposable
 @if (Entry.Title != null)
 {
     <span id="@Entry.Id" class="flex items-center scroll-mt-40 w-full">
         @if (Entry.Entries.Count > 0)
         {
-            <Button OnClick="@ToggleCollapse">
+            <Button OnClick="() => _collapsed = !_collapsed">
                 @if (_collapsed)
                 {
                     <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
@@ -16,7 +17,7 @@
                 }
             </Button>
         }
-        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => ReaderService.OnChapterSelected?.Invoke(Entry.Id!))">@Entry.Title</Button>
+        <Button Class="@(_isSelected.Then("font-bold") + " text-left w-full !justify-start")" OnClick="@(() => ReaderService.NavigateToChapter(Entry))">@Entry.Title</Button>
     </span>
 }
 
@@ -28,7 +29,7 @@
             @foreach (var chapter in Entry.Entries)
             {
                 <li>
-                    <TableOfContentsEntry Entry="chapter" CurrentChapterId="@CurrentChapterId" />
+                    <TableOfContentsEntry Entry="chapter" />
                 </li>
             }
         </ul>
@@ -37,20 +38,18 @@
 
 @code {
     [Inject] IJSRuntime JsRuntime { get; set; } = null!;
-    [Inject] ReaderService ReaderService { get; set; } = null!;
+    [Inject] IReaderService ReaderService { get; set; } = null!;
     
     [Parameter] public TocEntry Entry { get; set; } = null!;
 
-    [Parameter] public string? CurrentChapterId { get; set; }
-
-    //[Parameter] public EventCallback<string> OnChapterSelected { get; set; }
+    [CascadingParameter] public string? CurrentChapterId { get; set; }
     
     private IJSObjectReference? _jsModule;
     private bool _collapsed = true;
-    private bool _isSelected = false;
+    private bool _isSelected;
     private bool _shouldScroll;
 
-    private string? _lastSelectedChapterId = null;
+    private string? _lastSelectedChapterId;
 
     protected override void OnInitialized()
     {
@@ -79,13 +78,6 @@
             _shouldScroll = false;
             await _jsModule!.InvokeVoidAsync("ScrollToChapterInIndex", CurrentChapterId);
         }
-    }
-
-    
-
-    private void ToggleCollapse()
-    {
-        _collapsed = !_collapsed;
     }
     
     public async ValueTask DisposeAsync()

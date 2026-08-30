@@ -1,4 +1,5 @@
 ﻿@using BookHeaven.Core.Features.Fonts
+@using BookHeaven.Core.Features.Reader.Abstractions
 @implements IDisposable
 @if(_fonts.Count == 0) return;
 <style>
@@ -8,12 +9,12 @@
 	}
 	@@scope (#viewer) {
 		:scope {
-			font-family: '@ProfileSettingsService.ProfileSettings.SelectedFont', serif;
+			font-family: '@ReaderSettingsService.ReaderSettings?.SelectedFont', serif;
 		}
 	}
 </style>
 @code {
-	[Inject] ProfileSettingsService ProfileSettingsService { get; set; } = null!;
+	[Inject] IReaderSettingsService ReaderSettingsService { get; set; } = null!;
 	[Inject] ISender Sender { get; set; } = null!;
 	[Inject] AppStateService AppStateService { get; set; } = null!;
 	
@@ -22,13 +23,13 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		ProfileSettingsService.OnProfileSettingsChanged += OnSelectedFontChanged;
+		ReaderSettingsService.OnSettingsChanged += OnSelectedFontChanged;
 		await GetFonts();
 	}
 	
 	private async Task GetFonts()
 	{
-		_fontFamily = ProfileSettingsService.ProfileSettings.SelectedFont;
+		_fontFamily = ReaderSettingsService.ReaderSettings?.SelectedFont;
 		var getFonts = await Sender.Send(new GetAllFonts.Query(_fontFamily));
 		if (getFonts.IsFailure)
 		{
@@ -38,9 +39,10 @@
 		_fonts = getFonts.Value;
 	}
 	
-	private async void OnSelectedFontChanged(string? propertyName)
+	private async void OnSelectedFontChanged()
 	{
-		if (propertyName != nameof(ProfileSettings.SelectedFont)) return;
+		var newFontFamily = ReaderSettingsService.ReaderSettings?.SelectedFont;
+		if (newFontFamily == _fontFamily) return;
 
 		await GetFonts();
 		await InvokeAsync(StateHasChanged);
@@ -48,7 +50,7 @@
 
 	public void Dispose()
 	{
-		ProfileSettingsService.OnProfileSettingsChanged-= OnSelectedFontChanged;
+		ReaderSettingsService.OnSettingsChanged -= OnSelectedFontChanged;
 	}
 
 }

@@ -49,8 +49,6 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAppsService, AppsService>();
 		builder.Services.AddSingleton<BookInfoDialogService>();
 		
-		builder.Services.AddScoped<ReaderService>();
-		builder.Services.AddScoped<ProfileSettingsService>();
 		builder.Services.AddScoped<ImageViewerService>();
 		builder.Services.AddScoped<OverlayService>();
 		builder.Services.AddScoped<IContextMenuService, ContextMenuService>();

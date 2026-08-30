@@ -1,6 +1,6 @@
-﻿@attribute [Route($"{Urls.Reader}/{{id:guid}}")]
-@using System.Globalization
+﻿@using System.Globalization
 @using BookHeaven.Reader.Components.Pages.Reader.Partials
+@attribute [Route($"{Urls.Reader}/{{id:guid}}")]
 @layout EmptyLayout
 <!--suppress CssUnresolvedCustomProperty -->
 <style>
@@ -17,23 +17,23 @@
 		:scope {
 			container-type: size;
 			--column-count: 1;
-			--chapter-page: @ReaderService.CurrentPage;
-			--font-size: @ProfileSettingsService.ProfileSettings.FontSize.ToString("0.00", CultureInfo.InvariantCulture);
-			--line-height: @ProfileSettingsService.ProfileSettings.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
-			--letter-spacing: @ProfileSettingsService.ProfileSettings.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--paragraph-spacing: @ProfileSettingsService.ProfileSettings.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--text-indent: @ProfileSettingsService.ProfileSettings.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
-			--word-spacing: @ProfileSettingsService.ProfileSettings.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
-			--margin-vertical: @ProfileSettingsService.ProfileSettings.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-			--margin-horizontal: @ProfileSettingsService.ProfileSettings.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--chapter-page: @ReaderService.State?.PageNumber;
+			--font-size: @ReaderService.Settings?.FontSize.ToString("0.00", CultureInfo.InvariantCulture);
+			--line-height: @ReaderService.Settings?.LineHeight.ToString("0.00", CultureInfo.InvariantCulture);
+			--letter-spacing: @ReaderService.Settings?.LetterSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--paragraph-spacing: @ReaderService.Settings?.ParagraphSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--text-indent: @ReaderService.Settings?.TextIndent.ToString("0.00", CultureInfo.InvariantCulture);
+			--word-spacing: @ReaderService.Settings?.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-vertical: @ReaderService.Settings?.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
+			--margin-horizontal: @ReaderService.Settings?.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--page-gap: 6;
 			--page-height: 100cqh;
 			--page-width: 100cqw;
 			
 			@@media (min-width: 800px) and (orientation: landscape) {
 				--column-count: 2;
-				--page-gap: @ProfileSettingsService.ProfileSettings.PageGap.ToString("0.00", CultureInfo.InvariantCulture);
-				--page-width: calc((100cqw - (var(--page-gap) * 1px)) / 2);
+				--page-gap: calc(var(--margin-horizontal) * 2);
+				--page-width: calc((100cqw - (var(--page-gap) * 1rem)) / 2);
 			}
 			
 			margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
@@ -78,7 +78,7 @@
 			float: none !important;
 		}
 
-		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(Current?.ParagraphClassName) ? $",:scope > .chapter.current .{Current.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Previous?.ParagraphClassName) ? $",:scope > .chapter.prev .{Previous.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(Next?.ParagraphClassName) ? $",:scope > .chapter.next .{Next.ParagraphClassName}" : "")}") {
+		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName) ? $",:scope > .chapter.current .{ReaderService.State.CurrentChapter.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(ReaderService.State?.PreviousChapter?.ParagraphClassName) ? $",:scope > .chapter.prev .{ReaderService.State.PreviousChapter.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(ReaderService.State?.NextChapter?.ParagraphClassName) ? $",:scope > .chapter.next .{ReaderService.State.NextChapter.ParagraphClassName}" : "")}") {
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
 
@@ -102,27 +102,27 @@
 		}
 	}
 	@@scope(#viewer .current) {
-		@if (_styles.Count > 0)
+		@if (ReaderService.State?.Styles.Count > 0)
 		{
-			foreach (var style in _styles.Where(style => Current?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
+			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.CurrentChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
 		}
 	}
 	@@scope(#viewer .prev) {
-		@if (_styles.Count > 0)
+		@if (ReaderService.State?.Styles.Count > 0)
 		{
-			foreach (var style in _styles.Where(style => Previous?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
+			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.PreviousChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
 		}
 	}
 	@@scope(#viewer .next) {
-		@if (_styles.Count > 0)
+		@if (ReaderService.State?.Styles.Count > 0)
 		{
-			foreach (var style in _styles.Where(style => Next?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
+			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.NextChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
@@ -137,51 +137,51 @@
 <FontManager />
 <ImageViewer />
 <Navigation />
-@if (_bookLoading)
+@if (!ReaderService.IsReady)
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
 }
 <Overlay
-	Progress="@Progress"
+	Progress="@(ReaderService.State?.ProgressAsPercentage ?? 0)"
 	BookTitle="@_book?.Title"
-	ChapterTitle="@ChapterTitle"
-	IsTocEmpty="_ebook?.Content.TableOfContents.Count == 0"/>
+	ChapterTitle="@ReaderService.State?.ChapterTitle"
+	IsTocEmpty="ReaderService.State?.Ebook?.Content.TableOfContents.Count == 0"/>
 
 <TableOfContents
-	Chapters="@_ebook?.Content.TableOfContents"
-	CurrentChapterId="@Current?.Identifier"/>
+	Chapters="@ReaderService.State?.Ebook?.Content.TableOfContents"
+	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier"/>
 
 
-<div class="flex h-screen flex-col @(_bookLoading ? "invisible" : "")">
+<div class="flex h-screen flex-col @(!ReaderService.IsReady ? "invisible" : "")">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current">
-			@if (Current?.IsContentProcessed == true)
+			@if (ReaderService.State?.CurrentChapter?.IsContentProcessed == true)
 			{
-				@((MarkupString)Current.Content)
+				@((MarkupString)ReaderService.State.CurrentChapter.Content)
 			}
 		</div>
 		<div class="chapter prev invisible">
-			@if (Previous?.IsContentProcessed == true)
+			@if (ReaderService.State?.PreviousChapter?.IsContentProcessed == true)
 			{
-				@((MarkupString)Previous.Content)
+				@((MarkupString)ReaderService.State.PreviousChapter.Content)
 			}
 		</div>
 		<div class="chapter next invisible">
-			@if (Next?.IsContentProcessed == true)
+			@if (ReaderService.State?.NextChapter?.IsContentProcessed == true)
 			{
-				@((MarkupString)Next.Content)
+				@((MarkupString)ReaderService.State.NextChapter.Content)
 			}
 		</div>
 	</div>
 
 	<div class="relative mx-2 mt-auto flex h-(--info-bar-height) gap-2">
-		@if (!_bookLoading)
+		@if (ReaderService.IsReady)
 		{
 			<Clock/>
 			<BatteryInfo/>
-			<ChapterTitle Title="@ChapterTitle"/>
+			<ChapterTitle />
 			<div class="ms-auto text-end">
-				@(Progress.ToString("0.00"))%
+				@(ReaderService.State?.ProgressAsPercentage.ToString("0.00"))%
 			</div>
 		}
 	</div>
