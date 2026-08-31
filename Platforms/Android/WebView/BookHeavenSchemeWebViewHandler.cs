@@ -1,23 +1,33 @@
 using System.Text;
 using Android.Graphics;
 using Android.Webkit;
-using BookHeaven.Core;
+using BookHeaven.EbookManager;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Path = System.IO.Path;
 
 namespace BookHeaven.Reader.WebView;
 
-public class CustomBlazorWebViewHandler : BlazorWebViewHandler
+public class BookHeavenSchemeWebViewHandler : BlazorWebViewHandler
 {
 	protected override void ConnectHandler(Android.Webkit.WebView platformView)
 	{
 		base.ConnectHandler(platformView);
-		platformView.SetWebViewClient(new AppImageSchemeWebViewClient(platformView.WebViewClient));
+		platformView.SetWebViewClient(new BookHeavenSchemeWebViewClient(platformView.WebViewClient));
 	}
 }
 
-public class AppImageSchemeWebViewClient(WebViewClient? innerClient = null) : WebViewClient
+public class BookHeavenSchemeWebViewClient(WebViewClient? innerClient = null) : WebViewClient
 {
+	private static readonly Dictionary<string, string> CacheHeaders = new()
+	{
+		["Cache-Control"] = "public, max-age=31536000, immutable"
+	};
+
+	private static readonly Dictionary<string, string> NotFoundHeaders = new()
+	{
+		["Cache-Control"] = "no-store"
+	};
+
 	public override bool ShouldOverrideUrlLoading(Android.Webkit.WebView? view, IWebResourceRequest? request)
 	{
 		return innerClient?.ShouldOverrideUrlLoading(view, request) ?? base.ShouldOverrideUrlLoading(view, request);
@@ -37,52 +47,54 @@ public class AppImageSchemeWebViewClient(WebViewClient? innerClient = null) : We
 
 	public override WebResourceResponse? ShouldInterceptRequest(Android.Webkit.WebView? view, IWebResourceRequest? request)
 	{
-		if (request?.Url != null && string.Equals(request.Url.Scheme, AppImageScheme.Scheme, StringComparison.OrdinalIgnoreCase))
+		if (request?.Url != null && string.Equals(request.Url.Scheme, BookHeavenScheme.Scheme, StringComparison.OrdinalIgnoreCase))
 		{
 			var requestUrl = request.Url.ToString();
-			if (!string.IsNullOrWhiteSpace(requestUrl) && requestUrl.StartsWith(AppImageScheme.Prefix, StringComparison.OrdinalIgnoreCase))
+			if (!string.IsNullOrWhiteSpace(requestUrl) && requestUrl.StartsWith(BookHeavenScheme.Prefix, StringComparison.OrdinalIgnoreCase))
 			{
-				return HandleAppImageRequest(requestUrl);
+				return HandleBookHeavenRequest(requestUrl);
 			}
 		}
 
 		return innerClient?.ShouldInterceptRequest(view, request) ?? base.ShouldInterceptRequest(view, request);
 	}
 
-	private static WebResourceResponse HandleAppImageRequest(string requestUrl)
+	private static WebResourceResponse HandleBookHeavenRequest(string requestUrl)
 	{
-		var encodedRelativePath = new Uri(requestUrl).Segments[1];
-		var queryIndex = encodedRelativePath.IndexOf('?');
+		var uri = new Uri(requestUrl);
+		var resourceFolder = uri.Host;
+		var filePath = uri.AbsolutePath.TrimStart('/');
+		var queryIndex = filePath.IndexOf('?');
 		if (queryIndex >= 0)
 		{
-			encodedRelativePath = encodedRelativePath[..queryIndex];
+			filePath = filePath[..queryIndex];
 		}
 
-		var relativePath = Uri.UnescapeDataString(encodedRelativePath)
-			.Replace('/', Path.DirectorySeparatorChar)
-			.Replace('\\', Path.DirectorySeparatorChar);
-
-		if (relativePath.Contains("..", StringComparison.Ordinal) || Path.IsPathRooted(relativePath))
+		if (filePath.Contains("..", StringComparison.Ordinal))
 		{
 			return CreateNotFoundResponse();
 		}
-
-		var absolutePath = Path.GetFullPath(Path.Combine(FileSystem.AppDataDirectory, relativePath));
-		var coversRoot = Path.GetDirectoryName(CoreGlobals.CoversPath) ?? FileSystem.AppDataDirectory;
-		if (!absolutePath.StartsWith(coversRoot, StringComparison.OrdinalIgnoreCase) || !File.Exists(absolutePath))
+		
+		var absolutePath = Path.Combine(FileSystem.AppDataDirectory, resourceFolder, filePath);
+		if (resourceFolder == "cache")
+		{
+			absolutePath = Path.Combine(FileSystem.CacheDirectory, resourceFolder, filePath);
+		}
+		
+		if (!File.Exists(absolutePath))
 		{
 			return CreateNotFoundResponse();
 		}
 
 		var contentType = GetContentType(absolutePath);
 		var fileBytes = File.ReadAllBytes(absolutePath);
-		return new WebResourceResponse(contentType, null, new MemoryStream(fileBytes));
+		return new WebResourceResponse(contentType, null, 200, "OK", new Dictionary<string, string>(CacheHeaders), new MemoryStream(fileBytes));
 	}
 
 	private static WebResourceResponse CreateNotFoundResponse()
 	{
-		const string payload = "Image not found.";
-		return new WebResourceResponse("text/plain", "utf-8", new MemoryStream(Encoding.UTF8.GetBytes(payload)));
+		const string payload = "Resource not found.";
+		return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", new Dictionary<string, string>(NotFoundHeaders), new MemoryStream(Encoding.UTF8.GetBytes(payload)));
 	}
 
 	private static string GetContentType(string filePath)

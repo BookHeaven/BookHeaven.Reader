@@ -1,11 +1,12 @@
 using BookHeaven.Core;
+using BookHeaven.EbookManager;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 
 namespace BookHeaven.Reader.WebView;
 
-public class CustomBlazorWebViewHandler : BlazorWebViewHandler
+public class BookHeavenSchemeWebViewHandler : BlazorWebViewHandler
 {
 	protected override void ConnectHandler(WebView2 platformView)
 	{
@@ -24,32 +25,36 @@ public class CustomBlazorWebViewHandler : BlazorWebViewHandler
 			return;
 		}
 
-		platformView.CoreWebView2.AddWebResourceRequestedFilter($"{AppImageScheme.Prefix}*", CoreWebView2WebResourceContext.Image);
+		platformView.CoreWebView2.AddWebResourceRequestedFilter($"{BookHeavenScheme.Scheme}*", CoreWebView2WebResourceContext.Image);
 		platformView.CoreWebView2.WebResourceRequested += (_, args) =>
 		{
 			var requestedUri = args.Request.Uri;
-			if (!requestedUri.StartsWith(AppImageScheme.Prefix, StringComparison.OrdinalIgnoreCase))
+			if (!requestedUri.StartsWith(BookHeavenScheme.Scheme, StringComparison.OrdinalIgnoreCase))
 			{
 				return;
 			}
 			
-			var relativePath = new Uri(requestedUri).Segments[1];
-			var decodedPath = Uri.UnescapeDataString(relativePath).Replace('/', Path.DirectorySeparatorChar);
-			if (decodedPath.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(decodedPath))
+			var uri = new Uri(requestedUri);
+			var resourceFolder = uri.Host;
+			var filePath = uri.AbsolutePath.TrimStart('/');
+			if (filePath.StartsWith("..", StringComparison.Ordinal))
 			{
 				return;
 			}
 
-			var rootDirectory = Path.GetDirectoryName(CoreGlobals.CoversPath) ?? Path.GetFullPath(FileSystem.AppDataDirectory);
-			var absolutePath = Path.GetFullPath(Path.Combine(rootDirectory, decodedPath));
+			var absolutePath = Path.GetFullPath(Path.Combine(FileSystem.AppDataDirectory, resourceFolder, filePath));
+			if (resourceFolder == "cache")
+			{
+				absolutePath = Path.Combine(FileSystem.CacheDirectory, resourceFolder, filePath);
+			}
 
-			if (!absolutePath.StartsWith(rootDirectory, StringComparison.OrdinalIgnoreCase) || !File.Exists(absolutePath))
+			if (!File.Exists(absolutePath))
 			{
 				args.Response = platformView.CoreWebView2.Environment.CreateWebResourceResponse(
 					new MemoryStream([.. "Image not found."u8]).AsRandomAccessStream(),
 					404,
 					"Not Found",
-					"Content-Type: text/plain;charset=utf-8");
+					"Content-Type: text/plain;charset=utf-8\r\nCache-Control: no-store");
 				return;
 			}
 
@@ -71,7 +76,7 @@ public class CustomBlazorWebViewHandler : BlazorWebViewHandler
 				new MemoryStream(bytes).AsRandomAccessStream(),
 				200,
 				"OK",
-				$"Content-Type: {contentType}");
+				$"Content-Type: {contentType}\r\nCache-Control: public, max-age=31536000, immutable");
 		};
 	}
 }

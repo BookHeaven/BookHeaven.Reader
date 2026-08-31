@@ -27,7 +27,7 @@ public static class MauiProgram
 		builder.ConfigureMauiHandlers(handlers =>
 		{
 #if ANDROID || WINDOWS
-			handlers.AddHandler<BlazorWebView, CustomBlazorWebViewHandler>();
+			handlers.AddHandler<BlazorWebView, BookHeavenSchemeWebViewHandler>();
 #endif
 		});
 
