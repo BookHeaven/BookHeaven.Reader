@@ -9,6 +9,6 @@ public static class BookExtensions
 	{
 		public string CachePath(CacheKey key) => Path.Combine(EbookManagerGlobals.CachePath, $"{book.BookId}-{key}.cache");
 
-		public string CoverUrlWithCustomScheme => AppImageScheme.BuildUrl(book.CoverUrl());
+		public string CoverUrlWithCustomScheme => BookHeavenScheme.BuildUrl(book.CoverUrl());
 	}
 }
