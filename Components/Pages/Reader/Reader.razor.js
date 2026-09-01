@@ -1,7 +1,38 @@
-﻿let page, pagePrev, pageNext;
-
-let Reference = {};
+﻿let Reference = {};
 Reference.DotNet = null;
+
+const waitForImagesToLoad = async () => {
+    const images = Array.from(document.querySelectorAll('.chapter img, .chapter svg'));
+    if (!images.length) {
+        await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+        return;
+    }
+
+    await Promise.all(images.map(async (image) => {
+        if (image.tagName === 'IMG') {
+            if (image.complete) return;
+
+            await new Promise((resolve) => {
+                const cleanUp = () => {
+                    image.removeEventListener('load', onDone);
+                    image.removeEventListener('error', onDone);
+                    resolve();
+                };
+                const onDone = () => cleanUp();
+
+                image.addEventListener('load', onDone, { once: true });
+                image.addEventListener('error', onDone, { once: true });
+            });
+            return;
+        }
+
+        if (image.tagName === 'SVG') {
+            await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+        }
+    }));
+
+    await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+};
 
 const keyDownHandler = (e) => {
     if (e.repeat) return;
@@ -11,23 +42,21 @@ const keyDownHandler = (e) => {
 export function SetDotNetReference(dotnet) {
     Reference.DotNet = dotnet;
 
-    page = document.getElementsByClassName('chapter current')[0];
-    pagePrev = document.getElementsByClassName('chapter prev')[0];
-    pageNext = document.getElementsByClassName('chapter next')[0];
-
     window.addEventListener('keydown', keyDownHandler);
 }
 
 export async function GetPageCount() {
-    let pageWidth = page.offsetWidth + parseFloat(getComputedStyle(page).getPropertyValue('--page-gap'));
+    const chapters = Array.from(document.querySelectorAll('.chapter.invisible'));
+    if (!chapters.length) {
+        return [];
+    }
+    await waitForImagesToLoad();
 
-    const [pagesPrev, pages, pagesNext] = await Promise.all([
-        pagePrev.childElementCount > 0 ? Math.ceil(parseFloat((pagePrev.scrollWidth / pageWidth).toFixed(1))) : 0,
-        Math.ceil(parseFloat((page.scrollWidth / pageWidth).toFixed(1))),
-        pageNext.childElementCount > 0 ? Math.ceil(parseFloat((pageNext.scrollWidth / pageWidth).toFixed(1))) : 0
-    ]);
+    const firstChapter = chapters[0];
+    const pageGap = Number.parseFloat(getComputedStyle(firstChapter).columnGap) || 0;
+    const pageWidth = Math.max(firstChapter.offsetWidth + pageGap, 1);
 
-    return [pagesPrev, pages, pagesNext];
+    return chapters.map((chapter) => Math.max(1, Math.ceil(chapter.scrollWidth / pageWidth)));
 }
 
 export function Dispose() {

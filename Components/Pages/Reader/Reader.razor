@@ -78,7 +78,7 @@
 			float: none !important;
 		}
 
-		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName) ? $",:scope > .chapter.current .{ReaderService.State.CurrentChapter.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(ReaderService.State?.PreviousChapter?.ParagraphClassName) ? $",:scope > .chapter.prev .{ReaderService.State.PreviousChapter.ParagraphClassName}" : "")}{(!string.IsNullOrEmpty(ReaderService.State?.NextChapter?.ParagraphClassName) ? $",:scope > .chapter.next .{ReaderService.State.NextChapter.ParagraphClassName}" : "")}") {
+		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName) ? $",:scope > .chapter.current .{ReaderService.State.CurrentChapter.ParagraphClassName}" : "")}") {
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
 
@@ -105,24 +105,6 @@
 		@if (ReaderService.State?.Styles.Count > 0)
 		{
 			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.CurrentChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
-			{
-				@style.Content
-			}
-		}
-	}
-	@@scope(#viewer .prev) {
-		@if (ReaderService.State?.Styles.Count > 0)
-		{
-			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.PreviousChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
-			{
-				@style.Content
-			}
-		}
-	}
-	@@scope(#viewer .next) {
-		@if (ReaderService.State?.Styles.Count > 0)
-		{
-			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.NextChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
 			{
 				@style.Content
 			}
@@ -160,6 +142,12 @@
 				@((MarkupString)ReaderService.State.CurrentChapter.Content)
 			}
 		</div>
+		@*<div class="chapter current">
+			@if (ReaderService.State?.CurrentChapter?.IsContentProcessed == true)
+			{
+				@((MarkupString)ReaderService.State.CurrentChapter.Content)
+			}
+		</div>
 		<div class="chapter prev invisible">
 			@if (ReaderService.State?.PreviousChapter?.IsContentProcessed == true)
 			{
@@ -171,7 +159,16 @@
 			{
 				@((MarkupString)ReaderService.State.NextChapter.Content)
 			}
-		</div>
+		</div>*@
+		@foreach (var chapter in ReaderService.State?.Ebook?.Content.Chapters ?? [])
+		{
+			<div class="chapter invisible">
+				@if (chapter.IsContentProcessed)
+				{
+					@((MarkupString)chapter.Content)
+				}
+			</div>
+		}
 	</div>
 
 	<div class="relative mx-2 mt-auto flex h-(--info-bar-height) gap-2">

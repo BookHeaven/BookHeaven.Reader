@@ -27,7 +27,7 @@ public partial class Reader : IAsyncDisposable
     protected override async Task OnInitializedAsync()
     {
         ReaderService.OnPageChanged += RefreshUi;
-        ReaderService.OnChapterChanged += OnChapterChanged;
+        ReaderService.OnChapterChanged += RefreshUi;
         ReaderService.OnTotalPagesChanged += RefreshUi;
         ReaderSettingsService.OnSettingsChanged += OnSettingsChanged;
         
@@ -41,6 +41,7 @@ public partial class Reader : IAsyncDisposable
         AppStateService.CurrentScreenSaverCoverPath = _book.CoverPath();
 		
         await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+        _refreshTotalPages = true;
     }
     
     private void OnSettingsChanged()
@@ -93,20 +94,6 @@ public partial class Reader : IAsyncDisposable
         await ReaderService.SaveProgressAsync();
     }
 
-    private void OnProfileSettingsChanged(string? propertyName)
-    {
-        _refreshTotalPages = true;
-        InvokeAsync(StateHasChanged);
-    }
-
-    private async void OnChapterChanged()
-    {
-        await ReaderService.LoadCurrentContentAsync();
-        
-        _refreshTotalPages = true;
-        await InvokeAsync(StateHasChanged);
-    }
-
     [JSInvokable("OnKeyDown")]
     public void OnKeyDown(string key)
     {
@@ -125,9 +112,9 @@ public partial class Reader : IAsyncDisposable
     {
         _refreshTotalPages = false;
         var pagesArray = await _module.InvokeAsync<int[]>("GetPageCount");
-        ReaderService.SetTotalPages(pagesArray[1], pagesArray[0], pagesArray[2]);
+        ReaderService.SetTotalPages(pagesArray);
         
-        if(ReaderService is { IsReady: false, State.TotalPages: > 0 })
+        if(!ReaderService.IsReady)
         {
             ReaderService.NavigateToInitialPage();
             await InvokeAsync(StateHasChanged);
@@ -136,18 +123,22 @@ public partial class Reader : IAsyncDisposable
     
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        await ReaderService.SaveProgressAsync();
         AppStateService.CurrentScreenSaverCoverPath = null;
         ReaderService.OnPageChanged -= RefreshUi;
-        ReaderService.OnChapterChanged -= OnChapterChanged;
+        ReaderService.OnChapterChanged -= RefreshUi;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
         LifeCycleService.Resumed -= OnResumed;
         LifeCycleService.Paused -= OnPaused;
         LifeCycleService.Destroyed -= OnDestroy;
-        await _module.InvokeVoidAsync("Dispose");
-        await _module.DisposeAsync();
-        _dotNetReference.Dispose();
-        ReaderService.Dispose();
+        try
+        {
+            await ReaderService.SaveProgressAsync();
+            ReaderService.Dispose();
+            _dotNetReference.Dispose();
+            await _module.InvokeVoidAsync("Dispose");
+            await _module.DisposeAsync();
+        }
+        catch {}
 #if ANDROID
         var activity = Platform.CurrentActivity!;
         activity.Window?.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
