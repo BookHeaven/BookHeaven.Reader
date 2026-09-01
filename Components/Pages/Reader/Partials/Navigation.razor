@@ -1,8 +1,7 @@
-@using System.Diagnostics
 @using BookHeaven.Core.Features.Reader.Abstractions
 @using BookHeaven.Reader.Functions
 @implements IAsyncDisposable
-<div class="absolute w-screen h-screen z-999 grid grid-cols-3" @onpointerdown="@PointerDown" @onpointerup="@PointerUp">
+<div class="absolute w-screen h-screen z-999 grid grid-cols-3" @oncontextmenu="@OpenImageViewer" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
     @foreach(var button in Buttons)
     {
         <span @onclick="@(() => HandleNavigation(button))"></span>
@@ -19,12 +18,8 @@
     private NavigationLayoutType _selectedLayout;
     
     private IJSObjectReference _module = null!;
-
-    private long _timeStamp;
     
     private List<NavigationButton> Buttons => ReaderFunctions.GetLayoutForType(_selectedLayout);
-
-    private bool _cancelNavigation;
     
     protected override void OnInitialized()
     {
@@ -49,42 +44,28 @@
 
     private void HandleNavigation(NavigationButton button)
     {
-        if (!_cancelNavigation)
+        switch (button)
         {
-            switch (button)
-            {
-                case NavigationButton.None:
-                    break;
-                case NavigationButton.Next:
-                    ReaderService.NextPage();
-                    break;
-                case NavigationButton.Previous:
-                    ReaderService.PreviousPage();
-                    break;
-                case NavigationButton.Overlay:
-                    OverlayService.ToggleOverlay();
-                    break;
-            }
+            case NavigationButton.None:
+                break;
+            case NavigationButton.Next:
+                ReaderService.NextPage();
+                break;
+            case NavigationButton.Previous:
+                ReaderService.PreviousPage();
+                break;
+            case NavigationButton.Overlay:
+                OverlayService.ToggleOverlay();
+                break;
         }
-        _cancelNavigation = false;
     }
 
-    private void PointerDown()
+    private async Task OpenImageViewer(MouseEventArgs e)
     {
-        _timeStamp = Stopwatch.GetTimestamp();
-    }
-
-    private async Task PointerUp(MouseEventArgs e)
-    {
-        _cancelNavigation = false;
-        if (Stopwatch.GetElapsedTime(_timeStamp).TotalMilliseconds > 400)
+        var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
+        if (!string.IsNullOrEmpty(data))
         {
-            _cancelNavigation = true;
-            var data = await _module.InvokeAsync<string?>("FindZoomableElement", e.ClientX, e.ClientY);
-            if (!string.IsNullOrEmpty(data))
-            {
-                ImageViewerService.OnOpenImage?.Invoke(data);
-            }
+            ImageViewerService.OnOpenImage?.Invoke(data);
         }
     }
 
