@@ -41,7 +41,10 @@ public partial class Reader : IAsyncDisposable
         AppStateService.CurrentScreenSaverCoverPath = _book.CoverPath();
 		
         await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
-        _refreshTotalPages = true;
+        if (!ReaderService.IsReady)
+        {
+            _refreshTotalPages = true;
+        }
     }
     
     private void OnSettingsChanged()
