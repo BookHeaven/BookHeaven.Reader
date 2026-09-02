@@ -16,12 +16,11 @@ const waitForImagesToLoad = async () => {
             if (image.complete) return;
 
             await new Promise((resolve) => {
-                const cleanUp = () => {
+                const onDone = () => {
                     image.removeEventListener('load', onDone);
                     image.removeEventListener('error', onDone);
                     resolve();
                 };
-                const onDone = () => cleanUp();
 
                 image.addEventListener('load', onDone, { once: true });
                 image.addEventListener('error', onDone, { once: true });
@@ -57,10 +56,10 @@ export async function GetPageCount() {
     if (!chapters.length) {
         return [];
     }
-    await waitForImagesToLoad();
     if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
     }
+    await waitForImagesToLoad();
     return chapters.map((chapter) => Math.max(1, Math.ceil(chapter.scrollWidth / pageWidth)));
 }
 
