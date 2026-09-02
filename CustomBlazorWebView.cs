@@ -12,10 +12,8 @@ namespace BookHeaven.Reader
 		public override IFileProvider CreateFileProvider(string contentRootDir)
 		{
 			var appDataDirectory = new PhysicalFileProvider(FileSystem.Current.AppDataDirectory);
-			var cacheDirectory = new PhysicalFileProvider(FileSystem.Current.CacheDirectory);
 			return new CompositeFileProvider(
-				appDataDirectory, 
-				cacheDirectory, 
+				appDataDirectory,
 				base.CreateFileProvider(contentRootDir));
 		}
 	}
