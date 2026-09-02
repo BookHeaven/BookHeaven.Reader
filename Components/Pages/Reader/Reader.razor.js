@@ -1,5 +1,8 @@
-﻿let Reference = {};
-Reference.DotNet = null;
+﻿let Reference = { DotNet: null };
+let mainChapter = null;
+let pageWidth = null;
+let pageGap = null;
+
 
 const waitForImagesToLoad = async () => {
     const images = Array.from(document.querySelectorAll('.chapter img, .chapter svg'));
@@ -39,8 +42,12 @@ const keyDownHandler = (e) => {
     Reference.DotNet.invokeMethodAsync('OnKeyDown', e.key);
 }
 
-export function SetDotNetReference(dotnet) {
+export function Initialize(dotnet) {
     Reference.DotNet = dotnet;
+    
+    mainChapter = document.querySelector('.chapter.current');
+    pageGap = Number.parseFloat(getComputedStyle(mainChapter).columnGap);
+    pageWidth = Math.max(mainChapter.offsetWidth + pageGap, 1);
 
     window.addEventListener('keydown', keyDownHandler);
 }
@@ -51,11 +58,9 @@ export async function GetPageCount() {
         return [];
     }
     await waitForImagesToLoad();
-
-    const firstChapter = chapters[0];
-    const pageGap = Number.parseFloat(getComputedStyle(firstChapter).columnGap) || 0;
-    const pageWidth = Math.max(firstChapter.offsetWidth + pageGap, 1);
-
+    if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+    }
     return chapters.map((chapter) => Math.max(1, Math.ceil(chapter.scrollWidth / pageWidth)));
 }
 

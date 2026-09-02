@@ -57,20 +57,19 @@ public partial class Reader : IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+#if ANDROID
+                var activity = Platform.CurrentActivity!;
+                activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
+#endif
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
+            _dotNetReference = DotNetObjectReference.Create(this);
+            await _module.InvokeVoidAsync("Initialize", _dotNetReference);
+        }
         if (_refreshTotalPages)
         {
             await UpdateTotalPages();
-        }
-        if (firstRender)
-        {
-    #if ANDROID
-                var activity = Platform.CurrentActivity!;
-                activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
-    #endif
-            
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
-            _dotNetReference = DotNetObjectReference.Create(this);
-            await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
         }
     }
     
@@ -107,14 +106,15 @@ public partial class Reader : IAsyncDisposable
                 break;
         }
     }
+    
 
     private async Task UpdateTotalPages()
     {
         _refreshTotalPages = false;
         var pagesArray = await _module.InvokeAsync<int[]>("GetPageCount");
         ReaderService.SetTotalPages(pagesArray);
-        
-        if(!ReaderService.IsReady)
+
+        if (!ReaderService.IsReady)
         {
             ReaderService.NavigateToInitialPage();
             await InvokeAsync(StateHasChanged);
@@ -123,6 +123,7 @@ public partial class Reader : IAsyncDisposable
     
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
+        await ReaderService.SaveProgressAsync();
         AppStateService.CurrentScreenSaverCoverPath = null;
         ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= RefreshUi;
@@ -130,11 +131,10 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Resumed -= OnResumed;
         LifeCycleService.Paused -= OnPaused;
         LifeCycleService.Destroyed -= OnDestroy;
+        ReaderService.Dispose();
+        _dotNetReference.Dispose();
         try
         {
-            await ReaderService.SaveProgressAsync();
-            ReaderService.Dispose();
-            _dotNetReference.Dispose();
             await _module.InvokeVoidAsync("Dispose");
             await _module.DisposeAsync();
         }

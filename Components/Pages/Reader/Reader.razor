@@ -3,11 +3,7 @@
 @attribute [Route($"{Urls.Reader}/{{id:guid}}")]
 @layout EmptyLayout
 <!--suppress CssUnresolvedCustomProperty -->
-<style>
-	:root {
-		--info-bar-height: 24px;
-	}
-	
+<style>	
 	body {
 		margin: 0 !important;
 		overflow: hidden;
@@ -26,7 +22,7 @@
 			--word-spacing: @ReaderService.Settings?.WordSpacing.ToString("0.00", CultureInfo.InvariantCulture);
 			--margin-vertical: @ReaderService.Settings?.VerticalMargin.ToString("0.00", CultureInfo.InvariantCulture);
 			--margin-horizontal: @ReaderService.Settings?.HorizontalMargin.ToString("0.00", CultureInfo.InvariantCulture);
-			--page-gap: 6;
+			--page-gap: var(--margin-horizontal);
 			--page-height: 100cqh;
 			--page-width: 100cqw;
 			
@@ -78,10 +74,17 @@
 			float: none !important;
 		}
 
-		@($":scope > .chapter p:not([class]){(!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName) ? $",:scope > .chapter.current .{ReaderService.State.CurrentChapter.ParagraphClassName}" : "")}") {
+		:scope > .chapter p:not([class]) {
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
 
+		@foreach(var className in ReaderService.State?.Ebook?.Content.Chapters.DistinctBy(c => c.ParagraphClassName).Select(c => c.ParagraphClassName) ?? [])
+		{
+			@::scope > .chapter @("." + className) {
+				@:margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
+			@:}
+		}
+	
 		:scope sup {
 			font-size: 0.6em;
 			line-height: normal;
@@ -101,13 +104,11 @@
 			}
 		}
 	}
-	@@scope(#viewer .current) {
-		@if (ReaderService.State?.Styles.Count > 0)
-		{
-			foreach (var style in ReaderService.State.Styles.Where(style => ReaderService.State.CurrentChapter?.Stylesheets.Any(s => s.Contains(style.Identifier)) == true))
-			{
-				@style.Content
-			}
+	
+	@foreach (var stylesheet in ReaderService.State?.Styles ?? [])
+	{
+		@:@@scope(#viewer @(".stylesheet-" + stylesheet.Identifier)) {
+			@stylesheet.Content
 		}
 	}
 </style>
@@ -136,48 +137,32 @@
 
 <div class="flex h-screen flex-col @(!ReaderService.IsReady ? "invisible" : "")">
 	<div id="viewer" class="flex-1 overflow-hidden">
-		<div class="chapter current">
-			@if (ReaderService.State?.CurrentChapter?.IsContentProcessed == true)
+		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
+			@if (ReaderService.State?.CurrentChapter is not null)
 			{
 				@((MarkupString)ReaderService.State.CurrentChapter.Content)
 			}
 		</div>
-		@*<div class="chapter current">
-			@if (ReaderService.State?.CurrentChapter?.IsContentProcessed == true)
-			{
-				@((MarkupString)ReaderService.State.CurrentChapter.Content)
-			}
-		</div>
-		<div class="chapter prev invisible">
-			@if (ReaderService.State?.PreviousChapter?.IsContentProcessed == true)
-			{
-				@((MarkupString)ReaderService.State.PreviousChapter.Content)
-			}
-		</div>
-		<div class="chapter next invisible">
-			@if (ReaderService.State?.NextChapter?.IsContentProcessed == true)
-			{
-				@((MarkupString)ReaderService.State.NextChapter.Content)
-			}
-		</div>*@
-		@foreach (var chapter in ReaderService.State?.Ebook?.Content.Chapters ?? [])
+		@if (_refreshTotalPages)
 		{
-			<div class="chapter invisible">
-				@if (chapter.IsContentProcessed)
-				{
+			foreach (var chapter in ReaderService.State?.Ebook?.Content.Chapters ?? [])
+			{
+				<div class="chapter invisible @(string.Join(" ", chapter.Stylesheets.Select(s => "stylesheet-" + s)))">
 					@((MarkupString)chapter.Content)
-				}
-			</div>
+				</div>
+			}
 		}
 	</div>
 
-	<div class="relative mx-2 mt-auto flex h-(--info-bar-height) gap-2">
+	<div class="h-[24px] mx-2 grid grid-cols-[75px_1fr_75px] items-center gap-1">
 		@if (ReaderService.IsReady)
 		{
-			<Clock/>
-			<BatteryInfo/>
+			<div class="flex items-center gap-0.5">
+				<Clock/>
+				<BatteryInfo/>
+			</div>
 			<ChapterTitle />
-			<div class="ms-auto text-end">
+			<div class="text-end text-nowrap">
 				@(ReaderService.State?.ProgressAsPercentage.ToString("0.00"))%
 			</div>
 		}
