@@ -37,6 +37,7 @@ public static class MauiProgram
 			options.CoversPath = Path.Combine(FileSystem.AppDataDirectory, "covers");
 			options.FontsPath = Path.Combine(FileSystem.AppDataDirectory, "fonts");
 			options.DatabasePath = FileSystem.AppDataDirectory;
+			options.CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
 		});
 		builder.Services.AddEbookManager(options =>
 		{
