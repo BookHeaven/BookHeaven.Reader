@@ -2,6 +2,10 @@
 @using BookHeaven.Core.Features.Reader.Abstractions
 @implements IDisposable
 @if(_fonts.Count == 0) return;
+@foreach(var variant in _fonts)
+{
+	<link rel="preload" href="@variant.Url()" as="font" crossorigin="anonymous"/>
+}
 <style>
 	@foreach (var font in _fonts)
 	{
