@@ -1,6 +1,6 @@
 ﻿@using BookHeaven.Core.Features.Reader.Abstractions
 @implements IDisposable
-<div @ref="_containerRef" class="flex-1 flex items-center justify-center mx-2">
+<div @ref="_containerRef" class="flex items-center justify-center">
     <span @ref="_textRef" class="text-nowrap">@DisplayText</span>
     <span @ref="_pageRef" class="ms-1 text-nowrap">(@ReaderService.State?.PageNumber / @ReaderService.State?.TotalPages)</span>
 </div>
