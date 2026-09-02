@@ -72,6 +72,11 @@
     public async ValueTask DisposeAsync()
     {
         ReaderSettingsService.OnSettingsChanged -= OnSelectedLayoutChanged;
-        await _module.DisposeAsync();
+        try
+        {
+            await _module.DisposeAsync();
+        }
+        catch { }
+        
     }
 }
