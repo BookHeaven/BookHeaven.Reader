@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using BookHeaven.Core;
 using Microsoft.Extensions.Logging;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.BooksProgress;
@@ -142,19 +141,23 @@ public class ServerService(
 		try
 		{
 			var coverUrl = new Uri(_httpClient.BaseAddress!,"/covers/" + book.BookId + ".jpg");
-			var epubUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
+			var ebookUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
 
 			Result saveBook;
 			var getBook = await sender.Send(new GetBook.Query {BookId = book.BookId});
 			if (getBook.IsSuccess)
 			{
-				//If the book is already downloaded, we remove the local cache
-				Directory.EnumerateFiles(CoreGlobals.BooksPath).Where(f => f.StartsWith(book.BookId.ToString())).ToList().ForEach(File.Delete);
-				saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), epubUrl.ToString()));
+				var ebookFileChanged = getBook.Value.FileHash != book.FileHash;
+				saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), ebookFileChanged ? ebookUrl.ToString() : null));
+				if(saveBook.IsSuccess && ebookFileChanged)
+				{
+					readerCacheService.ClearCache(book.BookId);
+					_ = readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
+				}
 			}
 			else
 			{
-				saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), epubUrl.ToString(), false));
+				saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), ebookUrl.ToString(), false));
 			}
 			if (saveBook.IsFailure)
 			{
@@ -179,8 +182,6 @@ public class ServerService(
 				progress.BookWordCount = 0;
 				await sender.Send(new UpdateBookProgress.Command(progress));
 			}
-			
-			_ = readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
 				
 			return Result.Success();
 		}
