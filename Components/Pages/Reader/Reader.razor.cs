@@ -20,7 +20,7 @@ public partial class Reader : IAsyncDisposable
     private Book? _book;
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
-    private IJSObjectReference _module = null!;
+    private IJSObjectReference? _module;
     private bool _refreshTotalPages;
     private bool _isSuspended;
 
@@ -113,6 +113,7 @@ public partial class Reader : IAsyncDisposable
 
     private async Task UpdateTotalPages()
     {
+        if(_module is null) return;
         _refreshTotalPages = false;
         var pagesArray = await _module.InvokeAsync<int[]>("GetPageCount");
         ReaderService.SetTotalPages(pagesArray);
@@ -138,8 +139,11 @@ public partial class Reader : IAsyncDisposable
         _dotNetReference.Dispose();
         try
         {
-            await _module.InvokeVoidAsync("Dispose");
-            await _module.DisposeAsync();
+            if (_module is not null)
+            {
+                await _module.InvokeVoidAsync("Dispose");
+                await _module.DisposeAsync();
+            }
         }
         catch {}
 #if ANDROID
