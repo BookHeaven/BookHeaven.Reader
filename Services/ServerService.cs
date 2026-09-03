@@ -142,26 +142,29 @@ public class ServerService(
 		{
 			var coverUrl = new Uri(_httpClient.BaseAddress!,"/covers/" + book.BookId + ".jpg");
 			var ebookUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
+			var shouldCacheContent = false;
 
 			Result saveBook;
 			var getBook = await sender.Send(new GetBook.Query {BookId = book.BookId});
 			if (getBook.IsSuccess)
 			{
-				var ebookFileChanged = getBook.Value.FileHash != book.FileHash;
-				saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), ebookFileChanged ? ebookUrl.ToString() : null));
-				if(saveBook.IsSuccess && ebookFileChanged)
-				{
-					readerCacheService.ClearCache(book.BookId);
-					_ = readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
-				}
+				shouldCacheContent = getBook.Value.FileHash != book.FileHash;
+				saveBook = await sender.Send(new UpdateBook.Command(book, coverUrl.ToString(), shouldCacheContent ? ebookUrl.ToString() : null));
 			}
 			else
 			{
 				saveBook = await sender.Send(new AddBook.Command(book, coverUrl.ToString(), ebookUrl.ToString(), false));
+				shouldCacheContent = true;
 			}
 			if (saveBook.IsFailure)
 			{
 				return new Error("Failed to download book from server");
+			}
+			
+			if(shouldCacheContent)
+			{
+				readerCacheService.ClearCache(book.BookId);
+				_ = readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
 			}
 				
 			var getProgress = await GetBookProgress(profileId, book.BookId);
