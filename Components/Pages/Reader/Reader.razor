@@ -126,7 +126,7 @@
 }
 <Overlay
 	Progress="@(ReaderService.State?.ProgressAsPercentage ?? 0)"
-	BookTitle="@_book?.Title"
+	BookTitle="@ReaderService.State?.Ebook?.Title"
 	ChapterTitle="@ReaderService.State?.ChapterTitle"
 	IsTocEmpty="ReaderService.State?.Ebook?.Content.TableOfContents.Count == 0"/>
 
