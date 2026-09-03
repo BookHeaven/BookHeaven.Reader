@@ -6,6 +6,7 @@ using BookHeaven.Core.Features.BooksProgress;
 using BookHeaven.Core.Features.Fonts;
 using BookHeaven.Core.Features.Profiles;
 using BookHeaven.Core.Features.ProfileSettingss;
+using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Shared;
 using Font = BookHeaven.Core.Entities.Font;
 
@@ -27,7 +28,8 @@ public interface IServerService
 }
 public class ServerService(
 	ISender sender,
-	AppStateService appStateService, 
+	AppStateService appStateService,
+	IReaderCacheService readerCacheService,
 	ILogger<ServerService> logger) : IServerService
 {
 	private HttpClient _httpClient = new();
@@ -177,6 +179,8 @@ public class ServerService(
 				progress.BookWordCount = 0;
 				await sender.Send(new UpdateBookProgress.Command(progress));
 			}
+			
+			_ = readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
 				
 			return Result.Success();
 		}
