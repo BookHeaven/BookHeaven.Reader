@@ -72,6 +72,7 @@
     <PackageReference Include="CommunityToolkit.Maui" Version="15.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.100" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.100" />
+    <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
