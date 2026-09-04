@@ -1,3 +1,4 @@
+using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using CommunityToolkit.Maui.Alerts;
@@ -16,8 +17,7 @@ public partial class Reader : IAsyncDisposable
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private IReaderService ReaderService { get; set; } = null!;
     [Inject] private IReaderSettingsService ReaderSettingsService { get; set; } = null!;
-
-    private Book? _book;
+    [Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
@@ -37,8 +37,7 @@ public partial class Reader : IAsyncDisposable
             await Toast.Make(getBook.Error.Description).Show();
             return;
         }
-        _book = getBook.Value;
-        AppStateService.CurrentScreenSaverCoverPath = _book.CoverPath();
+        AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
 		
         await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
         if (!ReaderService.IsReady)

@@ -112,10 +112,7 @@
 		@:}
 	}
 </style>
-@if (_book is not null)
-{
-	<StandbyWallpaper ImageSrc="@_book.CoverUrl()" />
-}
+<StandbyWallpaper ImageSrc="@UrlBuilder.CoverUrl(Id)" />
 <ColorTemperatureOverlay />
 <FontManager />
 <ImageViewer />

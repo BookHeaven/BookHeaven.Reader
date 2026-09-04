@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using BookHeaven.Core.Abstractions.Services;
 using Microsoft.Extensions.Logging;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.BooksProgress;
@@ -29,7 +30,8 @@ public class ServerService(
 	ISender sender,
 	AppStateService appStateService,
 	IReaderCacheService readerCacheService,
-	ILogger<ServerService> logger) : IServerService
+	ILogger<ServerService> logger,
+	IUrlBuilder urlBuilder) : IServerService
 {
 	private HttpClient _httpClient = new();
 
@@ -164,7 +166,7 @@ public class ServerService(
 			if(shouldCacheContent)
 			{
 				readerCacheService.ClearCache(book.BookId);
-				await readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
+				await readerCacheService.CacheContentAsync(book.BookId, urlBuilder.EbookFilePath(book.BookId, book.Format));
 			}
 				
 			var getProgress = await GetBookProgress(profileId, book.BookId);
@@ -291,14 +293,14 @@ public class ServerService(
 
 			foreach (var font in response)
 			{
-				var fontPath = font.FilePath();
+				var fontPath = urlBuilder.FontFilePath(font.Family, font.FileName);
 				var folder = Path.GetDirectoryName(fontPath);
 				if (!Directory.Exists(folder))
 				{
 					Directory.CreateDirectory(folder!);
 				}
 					
-				var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + font.Url());
+				var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + urlBuilder.FontUrl(font.Family, font.FileName));
 				await File.WriteAllBytesAsync(fontPath, fileBytes);
 
 				await sender.Send(new AddFont.Command(font));

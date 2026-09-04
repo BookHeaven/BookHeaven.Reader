@@ -1,4 +1,5 @@
-﻿@using BookHeaven.Core.Enums
+﻿@using BookHeaven.Core.Abstractions.Services
+@using BookHeaven.Core.Enums
 @using BookHeaven.Reader.Components.Shared.ContextMenu
 @using BookHeaven.Reader.Components.Shared.ContextMenu.Books
 <div data-book-card class="relative pt-px @Class">
@@ -9,7 +10,7 @@
 		@oncontextmenu="ShowContextMenu"
 		@oncontextmenu:preventDefault="true">
 		<div class="h-[190px] w-full overflow-hidden rounded">
-			<img class="h-full w-full" loading="lazy" decoding="async" src="@Book.CoverUrl()" draggable="false" alt=""/>
+			<img class="h-full w-full" loading="lazy" decoding="async" src="@UrlBuilder.CoverUrl(Book.BookId)" draggable="false" alt=""/>
 			@if (!HideBadge)
 			{
 				<span class="absolute top-0 right-[2px] w-[40%] font-bold">
@@ -33,6 +34,7 @@
 
 @code{
 	[Inject] private IContextMenuService ContextMenuService { get; set; } = null!;
+	[Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
 	
 	[Parameter] public required Book Book { get; set; }
 	[Parameter] public string? Class { get; set; }
