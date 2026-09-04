@@ -164,7 +164,7 @@ public class ServerService(
 			if(shouldCacheContent)
 			{
 				readerCacheService.ClearCache(book.BookId);
-				_ = readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
+				await readerCacheService.CacheContentAsync(book.BookId, book.EbookPath());
 			}
 				
 			var getProgress = await GetBookProgress(profileId, book.BookId);
