@@ -1,5 +1,4 @@
 ﻿@using BookHeaven.Core.Enums
-@using BookHeaven.Reader.Extensions
 @if (Book == null)
 {
 	return;
@@ -14,7 +13,7 @@
 		</div>
 		<div class="flex gap-5 mb-2">
 			<div class="grid gap-2 w-[150px]">
-				<img src="@Book.CoverUrlWithCustomScheme" class="block w-full" alt=""/>
+				<img src="@Book.CoverUrl()" class="block w-full" alt=""/>
 				<span class="bg-neutral-600 px-2 py-1 text-center text-xs text-white">
 					@switch (Book.ReadingStatus())
 					{
