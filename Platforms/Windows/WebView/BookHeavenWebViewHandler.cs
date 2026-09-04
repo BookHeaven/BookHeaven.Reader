@@ -43,11 +43,11 @@ public class BookHeavenWebViewHandler : BlazorWebViewHandler
 				return;
 			}
 
-			var absolutePath = Path.GetFullPath(Path.Combine(FileSystem.AppDataDirectory, filePath));
-			if (absolutePath.StartsWith("cache"))
-			{
-				absolutePath = Path.Combine(FileSystem.CacheDirectory, filePath);
-			}
+			var basePath = filePath.StartsWith("cache", StringComparison.OrdinalIgnoreCase)
+				? FileSystem.CacheDirectory
+				: FileSystem.AppDataDirectory;
+			
+			var absolutePath = Path.GetFullPath(Path.Combine(basePath, filePath));
 
 			if (!File.Exists(absolutePath))
 			{

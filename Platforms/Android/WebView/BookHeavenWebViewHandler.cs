@@ -69,11 +69,11 @@ public class BookHeavenWebViewClient(WebViewClient? innerClient = null) : WebVie
 			return CreateNotFoundResponse();
 		}
 		
-		var absolutePath = Path.Combine(FileSystem.AppDataDirectory, filePath);
-		if (filePath.StartsWith("cache"))
-		{
-			absolutePath = Path.Combine(FileSystem.CacheDirectory, filePath);
-		}
+		var basePath = filePath.StartsWith("cache", StringComparison.OrdinalIgnoreCase)
+			? FileSystem.CacheDirectory
+			: FileSystem.AppDataDirectory;
+			
+		var absolutePath = Path.GetFullPath(Path.Combine(basePath, filePath));
 		
 		if (!File.Exists(absolutePath))
 		{
