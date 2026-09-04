@@ -47,10 +47,6 @@ public static class MauiProgram
 			options.DatabasePath = FileSystem.AppDataDirectory;
 			options.CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
 		});
-		builder.Services.AddEbookManager(options =>
-		{
-			options.CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
-		});
 		
 		builder.Services.AddSingleton<AppStateService>();
 		builder.Services.AddSingleton<LifeCycleService>();
