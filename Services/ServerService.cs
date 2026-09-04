@@ -142,8 +142,8 @@ public class ServerService(
 	{
 		try
 		{
-			var coverUrl = new Uri(_httpClient.BaseAddress!,"/covers/" + book.BookId + ".jpg");
-			var ebookUrl = new Uri(_httpClient.BaseAddress!,book.EbookUrl());
+			var coverUrl = new Uri(_httpClient.BaseAddress!, urlBuilder.CoverUrl(book.BookId));
+			var ebookUrl = new Uri(_httpClient.BaseAddress!, urlBuilder.EbookUrl(book.BookId, book.Format));
 			var shouldCacheContent = false;
 
 			Result saveBook;
