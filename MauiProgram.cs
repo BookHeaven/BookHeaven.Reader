@@ -16,6 +16,14 @@ namespace BookHeaven.Reader;
 
 public static class MauiProgram
 {
+	
+	internal static readonly IReadOnlyList<string> Assets = [
+		"/cache",
+		"/covers",
+		"/books",
+		"/fonts"
+	];
+	
 	public static MauiApp CreateMauiApp()
 	{
 
@@ -27,7 +35,7 @@ public static class MauiProgram
 		builder.ConfigureMauiHandlers(handlers =>
 		{
 #if ANDROID || WINDOWS
-			handlers.AddHandler<BlazorWebView, BookHeavenSchemeWebViewHandler>();
+			handlers.AddHandler<BlazorWebView, BookHeavenWebViewHandler>();
 #endif
 		});
 

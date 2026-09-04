@@ -7,16 +7,16 @@ using Path = System.IO.Path;
 
 namespace BookHeaven.Reader.WebView;
 
-public class BookHeavenSchemeWebViewHandler : BlazorWebViewHandler
+public class BookHeavenWebViewHandler : BlazorWebViewHandler
 {
 	protected override void ConnectHandler(Android.Webkit.WebView platformView)
 	{
 		base.ConnectHandler(platformView);
-		platformView.SetWebViewClient(new BookHeavenSchemeWebViewClient(platformView.WebViewClient));
+		platformView.SetWebViewClient(new BookHeavenWebViewClient(platformView.WebViewClient));
 	}
 }
 
-public class BookHeavenSchemeWebViewClient(WebViewClient? innerClient = null) : WebViewClient
+public class BookHeavenWebViewClient(WebViewClient? innerClient = null) : WebViewClient
 {
 	private static readonly Dictionary<string, string> CacheHeaders = new()
 	{
@@ -47,23 +47,17 @@ public class BookHeavenSchemeWebViewClient(WebViewClient? innerClient = null) : 
 
 	public override WebResourceResponse? ShouldInterceptRequest(Android.Webkit.WebView? view, IWebResourceRequest? request)
 	{
-		if (request?.Url != null && string.Equals(request.Url.Scheme, BookHeavenScheme.Scheme, StringComparison.OrdinalIgnoreCase))
+		if(request?.Url is null || request.Url.Host != "0.0.0.1" || MauiProgram.Assets.All(folder => !request.Url.Path?.StartsWith(folder, StringComparison.OrdinalIgnoreCase) == true))
 		{
-			var requestUrl = request.Url.ToString();
-			if (!string.IsNullOrWhiteSpace(requestUrl) && requestUrl.StartsWith(BookHeavenScheme.Prefix, StringComparison.OrdinalIgnoreCase))
-			{
-				return HandleBookHeavenRequest(requestUrl);
-			}
+			return innerClient?.ShouldInterceptRequest(view, request) ?? base.ShouldInterceptRequest(view, request);
 		}
 
-		return innerClient?.ShouldInterceptRequest(view, request) ?? base.ShouldInterceptRequest(view, request);
+		return HandleBookHeavenRequest(new Uri(request.Url.ToString()!));
 	}
 
-	private static WebResourceResponse HandleBookHeavenRequest(string requestUrl)
+	private static WebResourceResponse HandleBookHeavenRequest(Uri requestUrl)
 	{
-		var uri = new Uri(requestUrl);
-		var resourceFolder = uri.Host;
-		var filePath = uri.AbsolutePath.TrimStart('/');
+		var filePath = requestUrl.AbsolutePath.TrimStart('/');
 		var queryIndex = filePath.IndexOf('?');
 		if (queryIndex >= 0)
 		{
@@ -75,10 +69,10 @@ public class BookHeavenSchemeWebViewClient(WebViewClient? innerClient = null) : 
 			return CreateNotFoundResponse();
 		}
 		
-		var absolutePath = Path.Combine(FileSystem.AppDataDirectory, resourceFolder, filePath);
-		if (resourceFolder == "cache")
+		var absolutePath = Path.Combine(FileSystem.AppDataDirectory, filePath);
+		if (filePath.StartsWith("cache"))
 		{
-			absolutePath = Path.Combine(FileSystem.CacheDirectory, resourceFolder, filePath);
+			absolutePath = Path.Combine(FileSystem.CacheDirectory, filePath);
 		}
 		
 		if (!File.Exists(absolutePath))
