@@ -1,7 +1,6 @@
 ﻿@using BookHeaven.Core.Enums
 @using BookHeaven.Reader.Components.Shared.ContextMenu
 @using BookHeaven.Reader.Components.Shared.ContextMenu.Books
-@using BookHeaven.Reader.Extensions
 <div data-book-card class="relative pt-px @Class">
 	<a 
 		class="flex h-full flex-col overflow-hidden rounded active:bg-black active:outline-4 active:outline-black" 
@@ -10,7 +9,7 @@
 		@oncontextmenu="ShowContextMenu"
 		@oncontextmenu:preventDefault="true">
 		<div class="h-[190px] w-full overflow-hidden rounded">
-			<img class="h-full w-full" loading="lazy" decoding="async" src="@Book.CoverUrlWithCustomScheme" draggable="false" alt=""/>
+			<img class="h-full w-full" loading="lazy" decoding="async" src="@Book.CoverUrl()" draggable="false" alt=""/>
 			@if (!HideBadge)
 			{
 				<span class="absolute top-0 right-[2px] w-[40%] font-bold">
