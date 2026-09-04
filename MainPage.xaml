@@ -9,13 +9,13 @@
     BackgroundColor="{DynamicResource PageBackgroundColor}"
     SafeAreaEdges="Container">
 
-    <local:CustomBlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html" StartPath="/setup">
+    <BlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html" StartPath="/setup">
         <BlazorWebView.RootComponents>
             <RootComponent
                 Selector="head::after"
                 ComponentType="{x:Type blazorweb:HeadOutlet}" />
             <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
         </BlazorWebView.RootComponents>
-    </local:CustomBlazorWebView>
+    </BlazorWebView>
 
 </ContentPage>
