@@ -117,7 +117,7 @@
 <FontManager />
 <ImageViewer />
 <Navigation />
-@if (!ReaderService.IsReady)
+@if (!_isFullyRendered)
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
 }
@@ -132,7 +132,7 @@
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier"/>
 
 
-<div class="flex h-screen flex-col @(!ReaderService.IsReady ? "invisible" : "")">
+<div class="flex h-screen flex-col @(!_isFullyRendered ? "invisible" : "")">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)

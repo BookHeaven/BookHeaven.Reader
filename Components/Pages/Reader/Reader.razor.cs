@@ -21,6 +21,7 @@ public partial class Reader : IAsyncDisposable
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
+    private bool _isFullyRendered;
     private bool _refreshTotalPages;
     private bool _isSuspended;
 
@@ -68,6 +69,12 @@ public partial class Reader : IAsyncDisposable
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync("Initialize", _dotNetReference);
+        }
+        if(_module is not null && ReaderService.IsReady && !_isFullyRendered)
+        {
+            await _module.InvokeVoidAsync("WaitForAssetsToLoad");
+            _isFullyRendered = true;
+            StateHasChanged();
         }
         if (_refreshTotalPages)
         {

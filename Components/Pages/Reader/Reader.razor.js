@@ -4,8 +4,8 @@ let pageWidth = null;
 let pageGap = null;
 
 
-const waitForImagesToLoad = async () => {
-    const images = Array.from(document.querySelectorAll('.chapter img, .chapter svg'));
+const waitForImagesToLoad = async (element = document) => {
+    const images = Array.from(element.querySelectorAll('.chapter img, .chapter svg'));
     if (!images.length) {
         await new Promise((resolve) => requestAnimationFrame(() => resolve()));
         return;
@@ -41,7 +41,7 @@ const keyDownHandler = (e) => {
     Reference.DotNet.invokeMethodAsync('OnKeyDown', e.key);
 }
 
-export function Initialize(dotnet) {
+export async function Initialize(dotnet) {
     Reference.DotNet = dotnet;
     
     mainChapter = document.querySelector('.chapter.current');
@@ -49,6 +49,13 @@ export function Initialize(dotnet) {
     pageWidth = Math.max(mainChapter.offsetWidth + pageGap, 1);
 
     window.addEventListener('keydown', keyDownHandler);
+}
+
+export async function WaitForAssetsToLoad() {
+    if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+    }
+    await waitForImagesToLoad(mainChapter);
 }
 
 export async function GetPageCount() {
