@@ -65,7 +65,7 @@
 			}
 		}
 
-		img, svg, figure {
+		img, svg, image, figure {
 			box-sizing: border-box;
 			object-fit: contain !important;
 			break-inside: avoid !important;
@@ -132,7 +132,7 @@
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier"/>
 
 
-<div class="flex h-screen flex-col @(!_isFullyRendered ? "invisible" : "")">
+<div class="flex h-screen flex-col @(_isFullyRendered ? "" : "invisible")">
 	<div id="viewer" class="flex-1 overflow-hidden">
 		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
@@ -152,16 +152,13 @@
 	</div>
 
 	<div class="h-[24px] mx-2 mb-2 grid grid-cols-[75px_1fr_75px] items-center gap-1">
-		@if (ReaderService.IsReady)
-		{
-			<div class="flex items-center gap-0.5">
-				<Clock/>
-				<BatteryInfo/>
-			</div>
-			<ChapterTitle />
-			<div class="text-end text-nowrap">
-				@(ReaderService.State?.ProgressAsPercentage.ToString("0.00"))%
-			</div>
-		}
+		<div class="flex items-center gap-0.5">
+			<Clock/>
+			<BatteryInfo/>
+		</div>
+		<ChapterTitle />
+		<div class="text-end text-nowrap">
+			@(ReaderService.State?.ProgressAsPercentage.ToString("0.00"))%
+		</div>
 	</div>
 </div>
