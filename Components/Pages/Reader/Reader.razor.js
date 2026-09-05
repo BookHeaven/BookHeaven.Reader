@@ -4,33 +4,40 @@ let pageWidth = null;
 let pageGap = null;
 
 
-const waitForImagesToLoad = async (element = document) => {
-    const images = Array.from(element.querySelectorAll('.chapter img, .chapter svg'));
+const waitForImagesToLoad = async (element = document.querySelector("#viewer")) => {
+    const images = Array.from(element.querySelectorAll('img, svg image'))
+        .filter((image) => !image.hasAttribute('width') && !image.hasAttribute('height'));
     if (!images.length) {
         await new Promise((resolve) => requestAnimationFrame(() => resolve()));
         return;
     }
 
     await Promise.all(images.map(async (image) => {
-        if (image.tagName === 'IMG') {
-            if (image.complete) return;
+        if (image.tagName.toLowerCase() === 'image') {
+            // <image> dentro de SVG no dispara eventos load/error, se espera a través de una Image temporal
+            const src = image.getAttribute('href') || image.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
+            if (!src) return;
 
+            const temp = new Image();
             await new Promise((resolve) => {
-                const onDone = () => {
-                    image.removeEventListener('load', onDone);
-                    image.removeEventListener('error', onDone);
-                    resolve();
-                };
-
-                image.addEventListener('load', onDone, { once: true });
-                image.addEventListener('error', onDone, { once: true });
+                temp.onload = temp.onerror = () => resolve();
+                temp.src = src;
             });
             return;
         }
 
-        if (image.tagName === 'SVG') {
-            await new Promise((resolve) => requestAnimationFrame(() => resolve()));
-        }
+        if (image.complete) return;
+
+        await new Promise((resolve) => {
+            const onDone = () => {
+                image.removeEventListener('load', onDone);
+                image.removeEventListener('error', onDone);
+                resolve();
+            };
+
+            image.addEventListener('load', onDone, { once: true });
+            image.addEventListener('error', onDone, { once: true });
+        });
     }));
 
     await new Promise((resolve) => requestAnimationFrame(() => resolve()));
