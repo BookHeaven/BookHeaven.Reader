@@ -45,8 +45,6 @@ export async function Initialize(dotnet) {
     Reference.DotNet = dotnet;
     
     mainChapter = document.querySelector('.chapter.current');
-    pageGap = Number.parseFloat(getComputedStyle(mainChapter).columnGap);
-    pageWidth = Math.max(mainChapter.offsetWidth + pageGap, 1);
 
     window.addEventListener('keydown', keyDownHandler);
 }
@@ -63,6 +61,10 @@ export async function GetPageCount() {
     if (!chapters.length) {
         return [];
     }
+
+    pageGap = Number.parseFloat(getComputedStyle(mainChapter).columnGap);
+    pageWidth = Math.max(mainChapter.offsetWidth + pageGap, 1);
+    
     if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
     }
