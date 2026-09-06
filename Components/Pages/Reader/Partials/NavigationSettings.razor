@@ -1,6 +1,6 @@
 @using BookHeaven.Core.Features.Reader.Abstractions
 @using BookHeaven.Reader.Functions
-<div class="col-span-2 flex justify-center flex-wrap gap-4 p-3">
+<div class="col-span-2 flex flex-wrap justify-center gap-4 p-3">
     @foreach (NavigationLayoutType type in Enum.GetValues(typeof(NavigationLayoutType)))
     {
         <div class="grid grid-cols-3 grid-rows-3 size-[100px] hover:cursor-pointer @((ReaderSettingsService.ReaderSettings?.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
@@ -28,7 +28,7 @@
                         break;
                 }
                 
-                <span class="flex items-center justify-center @color">
+                <span class="@color flex items-center justify-center">
                     @if (showIcon)
                     {
                         switch (buttons[i])
@@ -58,7 +58,7 @@
     private void ChangeLayout(NavigationLayoutType type)
     {
         ReaderSettingsService.ReaderSettings?.SelectedLayout = (int)type;
-        ReaderSettingsService.NotifySettingsChanged();
+        ReaderSettingsService.NotifySettingChanged(nameof(ReaderSettingsService.ReaderSettings.SelectedLayout));
     }
 
 }
