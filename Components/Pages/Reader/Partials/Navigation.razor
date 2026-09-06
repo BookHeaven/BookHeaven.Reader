@@ -1,7 +1,7 @@
 @using BookHeaven.Core.Features.Reader.Abstractions
 @using BookHeaven.Reader.Functions
 @implements IAsyncDisposable
-<div class="absolute w-screen h-screen z-999 grid grid-cols-3" @oncontextmenu="@OpenImageViewer" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
+<div class="absolute z-999 grid h-screen w-screen grid-cols-3" @oncontextmenu="@OpenImageViewer" @oncontextmenu:preventDefault @oncontextmenu:stopPropagation>
     @foreach(var button in Buttons)
     {
         <span @onclick="@(() => HandleNavigation(button))"></span>
@@ -24,12 +24,12 @@
     protected override void OnInitialized()
     {
         _selectedLayout = (NavigationLayoutType)ReaderSettingsService.ReaderSettings!.SelectedLayout;
-        ReaderSettingsService.OnSettingsChanged += OnSelectedLayoutChanged;
+        ReaderSettingsService.OnSettingChanged += OnSelectedLayoutChanged;
     }
     
-    private void OnSelectedLayoutChanged()
+    private void OnSelectedLayoutChanged(string? settingName)
     {
-        if(ReaderSettingsService.ReaderSettings?.SelectedLayout == (int)_selectedLayout) return;
+        if(settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedLayout)) return;
         _selectedLayout = (NavigationLayoutType)ReaderSettingsService.ReaderSettings!.SelectedLayout;
         InvokeAsync(StateHasChanged);
     }
@@ -71,7 +71,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        ReaderSettingsService.OnSettingsChanged -= OnSelectedLayoutChanged;
+        ReaderSettingsService.OnSettingChanged -= OnSelectedLayoutChanged;
         try
         {
             await _module.DisposeAsync();
