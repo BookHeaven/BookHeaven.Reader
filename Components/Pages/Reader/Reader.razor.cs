@@ -27,7 +27,6 @@ public partial class Reader : IAsyncDisposable
     private bool _recountRequested;
     private int _recountTotal;
     private bool _needsInitialNavigation;
-    private bool _isSuspended;
     private readonly ChapterRecountQueue _recountQueue = new();
 
     private double CountingProgress => _isCountingPages && _recountTotal > 0 ? 1 - (double)_recountQueue.Count / _recountTotal : 1;
@@ -38,7 +37,7 @@ public partial class Reader : IAsyncDisposable
         ReaderService.OnPageChanged += RefreshUi;
         ReaderService.OnChapterChanged += OnChapterChanged;
         ReaderService.OnTotalPagesChanged += RefreshUi;
-        ReaderSettingsService.OnSettingsChanged += OnSettingsChanged;
+        ReaderSettingsService.OnSettingChanged += OnSettingChanged;
         LifeCycleService.Paused += OnPaused;
         LifeCycleService.Resumed += OnResumed;
         LifeCycleService.Destroyed += OnDestroy;
@@ -100,7 +99,7 @@ public partial class Reader : IAsyncDisposable
         ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= OnChapterChanged;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
-        ReaderSettingsService.OnSettingsChanged -= OnSettingsChanged;
+        ReaderSettingsService.OnSettingChanged -= OnSettingChanged;
         LifeCycleService.Paused -= OnPaused;
         LifeCycleService.Resumed -= OnResumed;
         LifeCycleService.Destroyed -= OnDestroy;
@@ -128,8 +127,9 @@ public partial class Reader : IAsyncDisposable
     }
     
 
-    private void OnSettingsChanged()
+    private void OnSettingChanged(string? settingName)
     {
+        if(!string.IsNullOrEmpty(settingName) && settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedFont)) return;
         ReaderService.InvalidatePageCounts();
         if (ReaderService.State is { } state)
         {
@@ -185,15 +185,11 @@ public partial class Reader : IAsyncDisposable
 
     private void OnPaused()
     {
-        if (_isSuspended) return;
-        _isSuspended = true;
         ReaderService.PauseTimer();
     }
 
     private void OnResumed()
     {
-        if (!_isSuspended) return;
-        _isSuspended = false;
         ReaderService.ResumeTimer();
     }
 
