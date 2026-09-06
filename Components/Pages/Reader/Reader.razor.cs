@@ -22,6 +22,8 @@ public partial class Reader : IAsyncDisposable
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
     private bool _isFullyRendered;
+    private bool _isCountingPages;
+    private double _countingProgress;
     private bool _refreshTotalPages;
     private bool _isSuspended;
 
@@ -117,7 +119,7 @@ public partial class Reader : IAsyncDisposable
     }
     
 
-    private async Task UpdateTotalPages()
+    /*private async Task UpdateTotalPages()
     {
         if(_module is null) return;
         _refreshTotalPages = false;
@@ -129,6 +131,46 @@ public partial class Reader : IAsyncDisposable
             ReaderService.NavigateToInitialPage();
             await InvokeAsync(StateHasChanged);
         }
+    }*/
+    
+    private async Task UpdateTotalPages()
+    {
+        if (_module is null || ReaderService.State?.Ebook?.Content.Chapters is not { } chapters) return;
+
+        _refreshTotalPages = false;
+        _isCountingPages = true;
+        _countingProgress = 0;
+        StateHasChanged();
+
+        try
+        {
+            // Preparar los datos a pasar al JS (solo contenido + stylesheets)
+            var contents = chapters.Select(c => c.Content).ToArray();
+            var stylesheets = chapters.Select(c => c.Stylesheets.ToArray()).ToArray();
+            
+
+            var pagesArray = await _module.InvokeAsync<int[]>("GetPageCount", contents, stylesheets);
+            ReaderService.SetTotalPages(pagesArray);
+
+            if (!ReaderService.IsReady)
+            {
+                ReaderService.NavigateToInitialPage();
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        finally
+        {
+            _isCountingPages = false;
+            _countingProgress = 0;
+            StateHasChanged();
+        }
+    }
+    
+    [JSInvokable("OnCountingProgress")]
+    public void OnCountingProgress(double progress)
+    {
+        _countingProgress = progress;
+        InvokeAsync(StateHasChanged);
     }
     
     async ValueTask IAsyncDisposable.DisposeAsync()

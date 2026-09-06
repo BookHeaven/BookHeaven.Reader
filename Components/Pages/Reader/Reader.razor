@@ -140,7 +140,7 @@
 				@((MarkupString)ReaderService.State.CurrentChapter.Content)
 			}
 		</div>
-		@if (_refreshTotalPages)
+		@*@if (_refreshTotalPages)
 		{
 			foreach (var chapter in ReaderService.State?.Ebook?.Content.Chapters ?? [])
 			{
@@ -148,10 +148,10 @@
 					@((MarkupString)chapter.Content)
 				</div>
 			}
-		}
+		}*@
 	</div>
 
-	<div class="h-[24px] mx-2 mb-2 grid grid-cols-[75px_1fr_75px] items-center gap-1">
+	<div class="mx-2 mb-2 grid h-[24px] grid-cols-[75px_1fr_75px] items-center gap-1">
 		<div class="flex items-center gap-0.5">
 			<Clock/>
 			<BatteryInfo/>
@@ -162,3 +162,11 @@
 		</div>
 	</div>
 </div>
+
+@if (_isCountingPages)
+{
+	<div class="fixed right-0 bottom-0 left-0 z-10001 flex items-center gap-3 bg-neutral-900/80 px-4 py-2 text-sm text-white">
+		@* <MudProgressLinear Color="Color.Primary" Value="@(_countingProgress * 100)" Indeterminate="@(_countingProgress == 0)" Class="flex-1" Height="4px"/> *@
+		<span class="text-nowrap">Calculando páginas… @((int)(_countingProgress * 100))%</span>
+	</div>
+}
