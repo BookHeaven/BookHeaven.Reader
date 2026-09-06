@@ -1,6 +1,7 @@
 using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
+using BookHeaven.Core.Features.Reader.Models;
 using CommunityToolkit.Maui.Alerts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -10,7 +11,7 @@ namespace BookHeaven.Reader.Components.Pages.Reader;
 public partial class Reader : IAsyncDisposable
 {
     [Parameter] public Guid Id { get; set; }
-    
+
     [Inject] private AppStateService AppStateService { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
@@ -23,41 +24,41 @@ public partial class Reader : IAsyncDisposable
     private IJSObjectReference? _module;
     private bool _isFullyRendered;
     private bool _isCountingPages;
-    private double _countingProgress;
-    private bool _refreshTotalPages;
+    private bool _recountRequested;
+    private int _recountTotal;
+    private bool _needsInitialNavigation;
     private bool _isSuspended;
+    private readonly ChapterRecountQueue _recountQueue = new();
+
+    private double CountingProgress => _isCountingPages && _recountTotal > 0 ? 1 - (double)_recountQueue.Count / _recountTotal : 1;
+    
 
     protected override async Task OnInitializedAsync()
     {
         ReaderService.OnPageChanged += RefreshUi;
-        ReaderService.OnChapterChanged += RefreshUi;
+        ReaderService.OnChapterChanged += OnChapterChanged;
         ReaderService.OnTotalPagesChanged += RefreshUi;
         ReaderSettingsService.OnSettingsChanged += OnSettingsChanged;
-        
-        var getBook = await Sender.Send(new GetBook.Query {BookId = Id});
+        LifeCycleService.Paused += OnPaused;
+        LifeCycleService.Resumed += OnResumed;
+        LifeCycleService.Destroyed += OnDestroy;
+
+        var getBook = await Sender.Send(new GetBook.Query { BookId = Id });
         if (getBook.IsFailure)
         {
             await Toast.Make(getBook.Error.Description).Show();
             return;
         }
-        AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
-		
-        await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
-        if (!ReaderService.IsReady)
-        {
-            _refreshTotalPages = true;
-        }
-    }
-    
-    private void OnSettingsChanged()
-    {
-        _refreshTotalPages = true;
-        InvokeAsync(StateHasChanged);
-    }
 
-    private void RefreshUi()
-    {
-        InvokeAsync(StateHasChanged);
+        AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
+
+        await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+        if (ReaderService.State is { } state)
+        {
+            if (!ReaderService.IsReady || state.AnyChaptersPending) _recountRequested = true;
+            // Without cache there are no counts: navigate to the initial page after counting
+            if (!ReaderService.IsReady && state.BookPages == 0) _needsInitialNavigation = true;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -65,43 +66,107 @@ public partial class Reader : IAsyncDisposable
         if (firstRender)
         {
 #if ANDROID
-                var activity = Platform.CurrentActivity!;
-                activity.Window?.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
+            SetFullscreen(true);
 #endif
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync("Initialize", _dotNetReference);
+            if (ReaderService.State?.Ebook?.Content.Chapters is { } chapters)
+            {
+                var contents = chapters.Select(c => c.Content).ToArray();
+                var stylesheetIndices = chapters.Select(c => c.Stylesheets.ToArray()).ToArray();
+                await _module.InvokeVoidAsync("SetChapterData", contents, stylesheetIndices);
+            }
         }
-        if(_module is not null && ReaderService.IsReady && !_isFullyRendered)
+
+        if (_module is not null && ReaderService.IsReady && !_isFullyRendered)
         {
             await _module.InvokeVoidAsync("WaitForAssetsToLoad");
             _isFullyRendered = true;
             StateHasChanged();
         }
-        if (_refreshTotalPages)
+
+        if (_recountRequested)
         {
-            await UpdateTotalPages();
+            _ = RecountPagesAsync();
         }
     }
-    
-    private void OnPaused()
-    {
-        if(_isSuspended) return;
-        _isSuspended = true;
-        ReaderService.PauseTimer();
-        
-    }
 
-    private void OnResumed()
-    {
-        if (!_isSuspended) return;
-        _isSuspended = false;
-        ReaderService.ResumeTimer();
-    }
-    
-    private async void OnDestroy()
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
         await ReaderService.SaveProgressAsync();
+        AppStateService.CurrentScreenSaverCoverPath = null;
+
+        ReaderService.OnPageChanged -= RefreshUi;
+        ReaderService.OnChapterChanged -= OnChapterChanged;
+        ReaderService.OnTotalPagesChanged -= RefreshUi;
+        ReaderSettingsService.OnSettingsChanged -= OnSettingsChanged;
+        LifeCycleService.Paused -= OnPaused;
+        LifeCycleService.Resumed -= OnResumed;
+        LifeCycleService.Destroyed -= OnDestroy;
+
+        ReaderService.Dispose();
+        _dotNetReference.Dispose();
+
+        if (_module is not null)
+        {
+            try
+            {
+                await _module.InvokeVoidAsync("Dispose");
+                await _module.DisposeAsync();
+            }
+            catch
+            {
+                // Ignore errors during disposal
+            }
+        }
+
+#if ANDROID
+        SetFullscreen(false);
+#endif
+        GC.SuppressFinalize(this);
+    }
+    
+
+    private void OnSettingsChanged()
+    {
+        ReaderService.InvalidatePageCounts();
+        if (ReaderService.State is { } state)
+        {
+            if (_isCountingPages)
+            {
+                var pending = state.GetPendingChapterIndices();
+                _recountQueue.Enqueue(pending, front: true);
+                _recountQueue.Prioritize(state.ChapterNumber);
+                _recountTotal = Math.Max(_recountTotal, _recountQueue.Count);
+                InvokeAsync(() => PrioritizeChapters([state.ChapterNumber, .. pending.Except([state.ChapterNumber])]));
+            }
+            else
+            {
+                _recountRequested = true;
+            }
+        }
+        RefreshUi();
+    }
+
+    private void OnChapterChanged()
+    {
+        if (_isCountingPages &&
+            ReaderService.State is { } state &&
+            state.IsChapterPending(state.ChapterNumber))
+        {
+            _recountQueue.Prioritize(state.ChapterNumber);
+            InvokeAsync(() => PrioritizeChapters(state.ChapterNumber));
+        }
+        RefreshUi();
+    }
+
+    [JSInvokable("OnChapterCounted")]
+    public void OnChapterCounted(int chapter, int pageCount)
+    {
+        ReaderService.SetChapterPageCount(chapter, pageCount);
+        if (_isCountingPages) _recountQueue.Dequeue(chapter);
+        RefreshUi();
     }
 
     [JSInvokable("OnKeyDown")]
@@ -117,87 +182,112 @@ public partial class Reader : IAsyncDisposable
                 break;
         }
     }
-    
 
-    /*private async Task UpdateTotalPages()
+    private void OnPaused()
     {
-        if(_module is null) return;
-        _refreshTotalPages = false;
-        var pagesArray = await _module.InvokeAsync<int[]>("GetPageCount");
-        ReaderService.SetTotalPages(pagesArray);
+        if (_isSuspended) return;
+        _isSuspended = true;
+        ReaderService.PauseTimer();
+    }
 
-        if (!ReaderService.IsReady)
-        {
-            ReaderService.NavigateToInitialPage();
-            await InvokeAsync(StateHasChanged);
-        }
-    }*/
-    
-    private async Task UpdateTotalPages()
+    private void OnResumed()
     {
-        if (_module is null || ReaderService.State?.Ebook?.Content.Chapters is not { } chapters) return;
+        if (!_isSuspended) return;
+        _isSuspended = false;
+        ReaderService.ResumeTimer();
+    }
 
-        _refreshTotalPages = false;
+    private async void OnDestroy()
+    {
+        await ReaderService.SaveProgressAsync();
+    }
+    
+    private async Task RecountPagesAsync()
+    {
+        if (_module is not { } module || ReaderService.State is not { } state || _isCountingPages) return;
+        _recountRequested = false;
         _isCountingPages = true;
-        _countingProgress = 0;
-        StateHasChanged();
+        QueuePendingChapters(state);
+        _recountTotal = _recountQueue.Count;
+        RefreshUi();
+        if (_recountTotal == 0)
+        {
+            _isCountingPages = false;
+            return;
+        }
 
         try
         {
-            // Preparar los datos a pasar al JS (solo contenido + stylesheets)
-            var contents = chapters.Select(c => c.Content).ToArray();
-            var stylesheets = chapters.Select(c => c.Stylesheets.ToArray()).ToArray();
-            
-
-            var pagesArray = await _module.InvokeAsync<int[]>("GetPageCount", contents, stylesheets);
-            ReaderService.SetTotalPages(pagesArray);
-
-            if (!ReaderService.IsReady)
+            if (state.BookPages == 0)
             {
+                // Count all chapters in one go: no prior data to calculate progress
+                await module.InvokeVoidAsync("CountChapters", _recountQueue.ToArray());
+            }
+            else
+            {
+                // Incremental recount: the user can continue reading meanwhile
+                while (_recountQueue.TryDequeueNext(out var chapter))
+                {
+                    // The JS loop may have already counted it (prioritized on demand)
+                    if (!state.IsChapterPending(chapter)) continue;
+                    // The user may have changed chapters: prioritize the one being read
+                    _recountQueue.Prioritize(state.ChapterNumber);
+                    await module.InvokeVoidAsync("CountChapters", [chapter]);
+                    RefreshUi();
+                }
+            }
+            
+            if (state.AnyChaptersPending)
+            {
+                QueuePendingChapters(state);
+                if (_recountQueue.Count > 0)
+                {
+                    _recountTotal = Math.Max(_recountTotal, _recountQueue.Count);
+                    await module.InvokeVoidAsync("CountChapters", _recountQueue.ToArray());
+                }
+            }
+
+            if (_needsInitialNavigation)
+            {
+                _needsInitialNavigation = false;
                 ReaderService.NavigateToInitialPage();
-                await InvokeAsync(StateHasChanged);
+                RefreshUi();
             }
         }
         finally
         {
             _isCountingPages = false;
-            _countingProgress = 0;
-            StateHasChanged();
+            RefreshUi();
         }
     }
     
-    [JSInvokable("OnCountingProgress")]
-    public void OnCountingProgress(double progress)
+    private void QueuePendingChapters(ReaderState state)
     {
-        _countingProgress = progress;
-        InvokeAsync(StateHasChanged);
+        _recountQueue.Clear();
+        _recountQueue.Enqueue(state.GetPendingChapterIndices());
+        _recountQueue.Prioritize(state.ChapterNumber);
     }
     
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    private async Task PrioritizeChapters(params int[] chapters)
     {
-        await ReaderService.SaveProgressAsync();
-        AppStateService.CurrentScreenSaverCoverPath = null;
-        ReaderService.OnPageChanged -= RefreshUi;
-        ReaderService.OnChapterChanged -= RefreshUi;
-        ReaderService.OnTotalPagesChanged -= RefreshUi;
-        LifeCycleService.Resumed -= OnResumed;
-        LifeCycleService.Paused -= OnPaused;
-        LifeCycleService.Destroyed -= OnDestroy;
-        ReaderService.Dispose();
-        _dotNetReference.Dispose();
+        if (_module is null || chapters.Length == 0) return;
         try
         {
-            if (_module is not null)
-            {
-                await _module.InvokeVoidAsync("Dispose");
-                await _module.DisposeAsync();
-            }
+            await _module.InvokeVoidAsync("Prioritize", chapters);
         }
-        catch {}
-#if ANDROID
-        var activity = Platform.CurrentActivity!;
-        activity.Window?.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
-#endif
-        GC.SuppressFinalize(this);
+        catch { }
     }
+
+    private void RefreshUi() => InvokeAsync(StateHasChanged);
+
+#if ANDROID
+    private void SetFullscreen(bool enabled)
+    {
+        var window = Platform.CurrentActivity!.Window;
+        if (window is null) return;
+        var fullscreen = Android.Views.WindowManagerFlags.Fullscreen;
+        if (enabled) window.AddFlags(fullscreen);
+        else window.ClearFlags(fullscreen);
+    }
+#endif
 }

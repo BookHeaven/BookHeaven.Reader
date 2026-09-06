@@ -1,6 +1,10 @@
-﻿let Reference = { DotNet: null };
+let Reference = { DotNet: null };
 let mainChapter = null;
 let viewer = null;
+let chapterContents = null;
+let stylesheetIndices = null;
+let countQueue = [];
+let isCounting = false;
 
 
 const waitForImagesToLoad = async (element = document.querySelector("#viewer"), prefetched = null) => {
@@ -77,28 +81,24 @@ export async function Initialize(dotnet) {
     window.addEventListener('keydown', keyDownHandler);
 }
 
+/**
+ * Guarda los contenidos de los capítulos para los recuentos posteriores,
+ * evitando reenviarlos por JS interop en cada recuento.
+ */
+export function SetChapterData(contents, indices) {
+    chapterContents = contents;
+    stylesheetIndices = indices;
+}
+
 export async function WaitForAssetsToLoad() {
+    // Todo acotado: un asset que nunca dispare load/error (o una fuente colgada)
+    // no puede bloquear al lector para siempre
     if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
     }
     await waitForImagesToLoad(mainChapter);
 }
 
-/*export async function GetPageCount() {
-    const chapters = Array.from(document.querySelectorAll('.chapter.invisible'));
-    if (!chapters.length) {
-        return [];
-    }
-
-    pageGap = Number.parseFloat(getComputedStyle(mainChapter).columnGap);
-    pageWidth = Math.max(mainChapter.offsetWidth + pageGap, 1);
-    
-    if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-    }
-    await waitForImagesToLoad();
-    return chapters.map((chapter) => Math.max(1, Math.ceil(chapter.scrollWidth / pageWidth)));
-}*/
 
 /**
  * Extrae los src de las imágenes de todos los capítulos (solo las que no tienen
@@ -129,7 +129,12 @@ const prefetchChapterImages = async (chapterContents, poolSize = 6) => {
                     : image.getAttributeNS('http://www.w3.org/1999/xlink', 'href');
                 if (!href) return;
 
-                const url = new URL(href, base).href;
+                let url;
+            try {
+                url = new URL(href, base).href;
+            } catch {
+                return; // src malformado: se ignora
+            }
                 if (!seen.has(url)) {
                     seen.add(url);
                     sources.push(url);
@@ -155,14 +160,70 @@ const prefetchChapterImages = async (chapterContents, poolSize = 6) => {
     return seen;
 };
 
-export async function GetPageCount(chapterContents, stylesheetIndices) {
-    // Esperar a que las fuentes estén listas (solo una vez)
+/**
+ * Mueve los capítulos indicados al principio de la cola de medición.
+ * Si el conteo ya está en marcha, el bucle recoge el reordenado en su
+ * siguiente paso, lo que permite priorizar bajo demanda (p. ej. el capítulo
+ * al que ha saltado el usuario) sin reiniciar el conteo.
+ * Un capítulo que no esté en cola pero con el conteo activo se añade
+ * igualmente (p. ej. invalidado por un cambio de ajustes a mitad de conteo).
+ */
+export function Prioritize(chapters) {
+    if (!chapterContents || !chapters?.length) return;
+    for (const chapter of chapters) {
+        if (chapter < 0 || chapter >= chapterContents.length) continue;
+        const index = countQueue.indexOf(chapter);
+        if (index > 0) {
+            countQueue.splice(index, 1);
+            countQueue.unshift(chapter);
+        } else if (index === -1 && isCounting) {
+            countQueue.unshift(chapter);
+        }
+    }
+}
+
+/**
+ * Mide el número de páginas de los capítulos indicados (por índice) y notifica
+ * a .NET el resultado de CADA capítulo (OnChapterCounted), esperándolo para
+ * garantizar que .NET lo haya procesado antes de continuar.
+ *
+ * Los índices se añaden a una cola dinámica: si ya hay un conteo en marcha,
+ * el bucle en curso los recoge respetando cualquier reordenado previo
+ * (Prioritize), en lugar de lanzar un segundo conteo en paralelo.
+ */
+export async function CountChapters(indices) {
+    if (!chapterContents || !indices.length) return;
+    for (const i of indices) {
+        if (i < 0 || i >= chapterContents.length) continue;
+        if (!countQueue.includes(i)) countQueue.push(i);
+    }
+    if (isCounting) return; // el bucle en curso recogerá la cola
+    isCounting = true;
+    try {
+        await countQueuedChapters();
+    } finally {
+        isCounting = false;
+    }
+}
+
+async function countQueuedChapters() {
+    if (!countQueue.length) return;
+
+    // Re-localizar por si Blazor ha re-renderizado el DOM
+    viewer = document.querySelector('#viewer');
+    mainChapter = document.querySelector('.chapter.current');
+    if (!viewer || !mainChapter) {
+        console.warn('[Reader] CountChapters: no hay #viewer o .chapter.current en el DOM');
+        return; // la cola se conserva: la recogerá el próximo CountChapters
+    }
+
+    // Esperar a que las fuentes estén listas (acotado: si se cuelgan, se mide igual)
     if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
     }
 
-    // Pre-cargar en paralelo las imágenes de TODOS los capítulos
-    const prefetched = await prefetchChapterImages(chapterContents);
+    // Pre-cargar en paralelo las imágenes de los capítulos a contar (acotado)
+    const prefetched = await prefetchChapterImages(countQueue.map(i => chapterContents[i]));
 
     // Calcular el ancho de página real (incluye gap)
     const computedStyle = getComputedStyle(mainChapter);
@@ -175,36 +236,34 @@ export async function GetPageCount(chapterContents, stylesheetIndices) {
     measureEl.style.cssText = 'visibility:hidden;';
     viewer.appendChild(measureEl);
 
-    const results = [];
-    const total = chapterContents.length;
-    let lastReported = 0;
-
     try {
-        for (let i = 0; i < total; i++) {
-            // Insertar el HTML del capítulo en el contenedor de medición
-            measureEl.innerHTML = chapterContents[i];
+        // Cola dinámica: un Prioritize() llegado a mitad de conteo reordena
+        // los capítulos restantes, así el siguiente en medirse es el priorizado
+        while (countQueue.length) {
+            const i = countQueue.shift();
+            try {
+                console.log(`[Reader] Midiendo capítulo ${i}...`);
+                // Insertar el HTML del capítulo en el contenedor de medición
+                measureEl.innerHTML = chapterContents[i];
 
-            // Aplicar stylesheets si hay
-            measureEl.className = 'chapter measure-target' +
-                (stylesheetIndices[i] || []).map(s => ' stylesheet-' + s).join('');
+                // Aplicar stylesheets si hay
+                measureEl.className = 'chapter measure-target' +
+                    (stylesheetIndices[i] || []).map(s => ' stylesheet-' + s).join('');
 
-            // Esperar a que las imágenes se carguen (debería ser inmediato: ya están en caché)
-            await waitForImagesToLoad(measureEl, prefetched);
+                // Esperar a que las imágenes se carguen (acotado: ya vienen pre-cargadas)
+                await waitForImagesToLoad(measureEl, prefetched);
 
-            // Forzar layout (reflow) para que scrollWidth sea correcto
-            void measureEl.offsetWidth;
+                // Forzar layout (reflow) para que scrollWidth sea correcto
+                void measureEl.offsetWidth;
 
-            // Medir
-            results.push(measureChapter(measureEl, pageWidth, pageGap));
-
-            // Limpiar el contenedor (liberar memoria)
-            measureEl.innerHTML = '';
-
-            // Notificar progreso (throttleado: al menos 5% de avance, o al terminar)
-            const progress = (i + 1) / total;
-            if (i === total - 1 || progress - lastReported >= 0.05) {
-                lastReported = progress;
-                Reference.DotNet.invokeMethodAsync('OnCountingProgress', progress);
+                // Medir y notificar a .NET (esperar a que lo haya procesado)
+                const pageCount = measureChapter(measureEl, pageWidth, pageGap);
+                measureEl.innerHTML = '';
+                await Reference.DotNet.invokeMethodAsync('OnChapterCounted', i, pageCount);
+            } catch (e) {
+                // Un capítulo problemático no puede tumbar todo el lote
+                console.error(`[Reader] Error midiendo el capítulo ${i}:`, e);
+                measureEl.innerHTML = '';
             }
 
             // ⭐ YIELD al hilo de UI entre cada capítulo
@@ -216,8 +275,6 @@ export async function GetPageCount(chapterContents, stylesheetIndices) {
         // Limpiar el contenedor de medición
         viewer.removeChild(measureEl);
     }
-
-    return results;
 }
 
 export function Dispose() {

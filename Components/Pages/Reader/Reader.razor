@@ -140,15 +140,6 @@
 				@((MarkupString)ReaderService.State.CurrentChapter.Content)
 			}
 		</div>
-		@*@if (_refreshTotalPages)
-		{
-			foreach (var chapter in ReaderService.State?.Ebook?.Content.Chapters ?? [])
-			{
-				<div class="chapter invisible @(string.Join(" ", chapter.Stylesheets.Select(s => "stylesheet-" + s)))">
-					@((MarkupString)chapter.Content)
-				</div>
-			}
-		}*@
 	</div>
 
 	<div class="mx-2 mb-2 grid h-[24px] grid-cols-[75px_1fr_75px] items-center gap-1">
@@ -165,8 +156,7 @@
 
 @if (_isCountingPages)
 {
-	<div class="fixed right-0 bottom-0 left-0 z-10001 flex items-center gap-3 bg-neutral-900/80 px-4 py-2 text-sm text-white">
-		@* <MudProgressLinear Color="Color.Primary" Value="@(_countingProgress * 100)" Indeterminate="@(_countingProgress == 0)" Class="flex-1" Height="4px"/> *@
-		<span class="text-nowrap">Calculando páginas… @((int)(_countingProgress * 100))%</span>
+	<div class="fixed inset-x-0 top-0 z-10001 flex items-center gap-3 bg-neutral-900/80 px-4 py-2 text-sm text-white">
+		<span class="text-nowrap">Calculando páginas… @((int)(CountingProgress * 100))%</span>
 	</div>
 }
