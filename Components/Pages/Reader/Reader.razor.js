@@ -74,7 +74,7 @@ const measureChapter = (chapterEl, pageWidth, pageGap) => {
 export async function Initialize(dotnet) {
     Reference.DotNet = dotnet;
 
-    viewer = document.querySelector('#viewer');
+    viewer = document.querySelector('.viewer');
     mainChapter = document.querySelector('.chapter.current');
     
 
@@ -210,7 +210,7 @@ async function countQueuedChapters() {
     if (!countQueue.length) return;
 
     // Re-localizar por si Blazor ha re-renderizado el DOM
-    viewer = document.querySelector('#viewer');
+    viewer = document.querySelector('.viewer');
     mainChapter = document.querySelector('.chapter.current');
     if (!viewer || !mainChapter) {
         console.warn('[Reader] CountChapters: no hay #viewer o .chapter.current en el DOM');
@@ -242,7 +242,6 @@ async function countQueuedChapters() {
         while (countQueue.length) {
             const i = countQueue.shift();
             try {
-                console.log(`[Reader] Midiendo capítulo ${i}...`);
                 // Insertar el HTML del capítulo en el contenedor de medición
                 measureEl.innerHTML = chapterContents[i];
 
@@ -254,12 +253,11 @@ async function countQueuedChapters() {
                 await waitForImagesToLoad(measureEl, prefetched);
 
                 // Forzar layout (reflow) para que scrollWidth sea correcto
-                void measureEl.offsetWidth;
+                //void measureEl.offsetWidth;
 
                 // Medir y notificar a .NET (esperar a que lo haya procesado)
                 const pageCount = measureChapter(measureEl, pageWidth, pageGap);
-                measureEl.innerHTML = '';
-                await Reference.DotNet.invokeMethodAsync('OnChapterCounted', i, pageCount);
+                Reference.DotNet.invokeMethodAsync('OnChapterCounted', i, pageCount);
             } catch (e) {
                 // Un capítulo problemático no puede tumbar todo el lote
                 console.error(`[Reader] Error midiendo el capítulo ${i}:`, e);
