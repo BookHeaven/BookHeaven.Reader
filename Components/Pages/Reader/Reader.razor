@@ -9,7 +9,7 @@
 		overflow: hidden;
 	}
 
-	@@scope (#viewer) {
+	@@scope (.viewer) {
 		:scope {
 			container-type: size;
 			--column-count: 1;
@@ -103,13 +103,13 @@
 				clear: both;
 			}
 		}
-	}
-	
-	@foreach (var stylesheet in ReaderService.State?.Styles ?? [])
-	{
-		@:@@scope(#viewer @(".stylesheet-" + stylesheet.Identifier)) {
-			@stylesheet.Content
-		@:}
+
+		@foreach (var stylesheet in ReaderService.State?.Styles ?? [])
+		{
+			@::scope(@(".stylesheet-" + stylesheet.Identifier)) {
+				@stylesheet.Content
+			@:}
+		}
 	}
 </style>
 <StandbyWallpaper ImageSrc="@UrlBuilder.CoverUrl(Id)" />
@@ -133,7 +133,7 @@
 
 
 <div class="flex h-screen flex-col @(_isFullyRendered ? "" : "invisible")">
-	<div id="viewer" class="flex-1 overflow-hidden">
+	<div class="viewer flex-1 overflow-hidden">
 		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
 			{
