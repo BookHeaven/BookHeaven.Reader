@@ -129,5 +129,4 @@ jobs:
         serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON }}
         packageName: dev.ggarrido.bookheaven
         releaseFiles: ./bin/Release/${{ env.DOTNET_ANDROID_VERSION }}/publish/dev.ggarrido.bookheaven-Signed.aab
-        tracks: beta
-        status: completed
+        tracks: alpha
