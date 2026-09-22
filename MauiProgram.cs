@@ -16,14 +16,14 @@ namespace BookHeaven.Reader;
 
 public static class MauiProgram
 {
-	
+
 	internal static readonly IReadOnlyList<string> Assets = [
 		"/cache",
 		"/covers",
 		"/books",
 		"/fonts"
 	];
-	
+
 	public static MauiApp CreateMauiApp()
 	{
 
@@ -44,32 +44,33 @@ public static class MauiProgram
 			options.BooksPath = Path.Combine(FileSystem.AppDataDirectory, "books");
 			options.CoversPath = Path.Combine(FileSystem.AppDataDirectory, "covers");
 			options.FontsPath = Path.Combine(FileSystem.AppDataDirectory, "fonts");
-			options.DatabasePath = FileSystem.AppDataDirectory;
+			options.DatabasePath = Microsoft.Maui.Storage.FileSystem.AppDataDirectory;
 			options.CachePath = Path.Combine(FileSystem.CacheDirectory, "cache");
+			options.DefaultFontDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "ui-font", "Montserrat");
 		});
-		
+
 		builder.Services.AddSingleton<AppStateService>();
 		builder.Services.AddSingleton<LifeCycleService>();
 		builder.Services.AddSingleton<UdpBroadcastClient>();
 		builder.Services.AddSingleton<IAppsService, AppsService>();
 		builder.Services.AddSingleton<BookInfoDialogService>();
-		
+
 		builder.Services.AddScoped<ImageViewerService>();
 		builder.Services.AddScoped<OverlayService>();
 		builder.Services.AddScoped<IContextMenuService, ContextMenuService>();
-			
+
 		builder.Services.AddTransient<IServerService, ServerService>();
 		builder.Services.AddTransient<IAlertService, AlertService>();
 
-		
-		
+
+
 		builder.Services.AddMauiBlazorWebView();
 		builder.Services.AddBlazorPanzoomServices();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
-		
+
 		var app = builder.Build();
 
 		using (var scope = app.Services.CreateScope())
@@ -81,9 +82,9 @@ public static class MauiProgram
 				appStateService.DeviceId = Guid.NewGuid();
 			}
 		}
-		
+
 		app.Services.ApplyDatabaseMigrations();
-		
+
 		return app;
 	}
 }

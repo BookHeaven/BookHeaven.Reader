@@ -4,6 +4,10 @@
 @layout EmptyLayout
 <!--suppress CssUnresolvedCustomProperty -->
 <style>	
+	html {
+		font-size: 16px;
+	}
+	
 	body {
 		margin: 0 !important;
 		overflow: hidden;
@@ -36,11 +40,14 @@
 			
 
 			& > .chapter {
+				@if (ReaderService.State?.TotalPages > 0)
+				{
+					@:columns: @ReaderService.State?.TotalPages;
+				}
 				height: var(--page-height);
 				column-width: var(--page-width);
 				font-size: calc(var(--font-size) * 1px) !important;
 				letter-spacing: calc(var(--letter-spacing) * 1px);
-				column-fill: auto;
 				column-gap: calc(var(--page-gap) * 1px);
 				padding: 0;
 				orphans: 1;
@@ -78,9 +85,9 @@
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
 
-		@foreach(var className in ReaderService.State?.Ebook?.Content.Chapters.DistinctBy(c => c.ParagraphClassName).Select(c => c.ParagraphClassName) ?? [])
+		@if (!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName))
 		{
-			@::scope > .chapter @("." + className) {
+			@::scope > .chapter p@("." + ReaderService.State?.CurrentChapter?.ParagraphClassName) {
 				@:margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 			@:}
 		}
@@ -106,7 +113,7 @@
 
 		@foreach (var stylesheet in ReaderService.State?.Styles ?? [])
 		{
-			@::scope(@(".stylesheet-" + stylesheet.Identifier)) {
+			@::scope @(".stylesheet-" + stylesheet.Identifier) {
 				@stylesheet.Content
 			@:}
 		}
@@ -117,7 +124,7 @@
 <FontManager />
 <ImageViewer />
 <Navigation />
-@if (!_isFullyRendered)
+@if (!ReaderService.IsReady)
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
 }
@@ -132,7 +139,7 @@
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier"/>
 
 
-<div class="flex h-screen flex-col @(_isFullyRendered ? "" : "invisible")">
+<div class="flex h-screen flex-col @(_isFullyRendered ? "" : "opacity-0")">
 	<div class="viewer flex-1 overflow-hidden">
 		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
@@ -153,10 +160,3 @@
 		</div>
 	</div>
 </div>
-
-@if (_isCountingPages)
-{
-	<div class="fixed inset-x-0 top-0 z-10001 flex items-center gap-3 bg-neutral-900/80 px-4 py-2 text-sm text-white">
-		<span class="text-nowrap">Calculando páginas… @((int)(CountingProgress * 100))%</span>
-	</div>
-}
