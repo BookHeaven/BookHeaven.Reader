@@ -139,8 +139,8 @@
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier"/>
 
 
-<div class="flex h-screen flex-col @(_isFullyRendered ? "" : "opacity-0")">
-	<div class="viewer flex-1 overflow-hidden">
+<div class="flex h-screen flex-col">
+	<div class="viewer flex-1 overflow-hidden @(_isFullyRendered ? "" : "opacity-0")">
 		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
 			{
