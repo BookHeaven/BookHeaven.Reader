@@ -25,7 +25,7 @@ public partial class Reader : IAsyncDisposable
     private bool _isFullyRendered;
 
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         ReaderService.OnPageChanged += RefreshUi;
         ReaderService.OnChapterChanged += OnChapterChanged;
@@ -35,16 +35,7 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Resumed += OnResumed;
         LifeCycleService.Destroyed += OnDestroy;
 
-        var getBook = await Sender.Send(new GetBook.Query { BookId = Id });
-        if (getBook.IsFailure)
-        {
-            await AlertService.ShowToastAsync(getBook.Error.Description);
-            return;
-        }
-
         AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
-
-        await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -57,11 +48,15 @@ public partial class Reader : IAsyncDisposable
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync("Initialize", _dotNetReference);
+            await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+            StateHasChanged();
             if (!ReaderService.IsReady)
             {
                 _ = UpdateTotalPages();
             }
         }
+        
+        
 
         if (_module is not null && ReaderService.IsReady && !_isFullyRendered)
         {

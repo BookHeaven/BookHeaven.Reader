@@ -123,12 +123,16 @@
 </style>
 <StandbyWallpaper ImageSrc="@UrlBuilder.CoverUrl(Id)" />
 <ColorTemperatureOverlay />
-<FontManager />
 <ImageViewer />
-<Navigation />
+
 @if (!ReaderService.IsReady)
 {
 	<Message Content="@Translations.LOADING_BOOK"/>
+}
+else
+{
+	<FontManager />
+	<Navigation />
 }
 <Overlay
 	Progress="@(ReaderService.State?.ProgressAsPercentage ?? 0)"
