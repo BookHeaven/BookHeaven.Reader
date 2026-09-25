@@ -1,9 +1,7 @@
+using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Abstractions.Services;
-using BookHeaven.Core.DOM.Services.Abstractions;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
-using BookHeaven.Core.Features.Reader.Models;
-using CommunityToolkit.Maui.Alerts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -20,6 +18,7 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IReaderService ReaderService { get; set; } = null!;
     [Inject] private IReaderSettingsService ReaderSettingsService { get; set; } = null!;
     [Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
+    [Inject] private IAlertService AlertService { get; set; } = null!;
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
@@ -39,7 +38,7 @@ public partial class Reader : IAsyncDisposable
         var getBook = await Sender.Send(new GetBook.Query { BookId = Id });
         if (getBook.IsFailure)
         {
-            await Toast.Make(getBook.Error.Description).Show();
+            await AlertService.ShowToastAsync(getBook.Error.Description);
             return;
         }
 
@@ -129,7 +128,6 @@ public partial class Reader : IAsyncDisposable
         if(_module is null) return;
         var size = await _module.InvokeAsync<int[]>("GetPageDimensions");
         await ReaderService.CalculatePagesAsync(size[0], size[1]);
-
         if (!ReaderService.IsReady)
         {
             ReaderService.NavigateToInitialPage();
