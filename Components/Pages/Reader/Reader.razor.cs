@@ -23,6 +23,7 @@ public partial class Reader : IAsyncDisposable
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
     private bool _isFullyRendered;
+    private bool _recountPagesOnNextRender;
 
 
     protected override void OnInitialized()
@@ -56,13 +57,17 @@ public partial class Reader : IAsyncDisposable
             }
         }
         
-        
-
         if (_module is not null && ReaderService.IsReady && !_isFullyRendered)
         {
             await _module.InvokeVoidAsync("WaitForAssetsToLoad");
             _isFullyRendered = true;
             RefreshUi();
+        }
+
+        if (_recountPagesOnNextRender)
+        {
+            _recountPagesOnNextRender = false;
+            _ = UpdateTotalPages();
         }
     }
 
@@ -105,10 +110,7 @@ public partial class Reader : IAsyncDisposable
     private void OnSettingChanged(string? settingName)
     {
         if(!string.IsNullOrEmpty(settingName) && settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedFont)) return;
-        if (ReaderService.State is { } state)
-        {
-            _ = UpdateTotalPages();
-        }
+        _recountPagesOnNextRender = true;
         RefreshUi();
     }
 
