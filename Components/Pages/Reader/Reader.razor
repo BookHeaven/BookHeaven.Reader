@@ -4,11 +4,11 @@
 @attribute [Route($"{Urls.Reader}/{{id:guid}}")]
 @layout EmptyLayout
 <!--suppress CssUnresolvedCustomProperty -->
-<style>	
+<style>
 	html {
 		font-size: 16px;
 	}
-	
+
 	body {
 		margin: 0 !important;
 		overflow: hidden;
@@ -30,15 +30,15 @@
 			--page-gap: var(--margin-horizontal);
 			--page-height: 100cqh;
 			--page-width: 100cqw;
-			
+
 			@@media (min-width: 800px) and (orientation: landscape) {
 				--column-count: 2;
 				--page-gap: calc(var(--margin-horizontal) * 2);
 				--page-width: calc((100cqw - (var(--page-gap) * 1rem)) / 2);
 			}
-			
+
 			margin: calc(var(--margin-vertical) * 1rem) calc(var(--margin-horizontal) * 1rem);
-			
+
 
 			& > .chapter {
 				@if (ReaderService.State?.TotalPages > 0)
@@ -59,7 +59,7 @@
 				&.current {
 					transform: translateX(
 						calc(
-							(var(--page-width) + (var(--page-gap) * 1px)) 
+							(var(--page-width) + (var(--page-gap) * 1px))
 							* (var(--chapter-page) - 1)
 							* var(--column-count)
 							* -1
@@ -72,6 +72,10 @@
 					hyphens: none !important;
 				}
 			}
+		}
+
+		table {
+			table-layout: fixed !important;
 		}
 
 		img, svg, image, figure {
@@ -87,13 +91,6 @@
 			margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
 		}
 
-		@if (!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName))
-		{
-			@::scope > .chapter p@("." + ReaderService.State?.CurrentChapter?.ParagraphClassName) {
-				@:margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
-			@:}
-		}
-	
 		:scope sup {
 			font-size: 0.6em;
 			line-height: normal;
@@ -104,6 +101,7 @@
 		:scope .drop-cap {
 			orphans: 2;
 			display: flow-root;
+
 			&::first-letter {
 				initial-letter: 2;
 				margin-inline-end: 0.3em;
@@ -114,11 +112,22 @@
 			}
 		}
 
+		@if (!string.IsNullOrEmpty(ReaderService.State?.CurrentChapter?.ParagraphClassName))
+		{
+			<text>
+				:scope > .chapter p@("." + ReaderService.State?.CurrentChapter?.ParagraphClassName) {
+					margin-block: calc(var(--paragraph-spacing) * 1pt) !important;
+				}
+			</text>
+		}
+
 		@foreach (var stylesheet in ReaderService.State?.Styles ?? [])
 		{
-			@::scope @(".stylesheet-" + stylesheet.Identifier) {
-				@stylesheet.Content
-			@:}
+			<text>
+				:scope @(".stylesheet-" + stylesheet.Identifier) {
+					@stylesheet.Content
+				}
+			</text>
 		}
 	}
 </style>
@@ -128,7 +137,7 @@
 
 @if (!ReaderService.IsReady)
 {
-	<Message Content="@Translations.LOADING_BOOK"/>
+	<Message Content="@Translations.LOADING_BOOK" />
 }
 else
 {
@@ -139,27 +148,27 @@ else
 	Progress="@(ReaderService.State?.ProgressAsPercentage ?? 0)"
 	BookTitle="@ReaderService.State?.Ebook?.Title"
 	ChapterTitle="@ReaderService.State?.ChapterTitle"
-	IsTocEmpty="ReaderService.State?.Ebook?.Content.TableOfContents.Count == 0"/>
+	IsTocEmpty="ReaderService.State?.Ebook?.Content.TableOfContents.Count == 0" />
 
 <TableOfContents
 	Chapters="@ReaderService.State?.Ebook?.Content.TableOfContents"
-	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier"/>
+	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier" />
 
 
-<div class="flex h-screen flex-col">
+<div class="flex h-screen flex-col @(ReaderService.IsReady ? "" : "opacity-0")">
 	<div class="viewer flex-1 overflow-hidden @(_isFullyRendered ? "" : "opacity-0")">
-		<div class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
+		<div
+			class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
 			{
 				@((MarkupString)ReaderService.State.CurrentChapter.Content)
 			}
 		</div>
 	</div>
-
 	<div class="mx-2 mb-2 grid h-[24px] grid-cols-[75px_1fr_75px] items-center gap-1">
 		<div class="flex items-center gap-0.5">
-			<Clock/>
-			<BatteryInfo/>
+			<Clock />
+			<BatteryInfo />
 		</div>
 		<ChapterTitle />
 		<div class="text-end text-nowrap">
