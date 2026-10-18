@@ -8,12 +8,23 @@ export async function Initialize(dotnet) {
     window.addEventListener('keydown', keyDownHandler);
 }
 
-export function GetPageDimensions() {
+export function GetViewportInfo() {
+    let viewportWidth = document.documentElement.clientWidth;
+    let viewportHeight = document.documentElement.clientHeight;
     let mainChapter = document.querySelector('.chapter.current');
     return [
+        viewportWidth,
+        viewportHeight,
         mainChapter.offsetWidth,
         mainChapter.offsetHeight,
     ];
+}
+
+// The engine must emulate the line-breaking algorithm of the browser that renders the
+// page, so pagination matches. Firefox (Gecko) and everything else (Chrome, Chromium,
+// Edge, Opera — all Blink) are the only two algorithms the engine knows.
+export function DetectBrowser() {
+    return navigator.userAgent.includes("Firefox") ? "firefox" : "chrome";
 }
 
 export async function WaitForAssetsToLoad() {

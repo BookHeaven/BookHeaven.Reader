@@ -1,5 +1,6 @@
 using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Abstractions.Services;
+using BookHeaven.Core.DOM.Text.Enums;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using Microsoft.AspNetCore.Components;
@@ -123,8 +124,12 @@ public partial class Reader : IAsyncDisposable
     private async Task UpdateTotalPages()
     {
         if(_module is null) return;
-        var size = await _module.InvokeAsync<int[]>("GetPageDimensions");
-        await ReaderService.CalculatePagesAsync(size[0], size[1]);
+        var size = await _module.InvokeAsync<int[]>("GetViewportInfo");
+        // Emulate the line-breaking algorithm of the browser that renders the page so the
+        // engine's pagination matches it (Firefox vs Chrome break lines differently).
+        var browser = await _module.InvokeAsync<string>("DetectBrowser");
+        var mode = browser == "firefox" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
+        await ReaderService.CalculatePagesAsync(size[0], size[1], size[2], size[3], mode);
         if (!ReaderService.IsReady)
         {
             ReaderService.NavigateToInitialPage();
