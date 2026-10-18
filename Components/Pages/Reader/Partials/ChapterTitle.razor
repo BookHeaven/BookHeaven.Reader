@@ -17,7 +17,6 @@
     private ElementReference _textRef;
     private ElementReference _pageRef;
     private IJSObjectReference? _module;
-    private IJSObjectReference? _resizeObserver;
     private DotNetObjectReference<ChapterTitle>? _callbackRef;
     private string DisplayText { get; set; } = string.Empty;
 
@@ -30,7 +29,7 @@
         {
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/ChapterTitle.razor.js");
             _callbackRef = DotNetObjectReference.Create(this);
-            _resizeObserver = await _module.InvokeAsync<IJSObjectReference>("observeResize", _containerRef, _callbackRef);
+            await _module.InvokeVoidAsync("observeResize", _containerRef, _callbackRef);
             ReaderService.OnPageChanged += RefreshUi;
             ReaderService.OnChapterChanged += UpdateTitle;
             ReaderService.OnTotalPagesChanged += RefreshUi;
@@ -86,7 +85,7 @@
         ReaderService.OnChapterChanged -= UpdateTitle;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
         _callbackRef?.Dispose();
-        _resizeObserver?.DisposeAsync();
+        _module?.InvokeVoidAsync("dispose");
         _module?.DisposeAsync();
     }
 

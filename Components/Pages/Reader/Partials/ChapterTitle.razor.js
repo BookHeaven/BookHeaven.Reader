@@ -1,4 +1,5 @@
 let canvas;
+let resizeObserver;
 
 function getCtx() {
     canvas ??= document.createElement("canvas");
@@ -20,7 +21,11 @@ export function measureTitle(container, textElement, pageElement, text) {
 }
 
 export function observeResize(container, callback) {
-    const observer = new ResizeObserver(() => callback.invokeMethodAsync("OnResize"));
-    observer.observe(container);
-    return observer;
+    resizeObserver = new ResizeObserver(() => callback.invokeMethodAsync("OnResize"));
+    resizeObserver.observe(container);
+}
+
+export function dispose() {
+    resizeObserver?.disconnect();
+    resizeObserver = null;
 }
