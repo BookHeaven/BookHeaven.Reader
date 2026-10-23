@@ -3,6 +3,7 @@ using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.DOM.Text.Enums;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
+using BookHeaven.Core.Features.Reader.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -23,7 +24,7 @@ public partial class Reader : IAsyncDisposable
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
-    private bool _isFullyRendered;
+    private ReaderState _readerState;
     private bool _recountPagesOnNextRender;
 
 
@@ -36,7 +37,7 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Paused += OnPaused;
         LifeCycleService.Resumed += OnResumed;
         LifeCycleService.Destroyed += OnDestroy;
-
+        
         AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
     }
 
@@ -44,24 +45,39 @@ public partial class Reader : IAsyncDisposable
     {
         if (firstRender)
         {
+            
 #if ANDROID
             SetFullscreen(true);
 #endif
+            await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync("Initialize", _dotNetReference);
-            await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+            _readerState = ReaderState.Initialized;
             StateHasChanged();
-            if (!ReaderService.IsReady)
+            return;
+        }
+
+        if (_readerState == ReaderState.Initialized)
+        {
+            var readerContext = await GetReaderContextAsync();
+            await ReaderService.LoadCachedPagesAsync(readerContext);
+            if (ReaderService.State?.PagesPerChapter.Length > 0)
+            {
+                ReaderService.NavigateToInitialPage();
+            }
+            else
             {
                 _ = UpdateTotalPages();
             }
+            _readerState = ReaderState.WaitingForAssets;
+            StateHasChanged();
         }
-        
-        if (_module is not null && ReaderService.IsReady && !_isFullyRendered)
+
+        if (_readerState == ReaderState.WaitingForAssets)
         {
-            await _module.InvokeVoidAsync("WaitForAssetsToLoad");
-            _isFullyRendered = true;
+            await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
+            _readerState = ReaderState.Ready;
             RefreshUi();
         }
 
@@ -117,23 +133,35 @@ public partial class Reader : IAsyncDisposable
 
     private void OnChapterChanged()
     {
-        _isFullyRendered = false;
+        _readerState = ReaderState.WaitingForAssets;
         RefreshUi();
     }
 
     private async Task UpdateTotalPages()
     {
         if(_module is null) return;
-        var size = await _module.InvokeAsync<int[]>("GetViewportInfo");
-        // Emulate the line-breaking algorithm of the browser that renders the page so the
-        // engine's pagination matches it (Firefox vs Chrome break lines differently).
-        var browser = await _module.InvokeAsync<string>("DetectBrowser");
-        var mode = browser == "firefox" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
-        await ReaderService.CalculatePagesAsync(size[0], size[1], size[2], size[3], mode);
+        var context = await GetReaderContextAsync();
+        await ReaderService.CalculatePagesAsync(context);
         if (!ReaderService.IsReady)
         {
             ReaderService.NavigateToInitialPage();
         }
+    }
+    
+    private async Task<ReaderContext> GetReaderContextAsync()
+    {
+        if(_module is null) throw new InvalidOperationException("JS module is not initialized.");
+        var size = await _module.InvokeAsync<int[]>("GetViewportInfo");
+        var browser = await _module.InvokeAsync<string>("DetectBrowser");
+        var mode = browser == "firefox" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
+        return new ReaderContext
+        {
+            ViewportWidth = size[0],
+            ViewportHeight = size[1],
+            PageWidth = size[2],
+            PageHeight = size[3],
+            LineBreakingMode = mode
+        };
     }
 
     [JSInvokable("OnKeyDown")]
@@ -183,4 +211,11 @@ public partial class Reader : IAsyncDisposable
         else window.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
     }
 #endif
+
+    enum ReaderState
+    {
+        Initialized,
+        WaitingForAssets,
+        Ready
+    }
 }

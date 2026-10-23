@@ -152,7 +152,7 @@ else
 
 
 <div class="flex h-screen flex-col @(ReaderService.IsReady ? "" : "opacity-0")">
-	<div class="viewer flex-1 overflow-hidden @(_isFullyRendered ? "" : "opacity-0")">
+	<div class="viewer flex-1 overflow-hidden @(_readerState == ReaderState.Ready ? "" : "opacity-0")">
 		<div
 			class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
@@ -166,7 +166,15 @@ else
 			<Clock />
 			<BatteryInfo />
 		</div>
-		<ChapterTitle />
+		@if(_readerState == ReaderState.Ready)
+		{
+			<ChapterTitle />
+		}
+		else
+		{
+			<span></span>
+		}
+		
 		<div class="text-end text-nowrap">
 			@(ReaderService.State?.ProgressAsPercentage.ToString("0.00"))%
 		</div>
