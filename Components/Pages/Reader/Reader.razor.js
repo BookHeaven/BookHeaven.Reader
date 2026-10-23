@@ -12,11 +12,15 @@ export function GetViewportInfo() {
     let viewportWidth = document.documentElement.clientWidth;
     let viewportHeight = document.documentElement.clientHeight;
     let mainChapter = document.querySelector('.chapter.current');
+    let pageHeight = mainChapter.offsetHeight;
+    let computedChapter = getComputedStyle(mainChapter);
+    let pageWidth = parseFloat(computedChapter.getPropertyValue("column-width"));
+
     return [
         viewportWidth,
         viewportHeight,
-        mainChapter.offsetWidth,
-        mainChapter.offsetHeight,
+        pageWidth,
+        pageHeight,
     ];
 }
 
