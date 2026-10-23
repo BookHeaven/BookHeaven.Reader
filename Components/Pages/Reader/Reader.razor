@@ -41,16 +41,12 @@
 
 
 			& > .chapter {
-				@if (ReaderService.State?.TotalPages > 0)
-				{
-					@:columns: @ReaderService.State?.TotalPages;
-				}
 				height: var(--page-height);
 				column-width: var(--page-width);
 				font-size: calc(var(--font-size) * 1px) !important;
 				line-height: @ITextMeasurer.NormalLineHeightMultiplier.ToString("0.00", CultureInfo.InvariantCulture);
 				letter-spacing: calc(var(--letter-spacing) * 1px);
-				column-gap: calc(var(--page-gap) * 1px);
+				column-gap: calc(var(--page-gap) * 1rem);
 				padding: 0;
 				orphans: 1;
 				widows: 1;
@@ -59,7 +55,7 @@
 				&.current {
 					transform: translateX(
 						calc(
-							(var(--page-width) + (var(--page-gap) * 1px))
+							(var(--page-width) + (var(--page-gap) * 1rem))
 							* (var(--chapter-page) - 1)
 							* var(--column-count)
 							* -1
