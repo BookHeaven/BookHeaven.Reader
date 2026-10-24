@@ -160,7 +160,8 @@ public partial class Reader : IAsyncDisposable
             ViewportHeight = info.ViewportHeight,
             PageWidth = (int)info.PageWidth,
             PageHeight = (int)info.PageHeight,
-            LineBreakingMode = mode
+            LineBreakingMode = mode,
+            ColumnCount = info.ColumnCount
         };
     }
 
@@ -212,7 +213,7 @@ public partial class Reader : IAsyncDisposable
     }
 #endif
 
-    private record ReaderContextInfo(int ViewportWidth, int ViewportHeight, double PageWidth, double PageHeight, string Engine);
+    private record ReaderContextInfo(int ViewportWidth, int ViewportHeight, double PageWidth, double PageHeight, string Engine, int ColumnCount);
 
     private enum ReaderState
     {
