@@ -24,11 +24,11 @@ public partial class Reader : IAsyncDisposable
 
     private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
-    private ReaderState _readerState;
+    private ReaderState _readerState = ReaderState.Uninitialized;
     private bool _recountPagesOnNextRender;
 
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ReaderService.OnPageChanged += RefreshUi;
         ReaderService.OnChapterChanged += OnChapterChanged;
@@ -39,6 +39,8 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Destroyed += OnDestroy;
         
         AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
+        await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+        _readerState = ReaderState.Initialized;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -49,36 +51,35 @@ public partial class Reader : IAsyncDisposable
 #if ANDROID
             SetFullscreen(true);
 #endif
-            await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+            
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync("Initialize", _dotNetReference);
-            _readerState = ReaderState.Initialized;
-            StateHasChanged();
-            return;
         }
+        
+        if(_module is null) return;
 
-        if (_readerState == ReaderState.Initialized)
+        switch (_readerState)
         {
-            var readerContext = await GetReaderContextAsync();
-            await ReaderService.LoadCachedPagesAsync(readerContext);
-            if (ReaderService.State?.PagesPerChapter.Length > 0)
-            {
-                ReaderService.NavigateToInitialPage();
-            }
-            else
-            {
-                _ = UpdateTotalPages();
-            }
-            _readerState = ReaderState.WaitingForAssets;
-            StateHasChanged();
-        }
-
-        if (_readerState == ReaderState.WaitingForAssets)
-        {
-            await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
-            _readerState = ReaderState.Ready;
-            RefreshUi();
+            case ReaderState.Initialized:
+                var readerContext = await GetReaderContextAsync();
+                await ReaderService.LoadCachedPagesAsync(readerContext);
+                if (ReaderService.State?.PagesPerChapter.Length > 0)
+                {
+                    ReaderService.NavigateToInitialPage();
+                }
+                else
+                {
+                    await UpdateTotalPages();
+                }
+                _readerState = ReaderState.WaitingForAssets;
+                StateHasChanged();
+                break;
+            case ReaderState.WaitingForAssets:
+                await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
+                _readerState = ReaderState.Ready;
+                RefreshUi();
+                break;
         }
 
         if (_recountPagesOnNextRender)
@@ -152,8 +153,8 @@ public partial class Reader : IAsyncDisposable
     {
         if(_module is null) throw new InvalidOperationException("JS module is not initialized.");
         var size = await _module.InvokeAsync<int[]>("GetViewportInfo");
-        var browser = await _module.InvokeAsync<string>("DetectBrowser");
-        var mode = browser == "firefox" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
+        var engine = await _module.InvokeAsync<string>("DetectEngine");
+        var mode = engine == "gecko" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
         return new ReaderContext
         {
             ViewportWidth = size[0],
@@ -214,6 +215,7 @@ public partial class Reader : IAsyncDisposable
 
     enum ReaderState
     {
+        Uninitialized,
         Initialized,
         WaitingForAssets,
         Ready
