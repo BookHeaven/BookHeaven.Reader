@@ -25,10 +25,13 @@ export function GetViewportInfo() {
 }
 
 // The engine must emulate the line-breaking algorithm of the browser that renders the
-// page, so pagination matches. Firefox (Gecko) and everything else (Chrome, Chromium,
-// Edge, Opera — all Blink) are the only two algorithms the engine knows.
-export function DetectBrowser() {
-    return navigator.userAgent.includes("Firefox") ? "firefox" : "chrome";
+// page, so pagination matches. Gecko and Blink are the only two algorithms the engine
+// knows. Detection uses engine-specific API signals instead of the UA string, which
+// forks can alter (e.g. Zen Browser doesn't include "Firefox" in its UA).
+export function DetectEngine() {
+    if (navigator.userAgentData) return "blink"; // Chromium-only API (Chrome 85+)
+    if (navigator.vendor === "Apple Computer, Inc.") return "blink"; // WebKit ≈ Blink
+    return "gecko"; // Firefox, Zen, Waterfox, LibreWolf, Tor, ...
 }
 
 export async function WaitForAssetsToLoad() {
