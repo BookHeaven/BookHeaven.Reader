@@ -152,15 +152,14 @@ public partial class Reader : IAsyncDisposable
     private async Task<ReaderContext> GetReaderContextAsync()
     {
         if(_module is null) throw new InvalidOperationException("JS module is not initialized.");
-        var size = await _module.InvokeAsync<int[]>("GetViewportInfo");
-        var engine = await _module.InvokeAsync<string>("DetectEngine");
-        var mode = engine == "gecko" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
+        var info = await _module.InvokeAsync<ReaderContextInfo>("GetReaderContext");
+        var mode = info.Engine == "gecko" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
         return new ReaderContext
         {
-            ViewportWidth = size[0],
-            ViewportHeight = size[1],
-            PageWidth = size[2],
-            PageHeight = size[3],
+            ViewportWidth = info.ViewportWidth,
+            ViewportHeight = info.ViewportHeight,
+            PageWidth = (int)info.PageWidth,
+            PageHeight = (int)info.PageHeight,
             LineBreakingMode = mode
         };
     }
@@ -213,7 +212,9 @@ public partial class Reader : IAsyncDisposable
     }
 #endif
 
-    enum ReaderState
+    private record ReaderContextInfo(int ViewportWidth, int ViewportHeight, double PageWidth, double PageHeight, string Engine);
+
+    private enum ReaderState
     {
         Uninitialized,
         Initialized,
