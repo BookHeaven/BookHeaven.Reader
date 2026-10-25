@@ -52,7 +52,6 @@
 	[Inject] private IAlertService AlertService { get; set; } = null!;
 	[Inject] private BookInfoDialogService BookInfoDialogService { get; set; } = null!;
 	
-	
 	[Parameter] public required Book Book { get; set; }
 
 	private async Task ClearCache()
