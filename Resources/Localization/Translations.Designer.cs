@@ -114,11 +114,29 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cache cleared.
+        /// </summary>
+        public static string CACHE_CLEARED {
+            get {
+                return ResourceManager.GetString("CACHE_CLEARED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please check the URL and try again.
         /// </summary>
         public static string CHECK_THE_URL {
             get {
                 return ResourceManager.GetString("CHECK_THE_URL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear cache.
+        /// </summary>
+        public static string CLEAR_CACHE {
+            get {
+                return ResourceManager.GetString("CLEAR_CACHE", resourceCulture);
             }
         }
         

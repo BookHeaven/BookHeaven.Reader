@@ -212,4 +212,10 @@
     <data name="SEARCH_BOOKS" xml:space="preserve">
         <value>Buscar libros</value>
     </data>
+    <data name="CLEAR_CACHE" xml:space="preserve">
+        <value>Limpiar caché</value>
+    </data>
+    <data name="CACHE_CLEARED" xml:space="preserve">
+        <value>Se ha limpiado la caché</value>
+    </data>
 </root>
