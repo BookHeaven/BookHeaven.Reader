@@ -89,6 +89,9 @@
     <data name="BY_AUTHOR" xml:space="preserve">
         <value>Por Autor</value>
     </data>
+    <data name="RECOMMENDED" xml:space="preserve">
+        <value>Para ti</value>
+    </data>
     <data name="BY_MISSING" xml:space="preserve">
         <value>Por descargar</value>
     </data>

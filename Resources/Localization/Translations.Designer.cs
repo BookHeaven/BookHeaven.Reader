@@ -105,6 +105,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For you.
+        /// </summary>
+        public static string RECOMMENDED {
+            get {
+                return ResourceManager.GetString("RECOMMENDED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing.
         /// </summary>
         public static string BY_MISSING {

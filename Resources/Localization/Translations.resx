@@ -96,6 +96,9 @@
     <data name="BY_AUTHOR" xml:space="preserve">
         <value>By Author</value>
     </data>
+    <data name="RECOMMENDED" xml:space="preserve">
+        <value>For you</value>
+    </data>
     <data name="BY_MISSING" xml:space="preserve">
         <value>Missing</value>
     </data>

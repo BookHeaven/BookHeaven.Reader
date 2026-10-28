@@ -1,4 +1,6 @@
 using BookHeaven.Core.Features.Books;
+using BookHeaven.Core.Features.BooksProgress;
+using BookHeaven.Core.Helpers;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote;
@@ -18,7 +20,8 @@ public partial class Remote
     private HashSet<Guid>? _deviceBooks = [];
     private IEnumerable<Book>? _filteredBooks;
     private List<Book> CurrentPageBooks => _filteredBooks?.Skip((_currentPage - 1) * ItemsPerPage).Take(ItemsPerPage).ToList() ?? [];
-    private BookStatus _selectedBookStatus = BookStatus.Missing;
+    private List<Book> _recommendedBooks = [];
+    private BookStatus _selectedBookStatus = BookStatus.Recommended;
     private string _filter = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -55,13 +58,57 @@ public partial class Remote
         }
         _books = getBooks.Value.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
         await GetDownloadedBooks();
+        await GetRecommendations();
+        if (_recommendedBooks.Count == 0)
+        {
+            _selectedBookStatus = BookStatus.Missing;
+        }
         FilterBooks();
+    }
+
+    private async Task GetRecommendations()
+    {
+        var getLocalProgress = await Sender.Send(new GetAllBooksProgressByProfile.Query(AppStateService.ProfileId));
+        var getRemoteProgress = await ServerService.GetAllBooksProgress(AppStateService.ProfileId);
+        var remoteProgress = getRemoteProgress.IsSuccess
+            ? getRemoteProgress.Value
+            : await GetRemoteProgressPerBook();
+
+        _recommendedBooks = BookRecommender.Recommend(
+            _books ?? [],
+            getLocalProgress.IsSuccess ? getLocalProgress.Value : [],
+            remoteProgress,
+            _deviceBooks);
+    }
+
+    // Fallback for servers without the bulk progress endpoint.
+    private async Task<List<BookProgress>> GetRemoteProgressPerBook()
+    {
+        using var throttle = new SemaphoreSlim(8);
+        var requests = (_books ?? []).Select(async book =>
+        {
+            await throttle.WaitAsync();
+            try
+            {
+                var getProgress = await ServerService.GetBookProgress(AppStateService.ProfileId, book.BookId);
+                return getProgress.IsSuccess ? getProgress.Value : null;
+            }
+            finally
+            {
+                throttle.Release();
+            }
+        });
+
+        return (await Task.WhenAll(requests)).OfType<BookProgress>().ToList();
     }
 
     private void FilterBooks(bool resetPage = true)
     {
         switch (_selectedBookStatus)
         {
+            case BookStatus.Recommended:
+                _filteredBooks = _recommendedBooks.Where(x => _deviceBooks?.Contains(x.BookId) == false);
+                break;
             case BookStatus.All:
                 _filteredBooks = _books;
                 break;
@@ -82,7 +129,11 @@ public partial class Remote
                             || x.Series?.Name?.Contains(_filter, StringComparison.OrdinalIgnoreCase) == true);
         }
 
-        _filteredBooks = _filteredBooks?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex).ToList();
+        if (_selectedBookStatus != BookStatus.Recommended || !string.IsNullOrEmpty(_filter))
+        {
+            _filteredBooks = _filteredBooks?.OrderBy(x => x.Author?.Name).ThenBy(x => x.Series?.Name).ThenBy(x => x.SeriesIndex);
+        }
+        _filteredBooks = _filteredBooks?.ToList();
 
         _currentPage = resetPage ? 1 : Math.Clamp(_currentPage, 1, (int)Math.Ceiling(decimal.Divide(_filteredBooks?.Count() ?? 1, ItemsPerPage)));
     }
@@ -104,6 +155,7 @@ public partial class Remote
 
     private enum BookStatus
     {
+        Recommended,
         All,
         Missing
     }

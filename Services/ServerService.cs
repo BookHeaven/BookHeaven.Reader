@@ -19,6 +19,7 @@ public interface IServerService
 	Task<Result<List<Author>>> GetAllAuthors();
 	Task<Result<List<Profile>>> GetAllProfiles();
 	Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId);
+	Task<Result<List<BookProgress>>> GetAllBooksProgress(Guid profileId);
 	Task<Result> DownloadBook(Book book, Guid profileId);
 	Task<Result> UpdateBookProgress(BookProgress progress);
 	Task<Result> UpdateProgressByProfile(Guid profileId);
@@ -135,6 +136,20 @@ public class ServerService(
 		{
 			logger.LogError(ex, "Failed to get book progress from server");
 			return new Error("Failed to get book progress from server");
+		}
+	}
+
+	public async Task<Result<List<BookProgress>>> GetAllBooksProgress(Guid profileId)
+	{
+		try
+		{
+			var response = await _httpClient.GetFromJsonAsync<List<BookProgress>>($"api/progress/{profileId}");
+			return response ?? [];
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to get books progress from server");
+			return new Error("Failed to get books progress from server");
 		}
 	}
 
