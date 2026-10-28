@@ -26,6 +26,7 @@ public partial class Reader : IAsyncDisposable
     private IJSObjectReference? _module;
     private ReaderState _readerState = ReaderState.Uninitialized;
     private bool _recountPagesOnNextRender;
+    private Guid _assetLoadToken = Guid.NewGuid();
 
 
     protected override async Task OnInitializedAsync()
@@ -72,11 +73,17 @@ public partial class Reader : IAsyncDisposable
                 {
                     await UpdateTotalPages();
                 }
+                _assetLoadToken = Guid.NewGuid();
                 _readerState = ReaderState.WaitingForAssets;
                 StateHasChanged();
                 break;
             case ReaderState.WaitingForAssets:
+                var assetLoadToken = _assetLoadToken;
                 await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
+                if (assetLoadToken != _assetLoadToken || _readerState != ReaderState.WaitingForAssets)
+                {
+                    break;
+                }
                 _readerState = ReaderState.Ready;
                 RefreshUi();
                 break;
@@ -134,6 +141,7 @@ public partial class Reader : IAsyncDisposable
 
     private void OnChapterChanged()
     {
+        _assetLoadToken = Guid.NewGuid();
         _readerState = ReaderState.WaitingForAssets;
         RefreshUi();
     }
