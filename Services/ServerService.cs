@@ -320,13 +320,6 @@ public class ServerService(
 
 				await sender.Send(new AddFont.Command(font));
 			}
-				
-			var getProfileSettings = await sender.Send(new GetProfileSettings.Query(appStateService.ProfileId));
-			if (getProfileSettings.IsSuccess)
-			{
-				getProfileSettings.Value.SelectedFont = response.FirstOrDefault()?.Family ?? string.Empty;
-				await sender.Send(new UpdateProfileSettings.Command(getProfileSettings.Value));
-			}
 			return Result.Success();
 		}
 		catch (Exception ex)
