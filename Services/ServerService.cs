@@ -6,6 +6,7 @@ using BookHeaven.Core.Features.BooksProgress;
 using BookHeaven.Core.Features.Fonts;
 using BookHeaven.Core.Features.Profiles;
 using BookHeaven.Core.Features.ProfileSettingss;
+using BookHeaven.Core.Features.ReadingHistory;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Shared;
 using Font = BookHeaven.Core.Entities.Font;
@@ -214,6 +215,49 @@ public class ServerService(
 
 	public async Task<Result> UpdateBookProgress(BookProgress progress)
 	{
+		var updateProgress = await PutBookProgress(progress);
+		if (updateProgress.IsFailure)
+		{
+			return updateProgress;
+		}
+
+		var getHistory = await sender.Send(new GetReadingHistoryByBook.Query(progress.BookId, progress.ProfileId));
+		if (getHistory.IsFailure)
+		{
+			return getHistory.Error;
+		}
+
+		return await PutReadingHistory(getHistory.Value);
+	}
+
+	public async Task<Result> UpdateProgressByProfile(Guid profileId)
+	{
+		var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
+		if (getProgresses.IsFailure)
+		{
+			return getProgresses.Error;
+		}
+			
+		foreach (var progress in getProgresses.Value)
+		{
+			var updateProgress = await PutBookProgress(progress);
+			if (updateProgress.IsFailure)
+			{
+				return updateProgress.Error;
+			}
+		}
+
+		var getHistory = await sender.Send(new GetReadingHistoryByProfile.Query(profileId));
+		if (getHistory.IsFailure)
+		{
+			return getHistory.Error;
+		}
+
+		return await PutReadingHistory(getHistory.Value);
+	}
+
+	private async Task<Result> PutBookProgress(BookProgress progress)
+	{
 		var endpoint = "api/progress/update";
 
 		try
@@ -233,23 +277,23 @@ public class ServerService(
 		}
 	}
 
-	public async Task<Result> UpdateProgressByProfile(Guid profileId)
+	private async Task<Result> PutReadingHistory(List<ReadingHistoryEntry> entries)
 	{
-		var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
-		if (getProgresses.IsFailure)
+		if (entries.Count == 0)
 		{
-			return getProgresses.Error;
+			return Result.Success();
 		}
-			
-		foreach (var progress in getProgresses.Value)
+
+		try
 		{
-			var updateProgress = await UpdateBookProgress(progress);
-			if (updateProgress.IsFailure)
-			{
-				return updateProgress.Error;
-			}
+			var response = await _httpClient.PutAsJsonAsync("api/history/sync", entries);
+			return response.IsSuccessStatusCode ? Result.Success() : new Error("Failed to sync reading history to server");
 		}
-		return Result.Success();
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to sync reading history to server");
+			return new Error("Failed to sync reading history to server");
+		}
 	}
 		
 	public async Task<Result> UpdateProfileSettings(ProfileSettings settings)
