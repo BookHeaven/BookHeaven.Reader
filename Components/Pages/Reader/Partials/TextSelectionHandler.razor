@@ -1,0 +1,30 @@
+@using System.Globalization
+
+@if (_isSelectionActionVisible)
+{
+	<div id="reader-selection-action" class="bg-neutral-100 border-neutral-300 divide-neutral-300 fixed z-[1001] flex w-max items-center divide-x overflow-hidden rounded-full border"
+		data-anchor-x="@_selectionActionLeft.ToString(CultureInfo.InvariantCulture)"
+		style="left: @_selectionActionLeft.ToString(CultureInfo.InvariantCulture)px; top: @_selectionActionTop.ToString(CultureInfo.InvariantCulture)px; visibility: @(_selectionActionPositioned ? "visible" : "hidden")"
+		@onclick:stopPropagation="true">
+		@if (_selectionCanHighlight)
+		{
+			<button class="px-2 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="ApplyHighlight">@Translations.HIGHLIGHT</button>
+		}
+		@if (_selectionHasHighlight)
+		{
+			<button class="px-2 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="RemoveHighlight">@Translations.REMOVE_HIGHLIGHT</button>
+		}
+		<button class="px-2 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="EditNote">
+			@Translations.NOTE
+		</button>
+	</div>
+}
+@if (_isNoteEditorVisible)
+{
+	<AnnotationNoteDialog
+		Title="@(!string.IsNullOrWhiteSpace(_noteInitialValue) ? Translations.EDIT_NOTE : Translations.ADD_NOTE)"
+		PassageText="@(_noteSelection?.Text ?? string.Empty)"
+		InitialNote="@_noteInitialValue"
+		OnSave="SaveNote"
+		OnCancel="CancelNote" />
+}

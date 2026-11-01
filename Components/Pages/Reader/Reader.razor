@@ -125,6 +125,12 @@
 				}
 			</text>
 		}
+
+		::highlight(bookheaven-highlight) {
+			background-color: #d9d9d9;
+			color: inherit;
+			text-decoration: underline;
+		}
 	}
 </style>
 <StandbyWallpaper ImageSrc="@UrlBuilder.CoverUrl(Id)" />
@@ -139,19 +145,20 @@ else
 {
 	<FontManager />
 	<Navigation />
+	<TextSelectionHandler @ref="_textSelection" />
 }
 <Overlay
 	Progress="@(ReaderService.State?.ProgressAsPercentage ?? 0)"
 	BookTitle="@ReaderService.State?.Ebook?.Title"
 	ChapterTitle="@ReaderService.State?.ChapterTitle"
-	IsTocEmpty="ReaderService.State?.Ebook?.Content.TableOfContents.Count == 0" />
-
+	IsTocEmpty="ReaderService.State?.Ebook?.Content.TableOfContents.Count == 0"
+	OnAnnotationSelected="NavigateToAnnotationAsync" />
 <TableOfContents
 	Chapters="@ReaderService.State?.Ebook?.Content.TableOfContents"
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier" />
 
 
-<div class="flex h-screen flex-col @(ReaderService.IsReady ? "" : "opacity-0")">
+<div class="reader-surface flex h-screen flex-col @(ReaderService.IsReady ? "" : "opacity-0")">
 	<div class="viewer flex-1 overflow-hidden @(_readerState == ReaderState.Ready ? "" : "opacity-0")">
 		<div
 			class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
@@ -161,8 +168,8 @@ else
 			}
 		</div>
 	</div>
-	<div class="mx-2 mb-2 grid h-[24px] grid-cols-[75px_1fr_75px] items-center gap-1">
-		<div class="flex items-center gap-0.5">
+	<div class="mx-2 mb-2 gap-1 grid h-[24px] grid-cols-[75px_1fr_75px] items-center">
+		<div class="gap-0.5 flex items-center">
 			<Clock />
 			<BatteryInfo />
 		</div>

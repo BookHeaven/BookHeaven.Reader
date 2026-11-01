@@ -1,0 +1,140 @@
+﻿@using BookHeaven.Core.Features.Reader.Abstractions
+@using BookHeaven.Core.Entities
+@using BookHeaven.Core.Abstractions
+@using BookHeaven.Core.Abstractions.Services
+@using BookHeaven.Core.Enums
+@implements IDisposable
+
+<div class="inset-0 bg-black/50 fixed flex items-center justify-center" @onclick:stopPropagation="true">
+    <section class="max-w-2xl rounded-lg bg-white p-4 border-black flex max-h-[85vh] w-11/12 flex-col border-2">
+        <header class="mb-3 flex items-center">
+            <h2 class="text-lg font-semibold flex-1">@Translations.ANNOTATIONS</h2>
+            <button class="rounded px-3 py-2 active:bg-neutral-100" @onclick="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x size-8"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
+            </button>
+        </header>
+
+        @if (Annotations.Count == 0)
+        {
+            <p class="py-6 text-neutral-500 text-center">@Translations.NO_ANNOTATIONS</p>
+        }
+        else
+        {
+            <div class="min-h-0 divide-neutral-500 flex-1 divide-y overflow-y-auto">
+                @foreach (var annotation in Annotations)
+                {
+                    <article class="px-2 py-2">
+                        <div class="font-semibold">@annotation.ChapterTitle</div>
+                        <button class="mt-1 bg-neutral-300 px-2 py-1 line-clamp-3 w-full text-left"
+                            @onclick="() => OnOpenAnnotation.InvokeAsync(annotation)">
+                            &ldquo;@annotation.Text&rdquo;
+                        </button>
+                        <div class="mt-0.5 divide-neutral-500 text-sm flex items-center justify-end divide-x whitespace-nowrap">
+                            @if (!string.IsNullOrWhiteSpace(annotation.Note))
+                            {
+                                <button class="px-2 py-1 underline" @onclick="() => EditNote(annotation)">
+                                    @Translations.EDIT_NOTE
+                                </button>
+                                <button class="px-2 py-1 underline" @onclick="() => DeleteNoteAsync(annotation)">
+                                    @Translations.DELETE_NOTE
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="px-2 py-1 underline" @onclick="() => EditNote(annotation)">
+                                    @Translations.ADD_NOTE
+                                </button>
+                            }
+                            <button class="px-2 py-1 underline" @onclick="() => DeleteAnnotationAsync(annotation)">
+                                @Translations.DELETE
+                            </button>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(annotation.Note))
+                        {
+                            <div class="mt-1 font-semibold">@Translations.NOTE</div>
+                            <p class="text-sm line-clamp-2 whitespace-pre-wrap">@annotation.Note</p>
+                        }
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (_editingAnnotation is not null)
+    {
+        <AnnotationNoteDialog
+            Title="@(string.IsNullOrWhiteSpace(_editingAnnotation.Note) ? Translations.ADD_NOTE : Translations.EDIT_NOTE)"
+            PassageText="@_editingAnnotation.Text"
+            InitialNote="@_editingAnnotation.Note"
+            OnSave="SaveNoteEditAsync"
+            OnCancel="CancelNoteEdit" />
+    }
+</div>
+
+@code {
+    [Inject] private IReaderService ReaderService { get; set; } = null!;
+    [Inject] private OverlayService OverlayService { get; set; } = null!;
+    [Inject] private IAlertService AlertService { get; set; } = null!;
+    [Parameter] public EventCallback<BookAnnotation> OnOpenAnnotation { get; set; }
+
+    private BookAnnotation? _editingAnnotation;
+    private IReadOnlyList<BookAnnotation> Annotations => ReaderService.GetAllAnnotations();
+
+    protected override void OnInitialized()
+    {
+        ReaderService.OnHighlightsChanged += RefreshUi;
+    }
+
+    private void Close() => OverlayService.ToggleOverlay();
+
+    private void EditNote(BookAnnotation annotation)
+    {
+        _editingAnnotation = annotation;
+    }
+
+    private async Task DeleteAnnotationAsync(BookAnnotation annotation)
+    {
+        var result = await ReaderService.DeleteAnnotationAsync(annotation.BookAnnotationId);
+        if (result.IsFailure)
+        {
+            await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+        }
+    }
+
+    private async Task DeleteNoteAsync(BookAnnotation annotation)
+    {
+        var result = await ReaderService.UpdateAnnotationNoteAsync(annotation.BookAnnotationId, null);
+        if (result.IsFailure)
+        {
+            await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+        }
+    }
+
+    private async Task SaveNoteEditAsync(string note)
+    {
+        if (_editingAnnotation is null) return;
+
+        var result = await ReaderService.UpdateAnnotationNoteAsync(
+            _editingAnnotation.BookAnnotationId,
+            note);
+        if (result.IsFailure)
+        {
+            await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+            return;
+        }
+
+        CancelNoteEdit();
+    }
+
+    private void CancelNoteEdit()
+    {
+        _editingAnnotation = null;
+    }
+
+    private void RefreshUi() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ReaderService.OnHighlightsChanged -= RefreshUi;
+    }
+}

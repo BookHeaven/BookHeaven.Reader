@@ -1,13 +1,3 @@
-const Reference = {
-    DotNet: null,
-};
-
-export async function Initialize(dotnet) {
-    Reference.DotNet = dotnet;
-
-    window.addEventListener('keydown', keyDownHandler);
-}
-
 export function GetReaderContext() {
     let viewportWidth = document.documentElement.clientWidth;
     let viewportHeight = document.documentElement.clientHeight;
@@ -94,12 +84,3 @@ const waitForImagesToLoad = async (element = document.querySelector(".viewer")) 
 
     await new Promise((resolve) => requestAnimationFrame(() => resolve()));
 };
-
-export function Dispose() {
-    window.removeEventListener('keydown', keyDownHandler);
-}
-
-const keyDownHandler = (e) => {
-    if (e.repeat) return;
-    Reference.DotNet.invokeMethodAsync('OnKeyDown', e.key);
-}

@@ -167,6 +167,45 @@
     <data name="FONT" xml:space="preserve">
         <value>Fuente</value>
     </data>
+    <data name="HIGHLIGHT" xml:space="preserve">
+        <value>Resaltar</value>
+    </data>
+    <data name="ADD_NOTE" xml:space="preserve">
+        <value>Añadir nota</value>
+    </data>
+    <data name="EDIT_NOTE" xml:space="preserve">
+        <value>Editar nota</value>
+    </data>
+    <data name="DELETE_NOTE" xml:space="preserve">
+        <value>Eliminar nota</value>
+    </data>
+    <data name="NOTE" xml:space="preserve">
+        <value>Nota</value>
+    </data>
+    <data name="SAVE" xml:space="preserve">
+        <value>Guardar</value>
+    </data>
+    <data name="CANCEL" xml:space="preserve">
+        <value>Cancelar</value>
+    </data>
+    <data name="ANNOTATIONS" xml:space="preserve">
+        <value>Resaltados y notas</value>
+    </data>
+    <data name="NO_ANNOTATIONS" xml:space="preserve">
+        <value>Todavía no hay resaltados ni notas</value>
+    </data>
+    <data name="ANNOTATION_LOCATION_NOT_FOUND" xml:space="preserve">
+        <value>No se pudo encontrar este pasaje en el capítulo.</value>
+    </data>
+    <data name="CHAPTER" xml:space="preserve">
+        <value>Capítulo</value>
+    </data>
+    <data name="CLOSE" xml:space="preserve">
+        <value>Cerrar</value>
+    </data>
+    <data name="REMOVE_HIGHLIGHT" xml:space="preserve">
+        <value>Quitar resaltado</value>
+    </data>
     <data name="SEARCHING_SERVERS" xml:space="preserve">
         <value>Buscando servidores</value>
     </data>

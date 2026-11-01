@@ -193,7 +193,7 @@ namespace BookHeaven.Reader.Resources.Localization {
                 return ResourceManager.GetString("DELETE", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Details.
         /// </summary>
@@ -272,6 +272,123 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string FONT {
             get {
                 return ResourceManager.GetString("FONT", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight.
+        /// </summary>
+        public static string HIGHLIGHT {
+            get {
+                return ResourceManager.GetString("HIGHLIGHT", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Add note.
+        /// </summary>
+        public static string ADD_NOTE {
+            get {
+                return ResourceManager.GetString("ADD_NOTE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Edit note.
+        /// </summary>
+        public static string EDIT_NOTE {
+            get {
+                return ResourceManager.GetString("EDIT_NOTE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete note.
+        /// </summary>
+        public static string DELETE_NOTE {
+            get {
+                return ResourceManager.GetString("DELETE_NOTE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Note.
+        /// </summary>
+        public static string NOTE {
+            get {
+                return ResourceManager.GetString("NOTE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string SAVE {
+            get {
+                return ResourceManager.GetString("SAVE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string CANCEL {
+            get {
+                return ResourceManager.GetString("CANCEL", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Highlights and notes.
+        /// </summary>
+        public static string ANNOTATIONS {
+            get {
+                return ResourceManager.GetString("ANNOTATIONS", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No highlights or notes yet.
+        /// </summary>
+        public static string NO_ANNOTATIONS {
+            get {
+                return ResourceManager.GetString("NO_ANNOTATIONS", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not locate this passage in the chapter.
+        /// </summary>
+        public static string ANNOTATION_LOCATION_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("ANNOTATION_LOCATION_NOT_FOUND", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Chapter.
+        /// </summary>
+        public static string CHAPTER {
+            get {
+                return ResourceManager.GetString("CHAPTER", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string CLOSE {
+            get {
+                return ResourceManager.GetString("CLOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove highlight.
+        /// </summary>
+        public static string REMOVE_HIGHLIGHT {
+            get {
+                return ResourceManager.GetString("REMOVE_HIGHLIGHT", resourceCulture);
             }
         }
         

@@ -1,9 +1,13 @@
 using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Abstractions.Services;
+using BookHeaven.Core.Enums;
+using BookHeaven.Core.Entities;
 using BookHeaven.Core.DOM.Text.Enums;
+using BookHeaven.Core.Shared;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Features.Reader.Models;
+using BookHeaven.Reader.Components.Pages.Reader.Partials;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -18,14 +22,16 @@ public partial class Reader : IAsyncDisposable
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private IReaderService ReaderService { get; set; } = null!;
+    [Inject] private OverlayService OverlayService { get; set; } = null!;
     [Inject] private IReaderSettingsService ReaderSettingsService { get; set; } = null!;
     [Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
     [Inject] private IAlertService AlertService { get; set; } = null!;
 
-    private DotNetObjectReference<Reader> _dotNetReference = null!;
     private IJSObjectReference? _module;
     private ReaderState _readerState = ReaderState.Uninitialized;
     private bool _recountPagesOnNextRender;
+    private TextSelectionHandler? _textSelection;
+    private BookAnnotation? _annotationToNavigate;
     private Guid _assetLoadToken = Guid.NewGuid();
 
 
@@ -54,11 +60,26 @@ public partial class Reader : IAsyncDisposable
 #endif
             
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
-            _dotNetReference = DotNetObjectReference.Create(this);
-            await _module.InvokeVoidAsync("Initialize", _dotNetReference);
         }
         
         if(_module is null) return;
+
+        if (_annotationToNavigate is not null && _readerState == ReaderState.Ready && _textSelection is not null)
+        {
+            var annotation = _annotationToNavigate;
+            var targetPage = await _textSelection.GetPageForTextOffsetAsync(annotation.StartOffset);
+            _annotationToNavigate = null;
+            if (targetPage is null)
+            {
+                await AlertService.ShowToastAsync(
+                    Translations.ANNOTATION_LOCATION_NOT_FOUND,
+                    AlertSeverity.Warning);
+            }
+            else
+            {
+                ReaderService.NavigateToPage(targetPage.Value);
+            }
+        }
 
         switch (_readerState)
         {
@@ -83,6 +104,10 @@ public partial class Reader : IAsyncDisposable
                 if (assetLoadToken != _assetLoadToken || _readerState != ReaderState.WaitingForAssets)
                 {
                     break;
+                }
+                if (_textSelection is not null)
+                {
+                    await _textSelection.RestoreHighlightsAsync();
                 }
                 _readerState = ReaderState.Ready;
                 RefreshUi();
@@ -110,13 +135,10 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Destroyed -= OnDestroy;
 
         ReaderService.Dispose();
-        _dotNetReference.Dispose();
-
         if (_module is not null)
         {
             try
             {
-                await _module.InvokeVoidAsync("Dispose");
                 await _module.DisposeAsync();
             }
             catch
@@ -173,18 +195,18 @@ public partial class Reader : IAsyncDisposable
         };
     }
 
-    [JSInvokable("OnKeyDown")]
-    public void OnKeyDown(string key)
+    private Task NavigateToAnnotationAsync(BookAnnotation annotation)
     {
-        switch (key)
+        if (!ReaderService.NavigateToAnnotation(annotation))
         {
-            case "PageDown":
-                ReaderService.NextPage();
-                break;
-            case "PageUp":
-                ReaderService.PreviousPage();
-                break;
+            return AlertService.ShowToastAsync(
+                Translations.ANNOTATION_LOCATION_NOT_FOUND,
+                AlertSeverity.Warning);
         }
+
+        _annotationToNavigate = annotation;
+        OverlayService.ToggleOverlay();
+        return Task.CompletedTask;
     }
 
     private void OnPaused()

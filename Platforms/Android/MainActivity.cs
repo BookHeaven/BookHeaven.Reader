@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Views;
 
 namespace BookHeaven.Reader;
 
@@ -8,5 +9,12 @@ namespace BookHeaven.Reader;
 [IntentFilter([Intent.ActionMain], Categories = [Intent.CategoryDefault, Intent.CategoryHome, Intent.CategoryLauncher])]
 public class MainActivity : MauiAppCompatActivity
 {
-
+	public override void OnActionModeStarted(ActionMode? mode)
+	{
+		base.OnActionModeStarted(mode);
+		if (mode?.Type == ActionModeType.Floating)
+		{
+			mode.Finish();
+		}
+	}
 }
