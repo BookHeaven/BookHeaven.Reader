@@ -1,11 +1,11 @@
 ﻿using System.Net.Http.Json;
 using BookHeaven.Core.Abstractions.Services;
+using BookHeaven.Core.Features.BookAnnotations;
 using Microsoft.Extensions.Logging;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.BooksProgress;
 using BookHeaven.Core.Features.Fonts;
 using BookHeaven.Core.Features.Profiles;
-using BookHeaven.Core.Features.ProfileSettingss;
 using BookHeaven.Core.Features.ReadingHistory;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Shared;
@@ -227,7 +227,13 @@ public class ServerService(
 			return getHistory.Error;
 		}
 
-		return await PutReadingHistory(getHistory.Value);
+		var updateHistory = await PutReadingHistory(getHistory.Value);
+		if (updateHistory.IsFailure)
+		{
+			return updateHistory;
+		}
+
+		return await PutBookAnnotations(progress.ProfileId, progress.BookId);
 	}
 
 	public async Task<Result> UpdateProgressByProfile(Guid profileId)
@@ -253,7 +259,22 @@ public class ServerService(
 			return getHistory.Error;
 		}
 
-		return await PutReadingHistory(getHistory.Value);
+		var updateHistory = await PutReadingHistory(getHistory.Value);
+		if (updateHistory.IsFailure)
+		{
+			return updateHistory;
+		}
+
+		foreach (var progress in getProgresses.Value)
+		{
+			var updateAnnotations = await PutBookAnnotations(profileId, progress.BookId);
+			if (updateAnnotations.IsFailure)
+			{
+				return updateAnnotations;
+			}
+		}
+
+		return Result.Success();
 	}
 
 	private async Task<Result> PutBookProgress(BookProgress progress)
@@ -293,6 +314,39 @@ public class ServerService(
 		{
 			logger.LogError(ex, "Failed to sync reading history to server");
 			return new Error("Failed to sync reading history to server");
+		}
+	}
+
+	private async Task<Result> PutBookAnnotations(Guid profileId, Guid bookId)
+	{
+		var annotations = await sender.Send(new GetBookAnnotations.Query(bookId, profileId));
+		if (annotations.IsFailure)
+		{
+			return Result.Failure(annotations.Error);
+		}
+
+		try
+		{
+			var command = new SyncBookAnnotations.Command(bookId, profileId, annotations.Value);
+			var response = await _httpClient.PutAsJsonAsync("api/annotations/sync", command);
+			if (response.IsSuccessStatusCode)
+			{
+				return Result.Success();
+			}
+
+			var errorResponse = await response.Content.ReadAsStringAsync();
+			logger.LogError(
+				"Failed to sync annotations for book {BookId} and profile {ProfileId}: {StatusCode} {ErrorResponse}",
+				bookId,
+				profileId,
+				response.StatusCode,
+				errorResponse);
+			return new Error("Failed to sync book annotations to server");
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to sync book annotations to server");
+			return new Error("Failed to sync book annotations to server");
 		}
 	}
 		

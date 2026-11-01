@@ -3,6 +3,7 @@
 @using BookHeaven.Core.Abstractions
 @using BookHeaven.Core.Abstractions.Services
 @using BookHeaven.Core.Enums
+@using BookHeaven.Reader.Components.Dialogs.Annotations
 @implements IDisposable
 
 <div class="inset-0 bg-black/50 fixed flex items-center justify-center" @onclick:stopPropagation="true">
@@ -63,9 +64,7 @@
     @if (_editingAnnotation is not null)
     {
         <AnnotationNoteDialog
-            Title="@(string.IsNullOrWhiteSpace(_editingAnnotation.Note) ? Translations.ADD_NOTE : Translations.EDIT_NOTE)"
-            PassageText="@_editingAnnotation.Text"
-            InitialNote="@_editingAnnotation.Note"
+            Annotation="_editingAnnotation"
             OnSave="SaveNoteEditAsync"
             OnCancel="CancelNoteEdit" />
     }
@@ -103,20 +102,28 @@
 
     private async Task DeleteNoteAsync(BookAnnotation annotation)
     {
-        var result = await ReaderService.UpdateAnnotationNoteAsync(annotation.BookAnnotationId, null);
+        var annotationWithoutNote = new BookAnnotation
+        {
+            BookAnnotationId = annotation.BookAnnotationId,
+            BookId = annotation.BookId,
+            ProfileId = annotation.ProfileId,
+            ChapterIndex = annotation.ChapterIndex,
+            ChapterTitle = annotation.ChapterTitle,
+            StartOffset = annotation.StartOffset,
+            EndOffset = annotation.EndOffset,
+            Text = annotation.Text,
+            Note = null
+        };
+        var result = await ReaderService.SaveAnnotationAsync(annotationWithoutNote);
         if (result.IsFailure)
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
         }
     }
 
-    private async Task SaveNoteEditAsync(string note)
+    private async Task SaveNoteEditAsync(BookAnnotation annotation)
     {
-        if (_editingAnnotation is null) return;
-
-        var result = await ReaderService.UpdateAnnotationNoteAsync(
-            _editingAnnotation.BookAnnotationId,
-            note);
+        var result = await ReaderService.SaveAnnotationAsync(annotation);
         if (result.IsFailure)
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
