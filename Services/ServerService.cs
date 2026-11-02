@@ -203,7 +203,13 @@ public class ServerService(
 				progress.BookWordCount = 0;
 				await sender.Send(new UpdateBookProgress.Command(progress));
 			}
-				
+
+			var syncAnnotations = await SyncAnnotations(profileId, book.BookId);
+			if (syncAnnotations.IsFailure)
+			{
+				return syncAnnotations;
+			}
+
 			return Result.Success();
 		}
 		catch (Exception ex)
