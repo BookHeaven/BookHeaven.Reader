@@ -753,20 +753,20 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sync.
+        /// </summary>
+        public static string SYNC {
+            get {
+                return ResourceManager.GetString("SYNC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sync completed.
         /// </summary>
         public static string SYNC_COMPLETED {
             get {
                 return ResourceManager.GetString("SYNC_COMPLETED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sync Progress.
-        /// </summary>
-        public static string SYNC_PROGRESS {
-            get {
-                return ResourceManager.GetString("SYNC_PROGRESS", resourceCulture);
             }
         }
         

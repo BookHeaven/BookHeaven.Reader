@@ -20,8 +20,8 @@
     <data name="SETTINGS" xml:space="preserve">
         <value>Ajustes</value>
     </data>
-    <data name="SYNC_PROGRESS" xml:space="preserve">
-        <value>Sincr. Progreso</value>
+    <data name="SYNC" xml:space="preserve">
+        <value>Sincronizar</value>
     </data>
     <data name="BOOKS" xml:space="preserve">
         <value>Libros</value>

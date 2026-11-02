@@ -9,8 +9,8 @@
 	<ContextMenuItem OnClick="BackupProfile">
 		@Translations.BACKUP_PROFILE
 	</ContextMenuItem>
-	<ContextMenuItem OnClick="SyncProgress">
-		@Translations.SYNC_PROGRESS
+	<ContextMenuItem OnClick="Sync">
+		@Translations.SYNC
 	</ContextMenuItem>
 </ContextMenu>
 
@@ -31,7 +31,7 @@
 		return true;
 	}
 
-	private async Task SyncProgress()
+	private async Task Sync()
 	{
 		if(!await CheckConnection())
 			return;
