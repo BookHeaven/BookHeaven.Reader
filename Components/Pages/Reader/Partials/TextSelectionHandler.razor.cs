@@ -1,6 +1,7 @@
 using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Entities;
 using BookHeaven.Core.Enums;
+using BookHeaven.Core.Extensions;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Shared;
 using Microsoft.AspNetCore.Components;
@@ -12,6 +13,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
 {
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IReaderService ReaderService { get; set; } = null!;
+    [Inject] private IReaderAnnotationService AnnotationService { get; set; } = null!;
     [Inject] private IAlertService AlertService { get; set; } = null!;
 
     private DotNetObjectReference<TextSelectionHandler>? _dotNetReference;
@@ -28,7 +30,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
 
     protected override void OnInitialized()
     {
-        ReaderService.OnHighlightsChanged += OnHighlightsChanged;
+        AnnotationService.OnHighlightsChanged += OnHighlightsChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -62,7 +64,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
     public async Task RestoreHighlightsAsync()
     {
         if (_module is null) return;
-        await _module.InvokeVoidAsync("RestoreHighlights", ReaderService.GetAnnotationsForCurrentChapter());
+        await _module.InvokeVoidAsync("RestoreHighlights", AnnotationService.GetAnnotationsForCurrentChapter());
     }
 
     public async Task<int?> GetPageForTextOffsetAsync(int offset)
@@ -78,21 +80,21 @@ public partial class TextSelectionHandler : IAsyncDisposable
         _selectionActionPositioned = false;
         _selectionActionLeft = left;
         _selectionActionTop = top;
-        _selectionHasHighlight = _isSelectionActionVisible && ReaderService.HasAnnotationsInRange(startOffset, endOffset);
-        _selectionCanHighlight = _isSelectionActionVisible && ReaderService.HasUnhighlightedInRange(startOffset, endOffset);
+        _selectionHasHighlight = _isSelectionActionVisible && AnnotationService.HasAnnotationsInRange(startOffset, endOffset);
+        _selectionCanHighlight = _isSelectionActionVisible && AnnotationService.HasUnhighlightedInRange(startOffset, endOffset);
         return InvokeAsync(StateHasChanged);
     }
 
     private async Task ApplyHighlight()
     {
         await UpdateHighlightsFromSelectionAsync(range =>
-            ReaderService.AddAnnotationAsync(range.StartOffset, range.EndOffset, range.Text));
+            AnnotationService.AddAnnotationAsync(range.StartOffset, range.EndOffset, range.Text));
     }
 
     private async Task RemoveHighlight()
     {
         await UpdateHighlightsFromSelectionAsync(range =>
-            ReaderService.RemoveAnnotationsAsync(range.StartOffset, range.EndOffset));
+            AnnotationService.RemoveAnnotationsAsync(range.StartOffset, range.EndOffset));
     }
 
     private async Task UpdateHighlightsFromSelectionAsync(Func<HighlightRange, Task<Result>> update)
@@ -119,16 +121,14 @@ public partial class TextSelectionHandler : IAsyncDisposable
         var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection");
         if (range is null) return;
 
-        var existingAnnotation = ReaderService.GetAnnotationForRange(range.StartOffset, range.EndOffset);
-        _noteAnnotation = new BookAnnotation
+        var existingAnnotation = AnnotationService.GetAnnotationForRange(range.StartOffset, range.EndOffset);
+        _noteAnnotation = existingAnnotation?.Clone() ?? new BookAnnotation
         {
-            BookAnnotationId = existingAnnotation?.BookAnnotationId ?? Guid.Empty,
-            ChapterIndex = existingAnnotation?.ChapterIndex ?? ReaderService.State?.ChapterNumber ?? 0,
-            ChapterTitle = existingAnnotation?.ChapterTitle ?? ReaderService.State?.ChapterTitle ?? string.Empty,
-            StartOffset = existingAnnotation?.StartOffset ?? range.StartOffset,
-            EndOffset = existingAnnotation?.EndOffset ?? range.EndOffset,
-            Text = existingAnnotation?.Text ?? range.Text,
-            Note = existingAnnotation?.Note 
+            ChapterIndex = ReaderService.State?.ChapterNumber ?? 0,
+            ChapterTitle = ReaderService.State?.ChapterTitle ?? string.Empty,
+            StartOffset = range.StartOffset,
+            EndOffset = range.EndOffset,
+            Text = range.Text
         };
         _isSelectionActionVisible = false;
         _isNoteEditorVisible = true;
@@ -136,7 +136,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
 
     private async Task SaveNote(BookAnnotation annotation)
     {
-        var result = await ReaderService.SaveAnnotationAsync(annotation);
+        var result = await AnnotationService.SaveAnnotationAsync(annotation);
         if (result.IsFailure)
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
@@ -160,7 +160,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        ReaderService.OnHighlightsChanged -= OnHighlightsChanged;
+        AnnotationService.OnHighlightsChanged -= OnHighlightsChanged;
         _dotNetReference?.Dispose();
 
         if (_module is not null)

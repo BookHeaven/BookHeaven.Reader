@@ -1,5 +1,6 @@
 ﻿@using BookHeaven.Core.Features.Reader.Abstractions
 @using BookHeaven.Core.Entities
+@using BookHeaven.Core.Extensions
 @using BookHeaven.Core.Abstractions
 @using BookHeaven.Core.Abstractions.Services
 @using BookHeaven.Core.Enums
@@ -71,17 +72,17 @@
 </div>
 
 @code {
-    [Inject] private IReaderService ReaderService { get; set; } = null!;
+    [Inject] private IReaderAnnotationService AnnotationService { get; set; } = null!;
     [Inject] private OverlayService OverlayService { get; set; } = null!;
     [Inject] private IAlertService AlertService { get; set; } = null!;
     [Parameter] public EventCallback<BookAnnotation> OnOpenAnnotation { get; set; }
 
     private BookAnnotation? _editingAnnotation;
-    private IReadOnlyList<BookAnnotation> Annotations => ReaderService.GetAllAnnotations();
+    private IReadOnlyList<BookAnnotation> Annotations => AnnotationService.GetAllAnnotations();
 
     protected override void OnInitialized()
     {
-        ReaderService.OnHighlightsChanged += RefreshUi;
+        AnnotationService.OnHighlightsChanged += RefreshUi;
     }
 
     private void Close() => OverlayService.ToggleOverlay();
@@ -93,7 +94,7 @@
 
     private async Task DeleteAnnotationAsync(BookAnnotation annotation)
     {
-        var result = await ReaderService.DeleteAnnotationAsync(annotation.BookAnnotationId);
+        var result = await AnnotationService.DeleteAnnotationAsync(annotation.BookAnnotationId);
         if (result.IsFailure)
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
@@ -102,19 +103,7 @@
 
     private async Task DeleteNoteAsync(BookAnnotation annotation)
     {
-        var annotationWithoutNote = new BookAnnotation
-        {
-            BookAnnotationId = annotation.BookAnnotationId,
-            BookId = annotation.BookId,
-            ProfileId = annotation.ProfileId,
-            ChapterIndex = annotation.ChapterIndex,
-            ChapterTitle = annotation.ChapterTitle,
-            StartOffset = annotation.StartOffset,
-            EndOffset = annotation.EndOffset,
-            Text = annotation.Text,
-            Note = null
-        };
-        var result = await ReaderService.SaveAnnotationAsync(annotationWithoutNote);
+        var result = await AnnotationService.SaveAnnotationAsync(annotation.WithNote(null));
         if (result.IsFailure)
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
@@ -123,7 +112,7 @@
 
     private async Task SaveNoteEditAsync(BookAnnotation annotation)
     {
-        var result = await ReaderService.SaveAnnotationAsync(annotation);
+        var result = await AnnotationService.SaveAnnotationAsync(annotation);
         if (result.IsFailure)
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
@@ -142,6 +131,6 @@
 
     public void Dispose()
     {
-        ReaderService.OnHighlightsChanged -= RefreshUi;
+        AnnotationService.OnHighlightsChanged -= RefreshUi;
     }
 }
