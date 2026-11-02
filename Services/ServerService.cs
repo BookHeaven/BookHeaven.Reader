@@ -23,7 +23,7 @@ public interface IServerService
 	Task<Result<List<BookProgress>>> GetAllBooksProgress(Guid profileId);
 	Task<Result> DownloadBook(Book book, Guid profileId);
 	Task<Result> UpdateBookProgress(BookProgress progress);
-	Task<Result> UpdateProgressByProfile(Guid profileId);
+	Task<Result> SyncProfile(Guid profileId);
 	Task<Result> UpdateProfileSettings(ProfileSettings settings);
 	Task<Result> UpdateLocalProfiles();
 	Task<Result> DownloadFonts();
@@ -236,7 +236,7 @@ public class ServerService(
 		return await SyncAnnotations(progress.ProfileId, progress.BookId);
 	}
 
-	public async Task<Result> UpdateProgressByProfile(Guid profileId)
+	public async Task<Result> SyncProfile(Guid profileId)
 	{
 		var getProgresses = await sender.Send(new GetAllBooksProgressByProfile.Query(profileId));
 		if (getProgresses.IsFailure)

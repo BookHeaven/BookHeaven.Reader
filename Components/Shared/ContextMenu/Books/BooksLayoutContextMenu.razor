@@ -36,7 +36,7 @@
 		if(!await CheckConnection())
 			return;
 
-		await ServerService.UpdateProgressByProfile(AppStateService.ProfileId);
+		await ServerService.SyncProfile(AppStateService.ProfileId);
 		await Toast.Make(Translations.SYNC_COMPLETED).Show();
 	}
 
