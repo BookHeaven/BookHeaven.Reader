@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Features.BookAnnotations;
 using Microsoft.Extensions.Logging;
@@ -233,7 +233,7 @@ public class ServerService(
 			return updateHistory;
 		}
 
-		return await PutBookAnnotations(progress.ProfileId, progress.BookId);
+		return await SyncAnnotations(progress.ProfileId, progress.BookId);
 	}
 
 	public async Task<Result> UpdateProgressByProfile(Guid profileId)
@@ -267,7 +267,7 @@ public class ServerService(
 
 		foreach (var progress in getProgresses.Value)
 		{
-			var updateAnnotations = await PutBookAnnotations(profileId, progress.BookId);
+			var updateAnnotations = await SyncAnnotations(profileId, progress.BookId);
 			if (updateAnnotations.IsFailure)
 			{
 				return updateAnnotations;
@@ -317,37 +317,55 @@ public class ServerService(
 		}
 	}
 
-	private async Task<Result> PutBookAnnotations(Guid profileId, Guid bookId)
+	// Bidirectional sync: the server merges the local annotations with its own
+	// (last-write-wins) and returns the merged state, which is then merged back
+	// into the local database so both sides converge.
+	private async Task<Result> SyncAnnotations(Guid profileId, Guid bookId)
 	{
-		var annotations = await sender.Send(new GetBookAnnotations.Query(bookId, profileId));
-		if (annotations.IsFailure)
+		var localAnnotations = await sender.Send(new GetBookAnnotations.Query(bookId, profileId));
+		if (localAnnotations.IsFailure)
 		{
-			return Result.Failure(annotations.Error);
+			return Result.Failure(localAnnotations.Error);
 		}
 
+		List<BookAnnotation> serverAnnotations;
 		try
 		{
-			var command = new SyncBookAnnotations.Command(bookId, profileId, annotations.Value);
+			var command = new SyncBookAnnotations.Command(bookId, profileId, localAnnotations.Value);
 			var response = await _httpClient.PutAsJsonAsync("api/annotations/sync", command);
-			if (response.IsSuccessStatusCode)
+			if (!response.IsSuccessStatusCode)
 			{
-				return Result.Success();
+				var errorResponse = await response.Content.ReadAsStringAsync();
+				logger.LogError(
+					"Failed to sync annotations for book {BookId} and profile {ProfileId}: {StatusCode} {ErrorResponse}",
+					bookId,
+					profileId,
+					response.StatusCode,
+					errorResponse);
+				return new Error("Failed to sync book annotations with server");
 			}
 
-			var errorResponse = await response.Content.ReadAsStringAsync();
-			logger.LogError(
-				"Failed to sync annotations for book {BookId} and profile {ProfileId}: {StatusCode} {ErrorResponse}",
-				bookId,
-				profileId,
-				response.StatusCode,
-				errorResponse);
-			return new Error("Failed to sync book annotations to server");
+			serverAnnotations = await response.Content.ReadFromJsonAsync<List<BookAnnotation>>() ?? [];
 		}
 		catch (Exception ex)
 		{
-			logger.LogError(ex, "Failed to sync book annotations to server");
-			return new Error("Failed to sync book annotations to server");
+			logger.LogError(ex, "Failed to sync book annotations with server");
+			return new Error("Failed to sync book annotations with server");
 		}
+
+		var (upserts, deletedAnnotationIds) = SyncBookAnnotations.Merge(localAnnotations.Value, serverAnnotations);
+		if (upserts.Count == 0 && deletedAnnotationIds.Count == 0)
+		{
+			return Result.Success();
+		}
+
+		var applyChanges = await sender.Send(new ApplyBookAnnotationChanges.Command(bookId, profileId, upserts, deletedAnnotationIds));
+		if (applyChanges.IsFailure)
+		{
+			return applyChanges;
+		}
+
+		return Result.Success();
 	}
 		
 	public async Task<Result> UpdateProfileSettings(ProfileSettings settings)
