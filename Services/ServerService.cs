@@ -33,7 +33,8 @@ public class ServerService(
 	AppStateService appStateService,
 	IReaderCacheService readerCacheService,
 	ILogger<ServerService> logger,
-	IUrlBuilder urlBuilder) : IServerService
+	IUrlBuilder urlBuilder,
+	IPendingBookAnnotationDeletionStore pendingDeletionStore) : IServerService
 {
 	private HttpClient _httpClient = new();
 
@@ -334,10 +335,16 @@ public class ServerService(
 			return Result.Failure(localAnnotations.Error);
 		}
 
+		List<Guid> pendingDeletions;
 		List<BookAnnotation> serverAnnotations;
 		try
 		{
-			var command = new SyncBookAnnotations.Command(bookId, profileId, localAnnotations.Value);
+			pendingDeletions = await pendingDeletionStore.GetAsync(bookId, profileId);
+			var command = new SyncBookAnnotations.Command(
+				bookId,
+				profileId,
+				localAnnotations.Value,
+				pendingDeletions);
 			var response = await _httpClient.PutAsJsonAsync("api/annotations/sync", command);
 			if (!response.IsSuccessStatusCode)
 			{
@@ -360,15 +367,29 @@ public class ServerService(
 		}
 
 		var (upserts, deletedAnnotationIds) = SyncBookAnnotations.Merge(localAnnotations.Value, serverAnnotations);
-		if (upserts.Count == 0 && deletedAnnotationIds.Count == 0)
+		if (upserts.Count > 0 || deletedAnnotationIds.Count > 0)
 		{
-			return Result.Success();
+			var applyChanges = await sender.Send(new ApplyBookAnnotationChanges.Command(
+				bookId,
+				profileId,
+				upserts,
+				deletedAnnotationIds));
+			if (applyChanges.IsFailure)
+			{
+				return applyChanges;
+			}
 		}
 
-		var applyChanges = await sender.Send(new ApplyBookAnnotationChanges.Command(bookId, profileId, upserts, deletedAnnotationIds));
-		if (applyChanges.IsFailure)
+		try
 		{
-			return applyChanges;
+			await pendingDeletionStore.AcknowledgeAsync(bookId, profileId, pendingDeletions);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to acknowledge synced annotation deletions for book {BookId} and profile {ProfileId}",
+				bookId,
+				profileId);
+			return new Error("Failed to acknowledge synced annotation deletions");
 		}
 
 		return Result.Success();
