@@ -8,21 +8,21 @@
 @implements IDisposable
 
 <div class="inset-0 bg-black/50 fixed flex items-center justify-center" @onclick:stopPropagation="true">
-    <section class="max-w-2xl rounded-lg bg-white p-4 border-black flex max-h-[85vh] w-11/12 flex-col border-2">
-        <header class="mb-3 flex items-center">
-            <h2 class="text-lg font-semibold flex-1">@Translations.ANNOTATIONS</h2>
-            <button class="rounded px-3 py-2 active:bg-neutral-100" @onclick="Close">
+    <section class="max-w-2xl py-4 rounded-lg bg-white border-black flex h-[85vh] w-11/12 flex-col border-2">
+        <header class="mb-3 px-4 flex items-center">
+            <h2 class="text-lg font-semibold m-0 flex-1">@Translations.ANNOTATIONS</h2>
+            <Button Class="p-0!" OnClick="@Close">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x size-8"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
-            </button>
+            </Button>
         </header>
-
+        <hr class="border-neutral-300"/>
         @if (Annotations.Count == 0)
         {
             <p class="py-6 text-neutral-500 text-center">@Translations.NO_ANNOTATIONS</p>
         }
         else
         {
-            <div class="min-h-0 divide-neutral-500 flex-1 divide-y overflow-y-auto">
+            <div class="min-h-0 divide-neutral-500 px-2 flex-1 scrollbar-gutter-both divide-y overflow-y-auto">
                 @foreach (var annotation in Annotations)
                 {
                     <article class="px-2 py-2">
