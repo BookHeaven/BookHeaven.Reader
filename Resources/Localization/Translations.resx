@@ -177,6 +177,9 @@
     <data name="HIGHLIGHT" xml:space="preserve">
         <value>Highlight</value>
     </data>
+    <data name="COMBINE" xml:space="preserve">
+        <value>Combine</value>
+    </data>
     <data name="ADD_NOTE" xml:space="preserve">
         <value>Add note</value>
     </data>

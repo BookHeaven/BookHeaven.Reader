@@ -60,6 +60,42 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add note.
+        /// </summary>
+        public static string ADD_NOTE {
+            get {
+                return ResourceManager.GetString("ADD_NOTE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not locate this passage in the chapter..
+        /// </summary>
+        public static string ANNOTATION_LOCATION_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("ANNOTATION_LOCATION_NOT_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlights and notes.
+        /// </summary>
+        public static string ANNOTATIONS {
+            get {
+                return ResourceManager.GetString("ANNOTATIONS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Apply.
+        /// </summary>
+        public static string APPLY {
+            get {
+                return ResourceManager.GetString("APPLY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Apps.
         /// </summary>
         public static string APPS {
@@ -105,15 +141,6 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For you.
-        /// </summary>
-        public static string RECOMMENDED {
-            get {
-                return ResourceManager.GetString("RECOMMENDED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Missing.
         /// </summary>
         public static string BY_MISSING {
@@ -132,6 +159,24 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string CANCEL {
+            get {
+                return ResourceManager.GetString("CANCEL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chapter.
+        /// </summary>
+        public static string CHAPTER {
+            get {
+                return ResourceManager.GetString("CHAPTER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please check the URL and try again.
         /// </summary>
         public static string CHECK_THE_URL {
@@ -146,6 +191,24 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string CLEAR_CACHE {
             get {
                 return ResourceManager.GetString("CLEAR_CACHE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string CLOSE {
+            get {
+                return ResourceManager.GetString("CLOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Combine.
+        /// </summary>
+        public static string COMBINE {
+            get {
+                return ResourceManager.GetString("COMBINE", resourceCulture);
             }
         }
         
@@ -177,6 +240,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy.
+        /// </summary>
+        public static string COPY {
+            get {
+                return ResourceManager.GetString("COPY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default.
         /// </summary>
         public static string DEFAULT {
@@ -193,7 +265,16 @@ namespace BookHeaven.Reader.Resources.Localization {
                 return ResourceManager.GetString("DELETE", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete note.
+        /// </summary>
+        public static string DELETE_NOTE {
+            get {
+                return ResourceManager.GetString("DELETE_NOTE", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Details.
         /// </summary>
@@ -240,6 +321,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Edit note.
+        /// </summary>
+        public static string EDIT_NOTE {
+            get {
+                return ResourceManager.GetString("EDIT_NOTE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Finish Date.
         /// </summary>
         public static string END_DATE {
@@ -274,141 +364,6 @@ namespace BookHeaven.Reader.Resources.Localization {
                 return ResourceManager.GetString("FONT", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Highlight.
-        /// </summary>
-        public static string HIGHLIGHT {
-            get {
-                return ResourceManager.GetString("HIGHLIGHT", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Add note.
-        /// </summary>
-        public static string ADD_NOTE {
-            get {
-                return ResourceManager.GetString("ADD_NOTE", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Edit note.
-        /// </summary>
-        public static string EDIT_NOTE {
-            get {
-                return ResourceManager.GetString("EDIT_NOTE", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Delete note.
-        /// </summary>
-        public static string DELETE_NOTE {
-            get {
-                return ResourceManager.GetString("DELETE_NOTE", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Note.
-        /// </summary>
-        public static string NOTE {
-            get {
-                return ResourceManager.GetString("NOTE", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Save.
-        /// </summary>
-        public static string SAVE {
-            get {
-                return ResourceManager.GetString("SAVE", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Cancel.
-        /// </summary>
-        public static string CANCEL {
-            get {
-                return ResourceManager.GetString("CANCEL", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Highlights and notes.
-        /// </summary>
-        public static string ANNOTATIONS {
-            get {
-                return ResourceManager.GetString("ANNOTATIONS", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to No highlights or notes yet.
-        /// </summary>
-        public static string NO_ANNOTATIONS {
-            get {
-                return ResourceManager.GetString("NO_ANNOTATIONS", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Could not locate this passage in the chapter.
-        /// </summary>
-        public static string ANNOTATION_LOCATION_NOT_FOUND {
-            get {
-                return ResourceManager.GetString("ANNOTATION_LOCATION_NOT_FOUND", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Chapter.
-        /// </summary>
-        public static string CHAPTER {
-            get {
-                return ResourceManager.GetString("CHAPTER", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Close.
-        /// </summary>
-        public static string CLOSE {
-            get {
-                return ResourceManager.GetString("CLOSE", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Copy.
-        /// </summary>
-        public static string COPY {
-            get {
-                return ResourceManager.GetString("COPY", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Apply.
-        /// </summary>
-        public static string APPLY {
-            get {
-                return ResourceManager.GetString("APPLY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Remove highlight.
-        /// </summary>
-        public static string REMOVE_HIGHLIGHT {
-            get {
-                return ResourceManager.GetString("REMOVE_HIGHLIGHT", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Font Size.
@@ -416,6 +371,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string FONT_SIZE {
             get {
                 return ResourceManager.GetString("FONT_SIZE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight.
+        /// </summary>
+        public static string HIGHLIGHT {
+            get {
+                return ResourceManager.GetString("HIGHLIGHT", resourceCulture);
             }
         }
         
@@ -600,6 +564,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No highlights or notes yet.
+        /// </summary>
+        public static string NO_ANNOTATIONS {
+            get {
+                return ResourceManager.GetString("NO_ANNOTATIONS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No books found in your library.
         /// </summary>
         public static string NO_BOOKS_FOUND {
@@ -614,6 +587,15 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string NO_SERVERS_FOUND {
             get {
                 return ResourceManager.GetString("NO_SERVERS_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Note.
+        /// </summary>
+        public static string NOTE {
+            get {
+                return ResourceManager.GetString("NOTE", resourceCulture);
             }
         }
         
@@ -681,11 +663,38 @@ namespace BookHeaven.Reader.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For you.
+        /// </summary>
+        public static string RECOMMENDED {
+            get {
+                return ResourceManager.GetString("RECOMMENDED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove highlight.
+        /// </summary>
+        public static string REMOVE_HIGHLIGHT {
+            get {
+                return ResourceManager.GetString("REMOVE_HIGHLIGHT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Retry.
         /// </summary>
         public static string RETRY {
             get {
                 return ResourceManager.GetString("RETRY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string SAVE {
+            get {
+                return ResourceManager.GetString("SAVE", resourceCulture);
             }
         }
         
@@ -706,7 +715,7 @@ namespace BookHeaven.Reader.Resources.Localization {
                 return ResourceManager.GetString("SEARCHING_SERVERS", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Move selection end.
         /// </summary>
@@ -715,7 +724,7 @@ namespace BookHeaven.Reader.Resources.Localization {
                 return ResourceManager.GetString("SELECTION_END", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Move selection start.
         /// </summary>

@@ -170,6 +170,9 @@
     <data name="HIGHLIGHT" xml:space="preserve">
         <value>Resaltar</value>
     </data>
+    <data name="COMBINE" xml:space="preserve">
+        <value>Combinar</value>
+    </data>
     <data name="ADD_NOTE" xml:space="preserve">
         <value>Añadir nota</value>
     </data>

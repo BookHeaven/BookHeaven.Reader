@@ -21,6 +21,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
     private bool _isSelectionActionVisible;
     private bool _selectionHasHighlight;
     private bool _selectionCanHighlight;
+    private bool _selectionCanCombine;
     private bool _selectionActionPositioned;
     private bool _restoreHighlightsOnNextRender;
     private bool _isEditingHighlightModified;
@@ -121,6 +122,8 @@ public partial class TextSelectionHandler : IAsyncDisposable
                                  AnnotationService.HasRemovableAnnotationsInRange(startOffset, endOffset);
         _selectionCanHighlight = _isSelectionActionVisible && !_isEditingHighlightModified &&
                                  AnnotationService.HasUnhighlightedInRange(startOffset, endOffset);
+        _selectionCanCombine = _isSelectionActionVisible && !isEditingHighlight &&
+                              AnnotationService.HasAdjacentAnnotations(startOffset, endOffset);
         return InvokeAsync(StateHasChanged);
     }
 
@@ -155,6 +158,12 @@ public partial class TextSelectionHandler : IAsyncDisposable
     {
         await UpdateHighlightsFromSelectionAsync(range =>
             AnnotationService.AddAnnotationAsync(range.StartOffset, range.EndOffset, range.Text));
+    }
+
+    private async Task CombineHighlights()
+    {
+        await UpdateHighlightsFromSelectionAsync(range =>
+            AnnotationService.CombineAdjacentAnnotationsAsync(range.StartOffset, range.EndOffset, range.Text));
     }
 
     private async Task RemoveHighlight()
