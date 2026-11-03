@@ -11,6 +11,7 @@ const selectionMoveThreshold = 4;
 const selectionHandleKnobCenterOffsetY = 25;
 const selectionHandleHeight = 42;
 const selectionHandleMouseHitboxHeight = 16;
+const selectionHandleTouchStemExtension = 6;
 
 let activeSelection = null;
 let selectionInputType = 'mouse';
@@ -818,11 +819,14 @@ const isPointWithinBounds = (point, bounds) =>
 const setHandlePosition = (handle, point) => {
     const [stem, knob] = handle.children;
     const isTouch = selectionInputType === 'touch';
-    stem.style.top = isTouch ? '7px' : '-10px';
-    stem.style.height = isTouch ? '24px' : '10px';
-    knob.style.top = isTouch ? '25px' : '0';
+    const handleTop = point.y - selectionHandleMouseHitboxHeight / 2;
+    const stemTop = point.y - point.lineHeight - handleTop;
+    const stemExtension = isTouch ? selectionHandleTouchStemExtension : 0;
+    stem.style.top = `${stemTop}px`;
+    stem.style.height = `${point.lineHeight + stemExtension}px`;
+    knob.style.top = `${stemTop + point.lineHeight + stemExtension}px`;
     handle.style.left = `${point.x - 18}px`;
-    handle.style.top = `${point.y - selectionHandleMouseHitboxHeight / 2}px`;
+    handle.style.top = `${handleTop}px`;
     handle.style.display = 'block';
 };
 
@@ -848,7 +852,7 @@ const getTextCaretPoint = (root, offset, isStart) => {
     caret.collapse(true);
     const caretRect = caret.getBoundingClientRect();
     if (caretRect.height > 0) {
-        return { x: caretRect.left, y: caretRect.bottom };
+        return { x: caretRect.left, y: caretRect.bottom, lineHeight: caretRect.height };
     }
 
     const textLength = getTextLength(root);
@@ -865,7 +869,7 @@ const getTextCaretPoint = (root, offset, isStart) => {
     const direction = getComputedStyle(position.container.parentElement ?? root).direction;
     const isRightToLeft = direction === 'rtl';
     const useLeftEdge = isStart !== isRightToLeft;
-    return { x: useLeftEdge ? rect.left : rect.right, y: rect.bottom };
+    return { x: useLeftEdge ? rect.left : rect.right, y: rect.bottom, lineHeight: rect.height };
 };
 
 const getVisibleCaretPoint = (root, offset, bounds, isStart) => {
