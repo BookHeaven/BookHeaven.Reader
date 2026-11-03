@@ -10,8 +10,10 @@ const longPressDelay = 500;
 const selectionMoveThreshold = 4;
 const selectionHandleKnobCenterOffsetY = 25;
 const selectionHandleHeight = 42;
+const selectionHandleMouseHitboxHeight = 16;
 
 let activeSelection = null;
+let selectionInputType = 'mouse';
 let selectionChapter = null;
 let selectionChapterFirstChild = null;
 let editingHighlightRange = null;
@@ -110,7 +112,7 @@ const createSelectionHandle = label => {
         position: 'fixed',
         display: 'none',
         width: '36px',
-        height: `${selectionHandleHeight}px`,
+        height: `${selectionHandleMouseHitboxHeight}px`,
         padding: '0',
         border: '0',
         background: 'transparent',
@@ -124,26 +126,27 @@ const createSelectionHandle = label => {
     Object.assign(stem.style, {
         position: 'absolute',
         left: '17px',
-        top: '-1px',
+        top: '-10px',
         width: '2px',
-        height: '24px',
-        background: '#1677ff'
+        height: '10px',
+        background: '#1677ff',
+        pointerEvents: 'none'
     });
     const knob = document.createElement('span');
     Object.assign(knob.style, {
         position: 'absolute',
         left: '10px',
-        top: '17px',
+        top: '0',
         width: '16px',
         height: '16px',
         border: '2px solid white',
         borderRadius: '50%',
         boxSizing: 'border-box',
         background: '#1677ff',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, .45)'
+        boxShadow: '0 1px 3px rgba(0, 0, 0, .45)',
+        pointerEvents: 'none'
     });
     handle.append(stem, knob);
-    handle.addEventListener('pointerdown', event => beginSelectionHandleDrag(event, handle));
     handle.addEventListener('keydown', event => moveSelectionHandleWithKeyboard(event, handle));
     return handle;
 };
@@ -272,8 +275,20 @@ export function ClampSelectionAction() {
 const handleSelectionPointerDown = event => {
     clearTimeout(selectionCancellationTimeout);
     selectionCancellationPending = false;
-    if (event.target.closest?.('.reader-selection-handle')) return;
     if (event.button !== 0) return;
+
+    const handleAction = event.target.closest?.('#reader-selection-action');
+    const handle = event.target.closest?.('.reader-selection-handle') ??
+        (event.pointerType === 'touch' && !handleAction
+            ? getTouchSelectionHandleAtPoint(event.clientX, event.clientY)
+            : null);
+    if (handle) {
+        setSelectionInputType(event.pointerType);
+        beginSelectionHandleDrag(event, handle);
+        return;
+    }
+    if (handleAction) return;
+    if (event.target.closest?.('.reader-surface')) setSelectionInputType(event.pointerType);
 
     if (HasTextSelection() &&
         !event.target.closest?.('#reader-selection-action') &&
@@ -530,21 +545,43 @@ const handleSelectionContextMenu = event => {
     event.preventDefault();
 };
 
+const getTouchSelectionHandleAtPoint = (x, y) => {
+    if (!HasTextSelection() || !isSelectionRootCurrent()) return null;
+
+    const { startOffset, endOffset } = getSelectionOffsets();
+    const candidates = [
+        { handle: selectionStartHandle, point: getTextCaretPoint(selectionChapter, startOffset, true) },
+        { handle: selectionEndHandle, point: getTextCaretPoint(selectionChapter, endOffset, false) }
+    ].filter(({ point }) =>
+        point &&
+        x >= point.x - 18 &&
+        x <= point.x + 18 &&
+        y >= point.y &&
+        y <= point.y + selectionHandleHeight);
+
+    candidates.sort((first, second) =>
+        (x - first.point.x) ** 2 + (y - first.point.y - selectionHandleKnobCenterOffsetY) ** 2 -
+        ((x - second.point.x) ** 2 + (y - second.point.y - selectionHandleKnobCenterOffsetY) ** 2));
+    return candidates[0]?.handle ?? null;
+};
+
 const beginSelectionHandleDrag = (event, handle) => {
     event.preventDefault();
     event.stopPropagation();
     if (!isSelectionRootCurrent() || !HasTextSelection()) return;
 
+    setSelectionInputType(event.pointerType);
     const { startOffset, endOffset } = getSelectionOffsets();
     const startPoint = getTextCaretPoint(selectionChapter, startOffset, true);
     const endPoint = getTextCaretPoint(selectionChapter, endOffset, false);
+    const knobOffsetY = event.pointerType === 'touch' ? selectionHandleKnobCenterOffsetY : 0;
     const startDistance = startPoint
         ? (event.clientX - startPoint.x) ** 2 +
-          (event.clientY - startPoint.y - selectionHandleKnobCenterOffsetY) ** 2
+          (event.clientY - startPoint.y - knobOffsetY) ** 2
         : Number.POSITIVE_INFINITY;
     const endDistance = endPoint
         ? (event.clientX - endPoint.x) ** 2 +
-          (event.clientY - endPoint.y - selectionHandleKnobCenterOffsetY) ** 2
+          (event.clientY - endPoint.y - knobOffsetY) ** 2
         : Number.POSITIVE_INFINITY;
     const isStartHandle = startDistance === endDistance
         ? handle === selectionStartHandle
@@ -576,6 +613,7 @@ const moveSelectionHandleWithKeyboard = (event, handle) => {
     if ((event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') || !HasTextSelection()) return;
     event.preventDefault();
 
+    setSelectionInputType('mouse');
     const { startOffset, endOffset } = getSelectionOffsets();
     const isStartHandle = handle === selectionStartHandle;
     const anchorOffset = isStartHandle ? endOffset : startOffset;
@@ -778,9 +816,22 @@ const isPointWithinBounds = (point, bounds) =>
     point.y <= bounds.bottom;
 
 const setHandlePosition = (handle, point) => {
+    const [stem, knob] = handle.children;
+    const isTouch = selectionInputType === 'touch';
+    stem.style.top = isTouch ? '7px' : '-10px';
+    stem.style.height = isTouch ? '24px' : '10px';
+    knob.style.top = isTouch ? '25px' : '0';
     handle.style.left = `${point.x - 18}px`;
-    handle.style.top = `${point.y}px`;
+    handle.style.top = `${point.y - selectionHandleMouseHitboxHeight / 2}px`;
     handle.style.display = 'block';
+};
+
+const setSelectionInputType = pointerType => {
+    const inputType = pointerType === 'touch' ? 'touch' : 'mouse';
+    if (selectionInputType === inputType) return;
+
+    selectionInputType = inputType;
+    if (HasTextSelection()) renderSelection();
 };
 
 const hideSelectionHandles = () => {
