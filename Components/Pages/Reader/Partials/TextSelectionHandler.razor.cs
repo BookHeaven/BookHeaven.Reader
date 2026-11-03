@@ -200,7 +200,7 @@ public partial class TextSelectionHandler : IAsyncDisposable
         var text = await _module.InvokeAsync<string?>("GetSelectedText");
         if (string.IsNullOrEmpty(text)) return;
 
-        await Microsoft.Maui.ApplicationModel.DataTransfer.Clipboard.Default.SetTextAsync(text);
+        await Clipboard.SetTextAsync(text);
         _isSelectionActionVisible = false;
     }
 
