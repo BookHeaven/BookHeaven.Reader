@@ -382,6 +382,24 @@ namespace BookHeaven.Reader.Resources.Localization {
                 return ResourceManager.GetString("CLOSE", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Copy.
+        /// </summary>
+        public static string COPY {
+            get {
+                return ResourceManager.GetString("COPY", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Apply.
+        /// </summary>
+        public static string APPLY {
+            get {
+                return ResourceManager.GetString("APPLY", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Remove highlight.
@@ -686,6 +704,24 @@ namespace BookHeaven.Reader.Resources.Localization {
         public static string SEARCHING_SERVERS {
             get {
                 return ResourceManager.GetString("SEARCHING_SERVERS", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Move selection end.
+        /// </summary>
+        public static string SELECTION_END {
+            get {
+                return ResourceManager.GetString("SELECTION_END", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Move selection start.
+        /// </summary>
+        public static string SELECTION_START {
+            get {
+                return ResourceManager.GetString("SELECTION_START", resourceCulture);
             }
         }
         

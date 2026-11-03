@@ -3,21 +3,29 @@
 
 @if (_isSelectionActionVisible)
 {
-	<div id="reader-selection-action" class="bg-neutral-100 border-neutral-300 divide-neutral-300 fixed z-[1001] flex w-max items-center divide-x overflow-hidden rounded-full border"
+	<div id="reader-selection-action" class="bg-white text-lg border-black divide-black fixed z-[1001] flex w-max items-center divide-x overflow-hidden rounded-full border select-none"
 		data-anchor-x="@_selectionActionLeft.ToString(CultureInfo.InvariantCulture)"
 		style="left: @_selectionActionLeft.ToString(CultureInfo.InvariantCulture)px; top: @_selectionActionTop.ToString(CultureInfo.InvariantCulture)px; visibility: @(_selectionActionPositioned ? "visible" : "hidden")"
 		@onclick:stopPropagation="true">
-		@if (_selectionCanHighlight)
+		@if (_editingHighlight is not null && _isEditingHighlightModified)
 		{
-			<button class="px-2 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="ApplyHighlight">@Translations.HIGHLIGHT</button>
+			<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="ApplyEditedHighlight">@Translations.APPLY</button>
 		}
-		@if (_selectionHasHighlight)
+		else
 		{
-			<button class="px-2 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="RemoveHighlight">@Translations.REMOVE_HIGHLIGHT</button>
+			if (_selectionCanHighlight)
+			{
+				<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="ApplyHighlight">@Translations.HIGHLIGHT</button>
+			}
+			if (_selectionHasHighlight)
+			{
+				<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="RemoveHighlight">@Translations.REMOVE_HIGHLIGHT</button>
+			}
+			<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="EditNote">
+				@Translations.NOTE
+			</button>
 		}
-		<button class="px-2 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="EditNote">
-			@Translations.NOTE
-		</button>
+		<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="CopySelection">@Translations.COPY</button>
 	</div>
 }
 @if (_isNoteEditorVisible)

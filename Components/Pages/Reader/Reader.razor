@@ -131,6 +131,11 @@
 			color: inherit;
 			text-decoration: underline;
 		}
+
+		::highlight(bookheaven-selection) {
+			background-color: rgba(51, 119, 255, .32);
+			color: inherit;
+		}
 	}
 </style>
 <StandbyWallpaper ImageSrc="@UrlBuilder.CoverUrl(Id)" />
@@ -158,8 +163,8 @@ else
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier" />
 
 
-<div class="reader-surface flex h-screen flex-col @(ReaderService.IsReady ? "" : "opacity-0")">
-	<div class="viewer flex-1 overflow-hidden @(_readerState == ReaderState.Ready ? "" : "opacity-0")">
+<div class="reader-surface flex h-screen flex-col select-none touch-none @(ReaderService.IsReady ? "" : "opacity-0")">
+	<div class="viewer flex-1 min-h-0 min-w-0 overflow-clip @(_readerState == ReaderState.Ready ? "" : "opacity-0")">
 		<div
 			class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)

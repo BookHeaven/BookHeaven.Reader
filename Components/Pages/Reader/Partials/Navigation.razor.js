@@ -1,4 +1,8 @@
-import { SelectHighlightAt } from './TextSelectionHandler.razor.js';
+import {
+    ClearTextSelection,
+    ConsumeSelectionCancellation,
+    HasTextSelection
+} from './TextSelectionHandler.razor.js';
 
 let dotNetReference;
 let buttons = [];
@@ -48,15 +52,16 @@ function handleReaderClick(event) {
     hadSelectionOnMouseDown = false;
     if (!event.target.closest('.reader-surface')) return;
 
+    if (event.detail > 0 && ConsumeSelectionCancellation()) return;
+
     if (event.detail === 2) {
         event.preventDefault();
-        window.getSelection()?.removeAllRanges();
+        ClearTextSelection();
     }
 
     if (shouldSuppressNavigation) return;
 
-    const selection = window.getSelection();
-    if (selection && !selection.isCollapsed) return;
+    if (HasTextSelection()) return;
 
     const column = Math.min(2, Math.floor(event.clientX / window.innerWidth * 3));
     const row = Math.min(2, Math.floor(event.clientY / window.innerHeight * 3));
@@ -68,19 +73,18 @@ function handleReaderClick(event) {
 
 function handleReaderMouseDown(event) {
     const isReaderSurface = event.target.closest('.reader-surface') !== null;
-    const selection = window.getSelection();
-    hadSelectionOnMouseDown = isReaderSurface && selection !== null && !selection.isCollapsed;
+    hadSelectionOnMouseDown = isReaderSurface && HasTextSelection();
 
     if (event.detail < 2 || !isReaderSurface) return;
 
     event.preventDefault();
-    window.getSelection()?.removeAllRanges();
+    ClearTextSelection();
 }
 
 function handleReaderDoubleClick(event) {
     if (!event.target.closest('.reader-surface')) return;
     event.preventDefault();
-    window.getSelection()?.removeAllRanges();
+    ClearTextSelection();
 }
 
 function handleContextMenu(event) {
@@ -90,10 +94,5 @@ function handleContextMenu(event) {
         event.preventDefault();
         dotNetReference?.invokeMethodAsync('OnOpenImageViewer', data);
         return;
-    }
-    // Long-pressing (or right-clicking) a highlight selects it so the action
-    // popup offers to remove it, without interfering with tap navigation.
-    if (SelectHighlightAt(event.clientX, event.clientY)) {
-        event.preventDefault();
     }
 }

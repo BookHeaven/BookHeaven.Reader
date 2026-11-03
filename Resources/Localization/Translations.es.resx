@@ -203,11 +203,23 @@
     <data name="CLOSE" xml:space="preserve">
         <value>Cerrar</value>
     </data>
+    <data name="COPY" xml:space="preserve">
+        <value>Copiar</value>
+    </data>
+    <data name="APPLY" xml:space="preserve">
+        <value>Aplicar</value>
+    </data>
     <data name="REMOVE_HIGHLIGHT" xml:space="preserve">
         <value>Quitar resaltado</value>
     </data>
     <data name="SEARCHING_SERVERS" xml:space="preserve">
         <value>Buscando servidores</value>
+    </data>
+    <data name="SELECTION_END" xml:space="preserve">
+        <value>Mover el final de la selección</value>
+    </data>
+    <data name="SELECTION_START" xml:space="preserve">
+        <value>Mover el inicio de la selección</value>
     </data>
     <data name="NO_SERVERS_FOUND" xml:space="preserve">
         <value>No se han encontrado servidores</value>

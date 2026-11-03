@@ -210,11 +210,23 @@
     <data name="CLOSE" xml:space="preserve">
         <value>Close</value>
     </data>
+    <data name="COPY" xml:space="preserve">
+        <value>Copy</value>
+    </data>
+    <data name="APPLY" xml:space="preserve">
+        <value>Apply</value>
+    </data>
     <data name="REMOVE_HIGHLIGHT" xml:space="preserve">
         <value>Remove highlight</value>
     </data>
     <data name="SEARCHING_SERVERS" xml:space="preserve">
         <value>Searching for servers</value>
+    </data>
+    <data name="SELECTION_END" xml:space="preserve">
+        <value>Move selection end</value>
+    </data>
+    <data name="SELECTION_START" xml:space="preserve">
+        <value>Move selection start</value>
     </data>
     <data name="NO_SERVERS_FOUND" xml:space="preserve">
         <value>No servers found</value>

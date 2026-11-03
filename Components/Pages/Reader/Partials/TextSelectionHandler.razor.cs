@@ -23,7 +23,9 @@ public partial class TextSelectionHandler : IAsyncDisposable
     private bool _selectionCanHighlight;
     private bool _selectionActionPositioned;
     private bool _restoreHighlightsOnNextRender;
+    private bool _isEditingHighlightModified;
     private bool _isNoteEditorVisible;
+    private BookAnnotation? _editingHighlight;
     private BookAnnotation? _noteAnnotation;
     private double _selectionActionLeft;
     private double _selectionActionTop;
@@ -39,7 +41,11 @@ public partial class TextSelectionHandler : IAsyncDisposable
         {
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TextSelectionHandler.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
-            await _module.InvokeVoidAsync("Initialize", _dotNetReference);
+            await _module.InvokeVoidAsync(
+                "Initialize",
+                _dotNetReference,
+                Translations.SELECTION_START,
+                Translations.SELECTION_END);
         }
 
         if (_module is null) return;
@@ -74,15 +80,75 @@ public partial class TextSelectionHandler : IAsyncDisposable
     }
 
     [JSInvokable("OnTextSelected")]
-    public Task OnTextSelected(string? text, double left, double top, int startOffset, int endOffset)
+    public Task OnTextSelected(
+        string? text,
+        double left,
+        double top,
+        int startOffset,
+        int endOffset,
+        bool isEditingHighlight,
+        int originalStartOffset,
+        int originalEndOffset,
+        bool isEditingHighlightModified)
     {
         _isSelectionActionVisible = !string.IsNullOrWhiteSpace(text);
         _selectionActionPositioned = false;
         _selectionActionLeft = left;
         _selectionActionTop = top;
-        _selectionHasHighlight = _isSelectionActionVisible && AnnotationService.HasAnnotationsInRange(startOffset, endOffset);
-        _selectionCanHighlight = _isSelectionActionVisible && AnnotationService.HasUnhighlightedInRange(startOffset, endOffset);
+        if (isEditingHighlight)
+        {
+            if (_editingHighlight is null ||
+                _editingHighlight.StartOffset != originalStartOffset ||
+                _editingHighlight.EndOffset != originalEndOffset)
+            {
+                var existing = AnnotationService.GetAnnotationForRange(originalStartOffset, originalEndOffset);
+                _editingHighlight = existing is not null &&
+                                   existing.StartOffset == originalStartOffset &&
+                                   existing.EndOffset == originalEndOffset
+                    ? existing.Clone()
+                    : null;
+            }
+
+            _isEditingHighlightModified = _editingHighlight is not null && isEditingHighlightModified;
+        }
+        else
+        {
+            _editingHighlight = null;
+            _isEditingHighlightModified = false;
+        }
+
+        _selectionHasHighlight = _isSelectionActionVisible && !_isEditingHighlightModified &&
+                                 AnnotationService.HasRemovableAnnotationsInRange(startOffset, endOffset);
+        _selectionCanHighlight = _isSelectionActionVisible && !_isEditingHighlightModified &&
+                                 AnnotationService.HasUnhighlightedInRange(startOffset, endOffset);
         return InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable("OnSelectionPageTurn")]
+    public bool OnSelectionPageTurn(int direction)
+    {
+        var state = ReaderService.State;
+        if (state is null) return false;
+
+        switch (direction)
+        {
+            case 1:
+            {
+                if (state.PageNumber >= state.TotalPages) return false;
+                ReaderService.NextPage();
+                break;
+            }
+            case -1:
+            {
+                if (state.PageNumber <= 1) return false;
+                ReaderService.PreviousPage();
+                break;
+            }
+            default:
+                return false;
+        }
+
+        return true;
     }
 
     private async Task ApplyHighlight()
@@ -97,6 +163,38 @@ public partial class TextSelectionHandler : IAsyncDisposable
             AnnotationService.RemoveAnnotationsAsync(range.StartOffset, range.EndOffset));
     }
 
+    private async Task ApplyEditedHighlight()
+    {
+        if (_module is null || _editingHighlight is null) return;
+
+        var annotation = _editingHighlight.Clone();
+        var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection", true);
+        _isSelectionActionVisible = false;
+        _editingHighlight = null;
+        _isEditingHighlightModified = false;
+        if (range is null) return;
+
+        annotation.StartOffset = range.StartOffset;
+        annotation.EndOffset = range.EndOffset;
+        annotation.Text = range.Text;
+        var result = await AnnotationService.UpdateAnnotationRangeAsync(annotation);
+        if (result.IsFailure)
+        {
+            await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+        }
+    }
+
+    private async Task CopySelection()
+    {
+        if (_module is null) return;
+
+        var text = await _module.InvokeAsync<string?>("GetSelectedText");
+        if (string.IsNullOrEmpty(text)) return;
+
+        await Microsoft.Maui.ApplicationModel.DataTransfer.Clipboard.Default.SetTextAsync(text);
+        _isSelectionActionVisible = false;
+    }
+
     private async Task UpdateHighlightsFromSelectionAsync(Func<HighlightRange, Task<Result>> update)
     {
         if (_module is null) return;
@@ -108,6 +206,8 @@ public partial class TextSelectionHandler : IAsyncDisposable
             result = await update(range);
         }
         _isSelectionActionVisible = false;
+        _editingHighlight = null;
+        _isEditingHighlightModified = false;
         if (result is { IsFailure: true })
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
