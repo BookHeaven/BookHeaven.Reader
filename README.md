@@ -30,7 +30,8 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 - :clock12: It will track your reading progress (date started, last read, % read, elapsed time, etc)
 - :book: Very customizable (font size, line height, page margins, paragraph spacing, indent, etc)
 - :hand: Provides a few tactile navigation layouts to choose from and physical buttons should work as well (Only tested with Meebook M7)
-- :boom: The images can be zoomed in and panned! :boom:
+- :boom: The images can be zoomed in and panned :boom:
+- :memo: Supports highlights and notes
 
 ## :exclamation: Requirements
 - Android 10+
