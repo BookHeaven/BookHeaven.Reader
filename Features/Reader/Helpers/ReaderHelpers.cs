@@ -1,4 +1,4 @@
-using BookHeaven.Reader.Enums;
+using BookHeaven.Reader.Features.Reader.Enums;
 
 namespace BookHeaven.Reader.Features.Reader.Helpers;
 

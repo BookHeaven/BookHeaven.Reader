@@ -1,4 +1,4 @@
-﻿namespace BookHeaven.Reader.Enums;
+﻿namespace BookHeaven.Reader.Features.Reader.Enums;
 
 public enum NavigationButton
 {
