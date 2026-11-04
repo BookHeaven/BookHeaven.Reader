@@ -2,7 +2,7 @@
 using BookHeaven.Core.Enums;
 using CommunityToolkit.Maui.Alerts;
 
-namespace BookHeaven.Reader.Services;
+namespace BookHeaven.Reader.Features.Alerts.Services;
 
 public class AlertService : IAlertService
 {
