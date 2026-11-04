@@ -62,6 +62,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<UdpBroadcastClient>();
 		builder.Services.AddSingleton<IAppsService, AppsService>();
 		builder.Services.AddSingleton<BookInfoDialogService>();
+		builder.Services.AddSingleton(new HttpClient(new SocketsHttpHandler
+		{
+			PooledConnectionLifetime = TimeSpan.FromMinutes(5)
+		})
+		{
+			Timeout = TimeSpan.FromSeconds(30)
+		});
 
 		builder.Services.AddScoped<ImageViewerService>();
 		builder.Services.AddScoped<OverlayService>();
@@ -69,8 +76,7 @@ public static class MauiProgram
 
 		builder.Services.AddTransient<IServerService, ServerService>();
 		builder.Services.AddTransient<IAlertService, AlertService>();
-
-
+		
 
 		builder.Services.AddMauiBlazorWebView();
 		builder.Services.AddBlazorPanzoomServices();

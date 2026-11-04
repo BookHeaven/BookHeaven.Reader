@@ -22,9 +22,10 @@ public sealed class ServerService(
 	IReaderCacheService readerCacheService,
 	ILogger<ServerService> logger,
 	IUrlBuilder urlBuilder,
-	IDeletedAnnotationHistory deletedAnnotationHistory) : IServerService
+	IDeletedAnnotationHistory deletedAnnotationHistory,
+	HttpClient httpClient) : IServerService
 {
-	private HttpClient _httpClient = new();
+	private readonly HttpClient _httpClient = httpClient;
 
 	public async Task<Result> CanConnect()
 	{
@@ -42,10 +43,7 @@ public sealed class ServerService(
 			
 		if(_httpClient.BaseAddress == null)
 		{
-			_httpClient = new HttpClient
-			{
-				BaseAddress = new Uri(url)
-			};
+			_httpClient.BaseAddress = new Uri(url);
 		}
 
 		try
