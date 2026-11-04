@@ -1,4 +1,4 @@
-namespace BookHeaven.Reader.Services;
+namespace BookHeaven.Reader.Features.Preferences.Services;
 
 public class PreferencesService
 {
@@ -77,12 +77,12 @@ public class PreferencesService
 
     private static void Set<T>(string key, T value)
     {
-        Preferences.Set(key, value!.ToString());
+        Microsoft.Maui.Storage.Preferences.Set(key, value!.ToString());
     }
 
     private static T? Get<T>(string key)
     {
-        var value = Preferences.Get(key, null);
+        var value = Microsoft.Maui.Storage.Preferences.Get(key, null);
         if(value == null) return default;
         var type = typeof(T);
         

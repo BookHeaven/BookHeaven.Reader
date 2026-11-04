@@ -7,6 +7,7 @@ using BookHeaven.Reader.Components.Dialogs.Books;
 using BookHeaven.Reader.Components.Shared.ContextMenu;
 using BookHeaven.Reader.Features.Alerts.Services;
 using BookHeaven.Reader.Features.Lifecycle.Services;
+using BookHeaven.Reader.Features.Preferences.Services;
 using BookHeaven.Reader.Features.Reader;
 using BookHeaven.Reader.Features.Reader.Services;
 using BookHeaven.Reader.WebView;

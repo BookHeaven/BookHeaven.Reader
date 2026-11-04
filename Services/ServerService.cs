@@ -10,6 +10,7 @@ using BookHeaven.Core.Features.Profiles;
 using BookHeaven.Core.Features.ReadingHistory;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Shared;
+using BookHeaven.Reader.Features.Preferences.Services;
 using Font = BookHeaven.Core.Entities.Font;
 
 namespace BookHeaven.Reader.Services;

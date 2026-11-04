@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui.Alerts;
+﻿using BookHeaven.Reader.Features.Preferences.Services;
+using CommunityToolkit.Maui.Alerts;
 using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote.Partials;
