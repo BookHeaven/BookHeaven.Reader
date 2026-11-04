@@ -1,17 +1,18 @@
 ﻿@inject NavigationManager NavigationManager
 @using BookHeaven.Core.Features.Reader.Abstractions
 @using BookHeaven.Core.Entities
+@using BookHeaven.Reader.Features.Reader.Services
 @implements IDisposable
 @if (!OverlayService.IsOverlayVisible)
 {
     return;
 }
-<div class="reader-overlay absolute inset-0 z-1000 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
-    <div class="border-bottom mb-auto flex w-full items-center gap-3 border-b-2 border-solid border-black bg-white" @onclick:stopPropagation="true">
+<div class="reader-overlay inset-0 absolute z-1000 flex flex-col justify-between" @onclick="OverlayService.ToggleOverlay">
+    <div class="border-bottom gap-3 border-black bg-white mb-auto flex w-full items-center border-b-2 border-solid" @onclick:stopPropagation="true">
         <Button OnClick="@(() => NavigationManager.NavigateTo("/books"))">
             <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
         </Button>
-        <span class="ms-auto me-4">@BookTitle</span>
+        <span class="me-4 ms-auto">@BookTitle</span>
     </div>
     
     <div>
@@ -31,10 +32,10 @@
                 break;
         }
         
-        <div class="w-full border-t-2 border-solid border-black bg-white" @onclick:stopPropagation="true">
+        <div class="border-black bg-white w-full border-t-2 border-solid" @onclick:stopPropagation="true">
             @if (!IsTocEmpty)
             {
-                <div class="flex items-center gap-3 px-2">
+                <div class="gap-3 px-2 flex items-center">
                     <Button OnClick="@ReaderService.PreviousChapter">
                         <svg  xmlns="http://www.w3.org/2000/svg"   viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevrons-left size-7"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 7l-5 5l5 5" /><path d="M17 7l-5 5l5 5" /></svg>
                     </Button>
@@ -44,7 +45,7 @@
                     </Button>
                 </div>
             }
-            <div class="flex items-center gap-3 px-2">
+            <div class="gap-3 px-2 flex items-center">
                 @if (!IsTocEmpty)
                 {
                     <Button OnClick="@OverlayService.ToggleToc">

@@ -8,6 +8,7 @@ using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Features.Reader.Models;
 using BookHeaven.Reader.Components.Pages.Reader.Partials;
+using BookHeaven.Reader.Features.Reader.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
