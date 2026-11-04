@@ -1,4 +1,5 @@
-﻿using BookHeaven.Reader.Features.Lifecycle.Services;
+﻿using BookHeaven.Reader.Features.Apps.Abstractions;
+using BookHeaven.Reader.Features.Lifecycle.Services;
 using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
 using Application = Microsoft.Maui.Controls.Application;
 

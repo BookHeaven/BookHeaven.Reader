@@ -5,6 +5,7 @@ using Android.Provider;
 using Android.OS;
 using Android.Net;
 using Android.Graphics.Drawables;
+using BookHeaven.Reader.Features.Apps.Abstractions;
 using BookHeaven.Reader.Features.Apps.Models;
 using BookHeaven.Reader.Helpers;
 using Microsoft.Maui.Controls.PlatformConfiguration;

@@ -1,6 +1,6 @@
 ﻿using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
 
-namespace BookHeaven.Reader.Interfaces;
+namespace BookHeaven.Reader.Features.Apps.Abstractions;
 
 public interface IAppsService
 {
