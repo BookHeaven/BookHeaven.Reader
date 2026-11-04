@@ -14,14 +14,14 @@ public sealed class ScreenSaverService : DreamService
         base.OnDreamingStarted();
         
         var appStateService = IPlatformApplication.Current!.Services.GetService<PreferencesService>();
-        var coverBase64 = appStateService?.CurrentScreenSaverCoverPath;
+        var coverPath = appStateService?.CurrentScreenSaverCoverPath;
 
         // C#
         var webView = new Android.Webkit.WebView(this);
         webView.Settings.JavaScriptEnabled = true;
         webView.Settings.AllowFileAccess = true;
         
-        webView.LoadUrl("file:///android_asset/wwwroot/screen-saver.html" + (!string.IsNullOrEmpty(coverBase64) ? "?cover=" + HttpUtility.UrlEncode(coverBase64) : ""));
+        webView.LoadUrl("file:///android_asset/wwwroot/screen-saver.html" + (!string.IsNullOrEmpty(coverPath) ? "?cover=" + HttpUtility.UrlEncode(coverPath) : ""));
 
         SetContentView(webView);
     }
