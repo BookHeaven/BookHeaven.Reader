@@ -17,7 +17,7 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 ## :warning: Disclaimer
 - You might need to update the WebView implementation of your device for the UI to render properly (pretty easy, more on the troubleshooting section below)
 - It won't work as standalone, it needs to connect to a Server instance to get the books (not planned, but might happen eventually)
-- No dictionary, no notes nor highlights
+- No dictionary
 - Supports epub and PDF files only
 
 > [!NOTE]
@@ -31,7 +31,7 @@ It's an Android app optimized for e-ink displays that connects to your BookHeave
 - :book: Very customizable (font size, line height, page margins, paragraph spacing, indent, etc)
 - :hand: Provides a few tactile navigation layouts to choose from and physical buttons should work as well (Only tested with Meebook M7)
 - :boom: The images can be zoomed in and panned :boom:
-- :memo: Supports highlights and notes
+- :memo: Highlights and notes
 
 ## :exclamation: Requirements
 - Android 10+
@@ -69,28 +69,30 @@ Steps might vary for your device, but overall this is what you need to do:
         <img src="https://bookheaven.ggarrido.dev/img/reader-books-shelf.png" alt="" />
     </td>
     <td>
-<img src="https://bookheaven.ggarrido.dev/img/reader-remote.png" alt="" />
-</td>
+        <img src="https://bookheaven.ggarrido.dev/img/reader-remote.png" alt="" />
+    </td>
   </tr>
   <tr>
     <td>
         <img src="https://bookheaven.ggarrido.dev/img/reader-book.png" alt="" />
     </td>
     <td>
-        <img src="https://bookheaven.ggarrido.dev/img/reader-index.png" alt="" />
+        <img src="https://bookheaven.ggarrido.dev/img/reader-highlights.png" alt="" />
     </td>
     <td>
-        <img src="https://bookheaven.ggarrido.dev/img/reader-text-settings.png" alt="" />
+        <img src="https://bookheaven.ggarrido.dev/img/reader-highlights-list.png" alt="" />
     </td>
   </tr>
   <tr>
+    <td>
+        <img src="https://bookheaven.ggarrido.dev/img/reader-text-settings.png" alt="" />
+    </td>
     <td>
         <img src="https://bookheaven.ggarrido.dev/img/reader-page-settings.png" alt="" />
     </td>
     <td>
         <img src="https://bookheaven.ggarrido.dev/img/reader-apps.png" alt="" />
     </td>
-    <td></td>
   </tr>
 </table>
 
