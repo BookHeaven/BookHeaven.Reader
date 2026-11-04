@@ -3,7 +3,7 @@
 @implements IDisposable
 
 @if(!PreferencesService.EnableColorTemperatureAdjustment) return;
-<div class="inset-0 pointer-events-none fixed z-99999999 mix-blend-multiply" style="background-color: @ReaderFunctions.KelvinToRgb(PreferencesService.ColorTemperatureInKelvin, (double)PreferencesService.ColorTemperatureOpacity);"></div>
+<div class="inset-0 pointer-events-none fixed z-99999999 mix-blend-multiply" style="background-color: @ReaderHelpers.KelvinToRgb(PreferencesService.ColorTemperatureInKelvin, (double)PreferencesService.ColorTemperatureOpacity);"></div>
 
 @code {
 	[Inject] private PreferencesService PreferencesService { get; set; } = null!;

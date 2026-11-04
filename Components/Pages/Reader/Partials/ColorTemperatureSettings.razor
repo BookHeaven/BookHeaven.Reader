@@ -11,7 +11,7 @@
 				<span 
 					@onclick="() => { if(PreferencesService.ColorTemperatureInKelvin != temp) PreferencesService.ColorTemperatureInKelvin = temp; }"
 					class="size-12 @(temp == PreferencesService.ColorTemperatureInKelvin ? "border-black border" : "")" 
-					style="background-color: @ReaderFunctions.KelvinToRgb(temp,1)"></span>
+					style="background-color: @ReaderHelpers.KelvinToRgb(temp,1)"></span>
 			}
 		</div>
 		<RangeSlider 

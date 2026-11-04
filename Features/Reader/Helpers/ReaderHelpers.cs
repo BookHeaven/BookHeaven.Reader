@@ -2,7 +2,7 @@ using BookHeaven.Reader.Enums;
 
 namespace BookHeaven.Reader.Features.Reader.Helpers;
 
-public static class ReaderFunctions
+public static class ReaderHelpers
 {
     public static List<NavigationButton> GetLayoutForType(NavigationLayoutType type)
     {

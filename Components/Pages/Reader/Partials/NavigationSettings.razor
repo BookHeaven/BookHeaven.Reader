@@ -5,7 +5,7 @@
     {
         <div class="grid grid-cols-3 grid-rows-3 size-[100px] hover:cursor-pointer @((ReaderSettingsService.ReaderSettings?.SelectedLayout == (int)type).Then("ring-black ring"))" @onclick="@(() => ChangeLayout(type))">
             @{
-                var buttons = ReaderFunctions.GetLayoutForType(type);
+                var buttons = ReaderHelpers.GetLayoutForType(type);
             }
 
             @for(var i = 0; i < buttons.Count; i++)

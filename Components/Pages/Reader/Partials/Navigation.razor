@@ -17,7 +17,7 @@
     private IJSObjectReference _module = null!;
     private DotNetObjectReference<Navigation> _dotNetReference = null!;
     
-    private List<NavigationButton> Buttons => ReaderFunctions.GetLayoutForType(_selectedLayout);
+    private List<NavigationButton> Buttons => ReaderHelpers.GetLayoutForType(_selectedLayout);
     
     protected override void OnInitialized()
     {
