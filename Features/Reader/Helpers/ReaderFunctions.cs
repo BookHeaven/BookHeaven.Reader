@@ -1,6 +1,6 @@
 using BookHeaven.Reader.Enums;
 
-namespace BookHeaven.Reader.Functions;
+namespace BookHeaven.Reader.Features.Reader.Helpers;
 
 public static class ReaderFunctions
 {

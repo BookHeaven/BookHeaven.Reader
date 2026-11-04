@@ -1,9 +1,9 @@
 @using BookHeaven.Core.Features.Reader.Abstractions
-@using BookHeaven.Reader.Functions
-<div class="col-span-2 flex flex-wrap justify-center gap-4 p-3">
+@using BookHeaven.Reader.Features.Reader.Helpers
+<div class="gap-4 p-3 col-span-2 flex flex-wrap justify-center">
     @foreach (NavigationLayoutType type in Enum.GetValues(typeof(NavigationLayoutType)))
     {
-        <div class="grid grid-cols-3 grid-rows-3 size-[100px] hover:cursor-pointer @((ReaderSettingsService.ReaderSettings?.SelectedLayout == (int)type).Then("ring ring-black"))" @onclick="@(() => ChangeLayout(type))">
+        <div class="grid grid-cols-3 grid-rows-3 size-[100px] hover:cursor-pointer @((ReaderSettingsService.ReaderSettings?.SelectedLayout == (int)type).Then("ring-black ring"))" @onclick="@(() => ChangeLayout(type))">
             @{
                 var buttons = ReaderFunctions.GetLayoutForType(type);
             }
