@@ -16,7 +16,7 @@
 
 @code {
 	[Inject] private NavigationManager NavigationManager { get; set; } = null!;
-	[Inject] private AppStateService AppStateService { get; set; } = null!;
+	[Inject] private PreferencesService PreferencesService { get; set; } = null!;
 	[Inject] private IServerService ServerService { get; set; } = null!;
 	[Inject] private ISender Sender { get; set; } = null!;
 	
@@ -36,7 +36,7 @@
 		if(!await CheckConnection())
 			return;
 
-		await ServerService.SyncProfile(AppStateService.ProfileId);
+		await ServerService.SyncProfile(PreferencesService.ProfileId);
 		await Toast.Make(Translations.SYNC_COMPLETED).Show();
 	}
 
@@ -45,7 +45,7 @@
 		if(!await CheckConnection())
 			return;
         
-		var getSettings = await Sender.Send(new GetProfileSettings.Query(AppStateService.ProfileId));
+		var getSettings = await Sender.Send(new GetProfileSettings.Query(PreferencesService.ProfileId));
 		if(getSettings.IsFailure) return;
         
 		await ServerService.UpdateProfileSettings(getSettings.Value);

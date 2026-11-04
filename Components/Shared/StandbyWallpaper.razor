@@ -3,18 +3,18 @@
 {
 	<div class="fixed z-[9000] inset-0 flex flex-col items-center justify-center @(string.IsNullOrEmpty(ImageSrc) ? "bg-white" : "bg-black")">
 		@if(!string.IsNullOrEmpty(ImageSrc)) {
-			<img decoding="async" class="w-full h-full object-contain" src="@ImageSrc" alt=""/>
+			<img decoding="async" class="h-full w-full object-contain" src="@ImageSrc" alt=""/>
 		}
 		else {
-			<img decoding="async" class="w-[200px] mx-auto" src="/logo.svg" alt=""/>
-			<p class="absolute bottom-16 text-2xl text-center text-neutral-600">BookHeaven</p>
+			<img decoding="async" class="mx-auto w-[200px]" src="/logo.svg" alt=""/>
+			<p class="bottom-16 text-2xl text-neutral-600 absolute text-center">BookHeaven</p>
 		}
 	</div>
 }
 
 @code {
 	[Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
-	[Inject] private AppStateService AppStateService { get; set; } = null!;
+	[Inject] private PreferencesService PreferencesService { get; set; } = null!;
 	
 	[Parameter] public string? ImageSrc { get; set; }
 
@@ -28,7 +28,7 @@
 
 	private void Show()
 	{
-		if(!AppStateService.EnableStandbyCoverWorkaround) return;
+		if(!PreferencesService.EnableStandbyCoverWorkaround) return;
 		_screenLocked = true;
 		InvokeAsync(StateHasChanged);
 		
@@ -36,7 +36,7 @@
 	
 	private void Hide()
 	{
-		if(!AppStateService.EnableStandbyCoverWorkaround) return;
+		if(!PreferencesService.EnableStandbyCoverWorkaround) return;
 		_screenLocked = false;
 		InvokeAsync(StateHasChanged);
 	}

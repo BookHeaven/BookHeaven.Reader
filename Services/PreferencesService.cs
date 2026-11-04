@@ -1,6 +1,6 @@
 namespace BookHeaven.Reader.Services;
 
-public class AppStateService
+public class PreferencesService
 {
     public string? CurrentScreenSaverCoverPath { get; set; }
     

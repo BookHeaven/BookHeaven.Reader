@@ -87,7 +87,7 @@
                         FilterByStatus="@BookStatus.Reading"
                         OrderBy="books => books.OrderByDescending(b => b.Progress().LastRead)"/>
                 </div>
-                <hr class="mx-4 my-2 border-t-2 border-t-neutral-300" />
+                <hr class="mx-4 my-2 border-t-neutral-300 border-t-2" />
                 <div class="flex-1">
                     <BookSection 
                         SectionName="@BookStatus.New.StringValue()"
@@ -110,7 +110,7 @@ else
 @code {
     [Inject] private IAlertService AlertService { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] private AppStateService AppStateService { get; set; } = null!;
+    [Inject] private PreferencesService PreferencesService { get; set; } = null!;
     [Inject] private BookManager BookManager { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
 
@@ -129,7 +129,7 @@ else
 
     protected override void OnInitialized()
     {
-        if (AppStateService.ProfileId == Guid.Empty) return;
+        if (PreferencesService.ProfileId == Guid.Empty) return;
 
         BookManager.OnBooksChanged += RefreshUi;
         _ = LoadBooksAsync();
@@ -137,7 +137,7 @@ else
 
     private async Task LoadBooksAsync()
     {
-        await BookManager.GetBooksAsync(AppStateService.ProfileId);
+        await BookManager.GetBooksAsync(PreferencesService.ProfileId);
         _initialized = true;
         await InvokeAsync(StateHasChanged);
     }

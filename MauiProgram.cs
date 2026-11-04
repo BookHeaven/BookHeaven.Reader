@@ -51,7 +51,7 @@ public static class MauiProgram
 			options.DefaultFontDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "ui-font", "Montserrat");
 		});
 
-		builder.Services.AddSingleton<AppStateService>();
+		builder.Services.AddSingleton<PreferencesService>();
 		builder.Services.AddSingleton<LifeCycleService>();
 		builder.Services.AddSingleton<UdpBroadcastClient>();
 		builder.Services.AddSingleton<IAppsService, AppsService>();
@@ -77,7 +77,7 @@ public static class MauiProgram
 
 		using (var scope = app.Services.CreateScope())
 		{
-			var appStateService = scope.ServiceProvider.GetRequiredService<AppStateService>();
+			var appStateService = scope.ServiceProvider.GetRequiredService<PreferencesService>();
 
 			if (appStateService.DeviceId == Guid.Empty)
 			{

@@ -31,7 +31,7 @@ public interface IServerService
 }
 public class ServerService(
 	ISender sender,
-	AppStateService appStateService,
+	PreferencesService preferencesService,
 	IReaderCacheService readerCacheService,
 	ILogger<ServerService> logger,
 	IUrlBuilder urlBuilder,
@@ -46,7 +46,7 @@ public class ServerService(
 			return new Error("No internet connection");
 		}
 			
-		var url = appStateService.ServerUrl;
+		var url = preferencesService.ServerUrl;
 
 		if (string.IsNullOrEmpty(url))
 		{
@@ -484,9 +484,9 @@ public class ServerService(
 			if (remoteProfile is null || remoteProfile.Name == profile.Name) continue;
                     
 			await sender.Send(new UpdateProfileName.Command(profile.ProfileId, remoteProfile.Name));
-			if (profile.ProfileId == appStateService.ProfileId)
+			if (profile.ProfileId == preferencesService.ProfileId)
 			{
-				appStateService.OnProfileNameChanged?.Invoke(remoteProfile.Name);
+				preferencesService.OnProfileNameChanged?.Invoke(remoteProfile.Name);
 			}
 		}
 		return Result.Success();
@@ -513,7 +513,7 @@ public class ServerService(
 					Directory.CreateDirectory(folder!);
 				}
 					
-				var fileBytes = await _httpClient.GetByteArrayAsync(appStateService.ServerUrl + urlBuilder.FontUrl(font.Family, font.FileName));
+				var fileBytes = await _httpClient.GetByteArrayAsync(preferencesService.ServerUrl + urlBuilder.FontUrl(font.Family, font.FileName));
 				await File.WriteAllBytesAsync(fontPath, fileBytes);
 
 				await sender.Send(new AddFont.Command(font));

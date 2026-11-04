@@ -7,7 +7,7 @@ namespace BookHeaven.Reader.Components.Pages.Remote;
 
 public partial class Remote
 {
-    [Inject] private AppStateService AppStateService { get; set; } = null!;
+    [Inject] private PreferencesService PreferencesService { get; set; } = null!;
     [Inject] private IServerService ServerService { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
 
@@ -68,8 +68,8 @@ public partial class Remote
 
     private async Task GetRecommendations()
     {
-        var getLocalProgress = await Sender.Send(new GetAllBooksProgressByProfile.Query(AppStateService.ProfileId));
-        var getRemoteProgress = await ServerService.GetAllBooksProgress(AppStateService.ProfileId);
+        var getLocalProgress = await Sender.Send(new GetAllBooksProgressByProfile.Query(PreferencesService.ProfileId));
+        var getRemoteProgress = await ServerService.GetAllBooksProgress(PreferencesService.ProfileId);
         var remoteProgress = getRemoteProgress.IsSuccess
             ? getRemoteProgress.Value
             : await GetRemoteProgressPerBook();
@@ -90,7 +90,7 @@ public partial class Remote
             await throttle.WaitAsync();
             try
             {
-                var getProgress = await ServerService.GetBookProgress(AppStateService.ProfileId, book.BookId);
+                var getProgress = await ServerService.GetBookProgress(PreferencesService.ProfileId, book.BookId);
                 return getProgress.IsSuccess ? getProgress.Value : null;
             }
             finally

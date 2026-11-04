@@ -12,7 +12,7 @@ public class ScreenSaverService : DreamService
     {
         base.OnDreamingStarted();
         
-        var appStateService = IPlatformApplication.Current!.Services.GetService<AppStateService>();
+        var appStateService = IPlatformApplication.Current!.Services.GetService<PreferencesService>();
         var coverBase64 = appStateService?.CurrentScreenSaverCoverPath;
 
         // C#

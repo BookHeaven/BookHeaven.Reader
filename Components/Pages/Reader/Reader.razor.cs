@@ -18,7 +18,7 @@ public partial class Reader : IAsyncDisposable
 {
     [Parameter] public Guid Id { get; set; }
 
-    [Inject] private AppStateService AppStateService { get; set; } = null!;
+    [Inject] private PreferencesService PreferencesService { get; set; } = null!;
     [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
@@ -46,8 +46,8 @@ public partial class Reader : IAsyncDisposable
         LifeCycleService.Resumed += OnResumed;
         LifeCycleService.Destroyed += OnDestroy;
         
-        AppStateService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
-        await ReaderService.InitializeAsync(Id, AppStateService.ProfileId);
+        PreferencesService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
+        await ReaderService.InitializeAsync(Id, PreferencesService.ProfileId);
         _readerState = ReaderState.Initialized;
     }
 
@@ -125,7 +125,7 @@ public partial class Reader : IAsyncDisposable
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         await ReaderService.SaveProgressAsync();
-        AppStateService.CurrentScreenSaverCoverPath = null;
+        PreferencesService.CurrentScreenSaverCoverPath = null;
 
         ReaderService.OnPageChanged -= RefreshUi;
         ReaderService.OnChapterChanged -= OnChapterChanged;

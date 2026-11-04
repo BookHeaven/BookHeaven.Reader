@@ -17,7 +17,7 @@
 @code {
 	[Inject] private IReaderSettingsService ReaderSettingsService { get; set; } = null!;
 	[Inject] private ISender Sender { get; set; } = null!;
-	[Inject] private AppStateService AppStateService { get; set; } = null!;
+	[Inject] private PreferencesService PreferencesService { get; set; } = null!;
 	[Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
 	
 	List<Font> _fonts = [];

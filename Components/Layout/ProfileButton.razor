@@ -11,16 +11,16 @@
 
 @code {
 	[Inject] ISender Sender { get; set; } = null!;
-	[Inject] AppStateService AppStateService { get; set; } = null!;
+	[Inject] PreferencesService PreferencesService { get; set; } = null!;
 	[Inject] NavigationManager NavigationManager { get; set; } = null!;
 
 	private string _profileName = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
-		AppStateService.OnProfileNameChanged += RefreshName;
+		PreferencesService.OnProfileNameChanged += RefreshName;
 		
-		var getProfile = await Sender.Send(new GetProfileById.Query(AppStateService.ProfileId));
+		var getProfile = await Sender.Send(new GetProfileById.Query(PreferencesService.ProfileId));
 		_profileName = getProfile.Value.Name;
 	}
 
@@ -32,7 +32,7 @@
 
 	public void Dispose()
 	{
-		AppStateService.OnProfileNameChanged -= RefreshName;
+		PreferencesService.OnProfileNameChanged -= RefreshName;
 	}
 
 }

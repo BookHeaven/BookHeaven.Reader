@@ -7,12 +7,12 @@
 	return;
 }
 
-<div class="w-screen h-screen flex flex-col items-center justify-center">
+<div class="flex h-screen w-screen flex-col items-center justify-center">
 	<h2>Select your profile</h2>
-	<div class="flex items-center flex-wrap justify-center mt-3 gap-2">
+	<div class="mt-3 gap-2 flex flex-wrap items-center justify-center">
 		@foreach (var profile in _profiles)
 		{
-			<button class="size-20 border border-black text-sm rounded" @onclick="() => SetProfile(profile.ProfileId)">
+			<button class="size-20 border-black text-sm rounded border" @onclick="() => SetProfile(profile.ProfileId)">
 				@profile.Name
 			</button>
 		}
@@ -21,7 +21,7 @@
 
 @code {
 	[Inject] private ISender Sender { get; set; } = null!;
-	[Inject] private AppStateService AppStateService { get; set; } = null!;
+	[Inject] private PreferencesService PreferencesService { get; set; } = null!;
 	[Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
 	private bool _initialized = false;
@@ -44,7 +44,7 @@
 	
 	private void SetProfile(Guid profileId)
 	{
-		AppStateService.ProfileId = profileId;
+		PreferencesService.ProfileId = profileId;
 		NavigationManager.NavigateTo(Urls.Books);
 	}
 }

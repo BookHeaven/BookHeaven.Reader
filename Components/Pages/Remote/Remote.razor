@@ -6,7 +6,7 @@
 {
     <Message Content="@Translations.CONNECTION_FAILED" OnButtonClick="@OnReconnectButtonClick">
         <Description>
-            <p>@AppStateService.ServerUrl</p>
+            <p>@PreferencesService.ServerUrl</p>
             @if (!string.IsNullOrEmpty(_connectError))
             {
                 <p class="mt-1 text-sm italic">@_connectError</p>
@@ -21,7 +21,7 @@
 }
 <div class="flex h-full flex-col bg-[lightgray]">
     <div class="m-2">
-        <div class="flex items-center justify-between gap-2">
+        <div class="gap-2 flex items-center justify-between">
             <RadioButtonGroup @bind-SelectedOption="_selectedBookStatus" @bind-SelectedOption:after="() => FilterBooks()">
                 <RadioButton Option="@BookStatus.Recommended" Label="@Translations.RECOMMENDED" />
                 <RadioButton Option="@BookStatus.Missing" Label="@Translations.BY_MISSING" />
@@ -41,7 +41,7 @@
         }
         else
         {
-            <div class="grid h-full grid-cols-1 grid-rows-6 gap-2 px-2 xs:grid-cols-2 xs:grid-rows-3">
+            <div class="gap-2 px-2 xs:grid-cols-2 xs:grid-rows-3 grid h-full grid-cols-1 grid-rows-6">
                 @foreach (var book in CurrentPageBooks)
                 {
                     <RemoteBook Book="@book" ServerService="@ServerService" OnBookDownloaded="HandleBookDownloaded"/>
