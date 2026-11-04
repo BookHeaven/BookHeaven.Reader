@@ -1,4 +1,4 @@
-﻿namespace BookHeaven.Reader.Services;
+﻿namespace BookHeaven.Reader.Features.Reader.Services;
 
 public class ImageViewerService
 {
