@@ -14,9 +14,9 @@
 	<div class="mt-3 gap-2 flex flex-wrap items-center justify-center">
 		@foreach (var profile in _profiles)
 		{
-			<button class="size-20 border-black text-sm rounded border" @onclick="() => SetProfile(profile.ProfileId)">
+			<Button Class="size-20 p-0! border-black text-sm rounded-lg border-2" OnClick="() => SetProfile(profile.ProfileId)">
 				@profile.Name
-			</button>
+			</Button>
 		}
 	</div>
 </div>
