@@ -1,6 +1,6 @@
 ﻿namespace BookHeaven.Reader.Components.Dialogs.Books;
 
-public class BookInfoDialogService
+public sealed class BookInfoDialogService
 {
     public event Action<Book>? OnShow;
     

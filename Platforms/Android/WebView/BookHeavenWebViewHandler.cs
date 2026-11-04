@@ -7,7 +7,7 @@ using Path = System.IO.Path;
 
 namespace BookHeaven.Reader.WebView;
 
-public class BookHeavenWebViewHandler : BlazorWebViewHandler
+public sealed class BookHeavenWebViewHandler : BlazorWebViewHandler
 {
 	protected override void ConnectHandler(Android.Webkit.WebView platformView)
 	{
@@ -16,7 +16,7 @@ public class BookHeavenWebViewHandler : BlazorWebViewHandler
 	}
 }
 
-public class BookHeavenWebViewClient(WebViewClient? innerClient = null) : WebViewClient
+public sealed class BookHeavenWebViewClient(WebViewClient? innerClient = null) : WebViewClient
 {
 	private static readonly Dictionary<string, string> CacheHeaders = new()
 	{

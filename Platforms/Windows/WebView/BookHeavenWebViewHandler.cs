@@ -5,7 +5,7 @@ using MimeTypes;
 
 namespace BookHeaven.Reader.WebView;
 
-public class BookHeavenWebViewHandler : BlazorWebViewHandler
+public sealed class BookHeavenWebViewHandler : BlazorWebViewHandler
 {
 	protected override void ConnectHandler(WebView2 platformView)
 	{

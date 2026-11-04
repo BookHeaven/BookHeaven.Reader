@@ -4,7 +4,7 @@ using CommunityToolkit.Maui.Alerts;
 
 namespace BookHeaven.Reader.Features.Alerts.Services;
 
-public class AlertService : IAlertService
+public sealed class AlertService : IAlertService
 {
     public async Task ShowAlertAsync(string title, string message, string cancel = "OK")
     {

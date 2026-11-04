@@ -1,6 +1,6 @@
 ﻿namespace BookHeaven.Reader.Features.Apps.Models;
 
-public class AppInfo
+public sealed class AppInfo
 {
 	public string? Name { get; set; }
 	public string? PackageName { get; set; }

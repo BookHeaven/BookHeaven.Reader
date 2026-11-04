@@ -1,6 +1,6 @@
 ﻿namespace BookHeaven.Reader.Features.Lifecycle.Services;
 
-public class LifeCycleService
+public sealed class LifeCycleService
 {
 	public Action? Resumed;
 	public Action? Paused;

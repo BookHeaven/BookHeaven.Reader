@@ -16,7 +16,7 @@ using Android.Net.Wifi;
 
 namespace BookHeaven.Reader.Features.Server.Services;
 
-public class UdpBroadcastClient
+public sealed class UdpBroadcastClient
 {
     public async Task<Result<string>> StartAsync()
     {

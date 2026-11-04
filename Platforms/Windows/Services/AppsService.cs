@@ -5,7 +5,7 @@ using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
 
 namespace BookHeaven.Reader.Services;
 
-public class AppsService : IAppsService
+public sealed class AppsService : IAppsService
 {
 	public List<AppInfo> Apps { get; set; } = [];
 	public Action? OnAppsChanged { get; set; }

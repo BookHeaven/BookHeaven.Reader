@@ -1,6 +1,6 @@
 ﻿namespace BookHeaven.Reader.Components.Pages.Reader.Partials;
 
-public partial class BatteryInfo : IDisposable
+public sealed partial class BatteryInfo : IDisposable
 {
     private int _batteryLevel = 100;
     private BatteryState _batteryState = BatteryState.Unknown;

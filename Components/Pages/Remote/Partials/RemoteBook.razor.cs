@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BookHeaven.Reader.Components.Pages.Remote.Partials;
 
-public partial class RemoteBook
+public sealed partial class RemoteBook
 {
     [Inject] private PreferencesService PreferencesService { get; set; } = null!;
     [Parameter] public IServerService ServerService { get; set; } = null!;

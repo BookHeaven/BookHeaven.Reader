@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BookHeaven.Reader.Platforms.Services
 {
-	public class AppsService : IAppsService
+	public sealed class AppsService : IAppsService
 	{
 		public List<Entities.AppInfo> GetInstalledApps()
 		{

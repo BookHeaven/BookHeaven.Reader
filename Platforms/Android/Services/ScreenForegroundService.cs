@@ -8,7 +8,7 @@ namespace BookHeaven.Reader.Services;
 
 // Unused, but could be useful in the future
 [Service(Name = "dev.ggarrido.bookheaven."+nameof(ScreenForegroundService),Exported = false, ForegroundServiceType = ForegroundService.TypeNone)]
-public class ScreenForegroundService : Service
+public sealed class ScreenForegroundService : Service
 {
     
     private const string ChannelId = "screen_service_channel";

@@ -16,7 +16,7 @@ using Microsoft.JSInterop;
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
-public partial class Reader : IAsyncDisposable
+public sealed partial class Reader : IAsyncDisposable
 {
     [Parameter] public Guid Id { get; set; }
 

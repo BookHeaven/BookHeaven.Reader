@@ -1,6 +1,6 @@
 ﻿namespace BookHeaven.Reader.Features.Reader.Services;
 
-public class OverlayService
+public sealed class OverlayService
 {
     public Action? OnOverlayChanged { get; set; }
     public bool IsOverlayVisible { get; private set; }

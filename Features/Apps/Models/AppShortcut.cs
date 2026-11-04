@@ -1,6 +1,6 @@
 ﻿namespace BookHeaven.Reader.Features.Apps.Models;
 
-public class AppShortcut
+public sealed class AppShortcut
 {
     public string? Id { get; set; }
     public string? ShortLabel { get; set; }

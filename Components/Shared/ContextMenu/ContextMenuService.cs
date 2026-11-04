@@ -10,7 +10,7 @@ public interface IContextMenuService
     void CloseMenu();
 }
 
-public class ContextMenuService : IContextMenuService
+public sealed class ContextMenuService : IContextMenuService
 {
     public event Func<ContextMenuReference, Task>? OnShow;
     public event Action? OnClose;

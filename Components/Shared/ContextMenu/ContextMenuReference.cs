@@ -2,7 +2,7 @@
 
 namespace BookHeaven.Reader.Components.Shared.ContextMenu;
 
-public class ContextMenuReference
+public sealed class ContextMenuReference
 {
     public double AnchorX { get; set; }
     public double AnchorY { get; set; }

@@ -3,7 +3,7 @@ using CommunityToolkit.Maui.Core;
 
 namespace BookHeaven.Reader
 {
-	public partial class MainPage : ContentPage
+	public sealed partial class MainPage : ContentPage
 	{
 		public MainPage()
 		{

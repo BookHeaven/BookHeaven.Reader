@@ -7,7 +7,7 @@ namespace BookHeaven.Reader.BroadcastReceivers;
 // Unused, but could be useful in the future
 [BroadcastReceiver(Enabled = true, Exported = false)]
 [IntentFilter([Intent.ActionScreenOn, Intent.ActionScreenOff])]
-public class ScreenEventsReceiver : BroadcastReceiver
+public sealed class ScreenEventsReceiver : BroadcastReceiver
 {
     public override void OnReceive(Context? context, Intent? intent)
     {

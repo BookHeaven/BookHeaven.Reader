@@ -7,7 +7,7 @@ namespace BookHeaven.Reader.Services;
 
 [Service(Name = "bookheaven.ScreenSaverService", Exported = true, Label = "BookHeaven", Permission = "android.permission.BIND_DREAM_SERVICE")]
 [IntentFilter(["android.service.dreams.DreamService"])]
-public class ScreenSaverService : DreamService
+public sealed class ScreenSaverService : DreamService
 {
     public override void OnDreamingStarted()
     {

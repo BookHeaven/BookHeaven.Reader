@@ -6,7 +6,7 @@ namespace BookHeaven.Reader.BroadcastReceivers;
 
 [BroadcastReceiver(Enabled = true, Exported = false)]
 [IntentFilter([Intent.ActionPackageRemoved, Intent.ActionPackageFullyRemoved, Intent.ActionPackageAdded], DataScheme = "package")]
-public class AppEventsReceiver : BroadcastReceiver
+public sealed class AppEventsReceiver : BroadcastReceiver
 {
     public override void OnReceive(Context? context, Intent? intent)
     {

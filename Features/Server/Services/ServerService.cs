@@ -16,7 +16,7 @@ using Font = BookHeaven.Core.Entities.Font;
 
 namespace BookHeaven.Reader.Features.Server.Services;
 
-public class ServerService(
+public sealed class ServerService(
 	ISender sender,
 	PreferencesService preferencesService,
 	IReaderCacheService readerCacheService,
