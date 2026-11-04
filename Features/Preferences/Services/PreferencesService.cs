@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace BookHeaven.Reader.Features.Preferences.Services;
 
 public sealed class PreferencesService
@@ -75,18 +77,19 @@ public sealed class PreferencesService
     }
 
 
+    private static readonly ConcurrentDictionary<Type, System.ComponentModel.TypeConverter> Converters = new();
+
     private static void Set<T>(string key, T value)
     {
         Microsoft.Maui.Storage.Preferences.Set(key, value!.ToString());
     }
-
+    
     private static T? Get<T>(string key)
     {
         var value = Microsoft.Maui.Storage.Preferences.Get(key, null);
         if(value == null) return default;
-        var type = typeof(T);
         
-        var converter = System.ComponentModel.TypeDescriptor.GetConverter(type);
+        var converter = Converters.GetOrAdd(typeof(T), System.ComponentModel.TypeDescriptor.GetConverter);
         if (converter.CanConvertFrom(typeof(string)))
         {
             return (T?)converter.ConvertFromString(value);
