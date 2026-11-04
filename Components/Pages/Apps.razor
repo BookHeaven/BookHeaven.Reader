@@ -1,6 +1,7 @@
 ﻿@attribute [Route(Urls.Apps)]
 @using BookHeaven.Reader.Components.Shared.ContextMenu
 @using BookHeaven.Reader.Components.Shared.ContextMenu.Apps
+@using BookHeaven.Reader.Features.Lifecycle.Services
 @using AppInfo = BookHeaven.Reader.Entities.AppInfo
 @implements IDisposable
 
@@ -16,16 +17,16 @@
 
 @if (AppsService.Apps.Count > 0)
 {
-    <div class="grid grid-cols-6 auto-rows-fr gap-x-4 gap-y-6 p-4 justify-center">
+    <div class="gap-x-4 gap-y-6 p-4 grid auto-rows-fr grid-cols-6 justify-center">
         @foreach (var app in FilteredApps)
         {
             <div 
-	            class="grid gap-0.5 w-full overflow-hidden rounded active:bg-neutral-200 active:outline-4 active:outline-neutral-200" 
+	            class="gap-0.5 rounded active:bg-neutral-200 active:outline-neutral-200 grid w-full overflow-hidden active:outline-4" 
 	            @onclick="@(() => AppsService.OpenApp(app.PackageName!))"
 	            @oncontextmenu="@(e => ShowContextMenu(e, app))"
 	            @oncontextmenu:preventDefault="true">
-                <img src="data:image/png;base64,@app.IconBase64" class="mx-auto w-16 px-2" alt="App icon" draggable="false"/>
-                <label class="text-xs text-nowrap select-none overflow-hidden text-ellipsis text-center mt-2">@app.Name</label>
+                <img src="data:image/png;base64,@app.IconBase64" class="w-16 px-2 mx-auto" alt="App icon" draggable="false"/>
+                <label class="text-xs mt-2 overflow-hidden text-center text-nowrap text-ellipsis select-none">@app.Name</label>
             </div>
         }
     </div>

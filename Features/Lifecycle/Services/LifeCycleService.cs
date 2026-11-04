@@ -1,4 +1,4 @@
-﻿namespace BookHeaven.Reader.Services;
+﻿namespace BookHeaven.Reader.Features.Lifecycle.Services;
 
 public class LifeCycleService
 {
