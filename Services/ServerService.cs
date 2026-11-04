@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Features.BookAnnotations;
+using BookHeaven.Core.Features.BookAnnotations.Abstractions;
 using Microsoft.Extensions.Logging;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.BooksProgress;
@@ -34,7 +35,7 @@ public class ServerService(
 	IReaderCacheService readerCacheService,
 	ILogger<ServerService> logger,
 	IUrlBuilder urlBuilder,
-	IPendingBookAnnotationDeletionStore pendingDeletionStore) : IServerService
+	IDeletedAnnotationHistory deletedAnnotationHistory) : IServerService
 {
 	private HttpClient _httpClient = new();
 
@@ -338,7 +339,7 @@ public class ServerService(
 		List<Guid> pendingDeletions;
 		try
 		{
-			pendingDeletions = await pendingDeletionStore.GetAsync(bookId, profileId);
+			pendingDeletions = await deletedAnnotationHistory.GetAsync(bookId, profileId);
 		}
 		catch (Exception ex)
 		{
@@ -362,7 +363,7 @@ public class ServerService(
 
 		try
 		{
-			await pendingDeletionStore.AcknowledgeAsync(bookId, profileId, pendingDeletions);
+			await deletedAnnotationHistory.AcknowledgeAsync(bookId, profileId, pendingDeletions);
 		}
 		catch (Exception ex)
 		{
