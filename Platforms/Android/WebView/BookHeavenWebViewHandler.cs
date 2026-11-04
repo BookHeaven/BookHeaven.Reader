@@ -81,14 +81,14 @@ public sealed class BookHeavenWebViewClient(WebViewClient? innerClient = null) :
 		}
 
 		var contentType = GetContentType(absolutePath);
-		var fileBytes = File.ReadAllBytes(absolutePath);
-		return new WebResourceResponse(contentType, null, 200, "OK", new Dictionary<string, string>(CacheHeaders), new MemoryStream(fileBytes));
+		var fileStream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+		return new WebResourceResponse(contentType, null, 200, "OK", CacheHeaders, fileStream);
 	}
 
 	private static WebResourceResponse CreateNotFoundResponse()
 	{
 		const string payload = "Resource not found.";
-		return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", new Dictionary<string, string>(NotFoundHeaders), new MemoryStream(Encoding.UTF8.GetBytes(payload)));
+		return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", NotFoundHeaders, new MemoryStream(Encoding.UTF8.GetBytes(payload)));
 	}
 
 	private static string GetContentType(string filePath)

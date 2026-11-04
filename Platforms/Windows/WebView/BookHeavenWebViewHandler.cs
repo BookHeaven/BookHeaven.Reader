@@ -61,10 +61,9 @@ public sealed class BookHeavenWebViewHandler : BlazorWebViewHandler
 
 			var extension = Path.GetExtension(absolutePath).ToLowerInvariant();
 
-			using var fileStream = File.OpenRead(absolutePath);
-			var bytes = File.ReadAllBytes(absolutePath);
+			var fileStream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 			args.Response = platformView.CoreWebView2.Environment.CreateWebResourceResponse(
-				new MemoryStream(bytes).AsRandomAccessStream(),
+				fileStream.AsRandomAccessStream(),
 				200,
 				"OK",
 				$"Content-Type: {MimeTypeMap.GetMimeType(extension)}\r\nCache-Control: public, max-age=31536000, immutable");
