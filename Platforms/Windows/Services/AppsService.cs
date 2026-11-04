@@ -48,7 +48,6 @@ public sealed class AppsService : IAppsService
 			    // Retrieve the program name and display it
 			    var displayName = subkey?.GetValue("DisplayName") as string;
 			    if (string.IsNullOrEmpty(displayName)) continue;
-			    Console.WriteLine(displayName);
 
 			    // Retrieve the display icon path
 			    var displayIconPath = subkey?.GetValue("DisplayIcon") as string;
