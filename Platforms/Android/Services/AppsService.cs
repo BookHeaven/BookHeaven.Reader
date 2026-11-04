@@ -5,9 +5,10 @@ using Android.Provider;
 using Android.OS;
 using Android.Net;
 using Android.Graphics.Drawables;
-using BookHeaven.Reader.Entities;
+using BookHeaven.Reader.Features.Apps.Models;
 using BookHeaven.Reader.Helpers;
-using AppInfo = BookHeaven.Reader.Entities.AppInfo;
+using Microsoft.Maui.Controls.PlatformConfiguration;
+using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
 
 namespace BookHeaven.Reader.Services;
 

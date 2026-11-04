@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
 using BookHeaven.Reader.Interfaces;
 using System.Drawing;
-using AppInfo = BookHeaven.Reader.Entities.AppInfo;
+using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
 
 namespace BookHeaven.Reader.Services;
 

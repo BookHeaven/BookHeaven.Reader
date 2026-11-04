@@ -1,4 +1,4 @@
-﻿namespace BookHeaven.Reader.Entities;
+﻿namespace BookHeaven.Reader.Features.Apps.Models;
 
 public class AppInfo
 {
