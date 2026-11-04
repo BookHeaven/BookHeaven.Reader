@@ -9,7 +9,7 @@ using Microsoft.JSInterop;
 
 namespace BookHeaven.Reader.Components.Pages.Reader.Partials;
 
-public partial class TextSelectionHandler : IAsyncDisposable
+public sealed partial class TextSelectionHandler : IAsyncDisposable
 {
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private IReaderService ReaderService { get; set; } = null!;
