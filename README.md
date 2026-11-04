@@ -69,7 +69,7 @@ Steps might vary for your device, but overall this is what you need to do:
         <img src="https://bookheaven.ggarrido.dev/img/reader-books-shelf.png" alt="" />
     </td>
     <td>
-        <img src="https://bookheaven.ggarrido.dev/img/reader-remote.png" alt="" />
+        <img src="https://bookheaven.ggarrido.dev/img/reader-remote.png?v=1" alt="" />
     </td>
   </tr>
   <tr>
@@ -85,10 +85,10 @@ Steps might vary for your device, but overall this is what you need to do:
   </tr>
   <tr>
     <td>
-        <img src="https://bookheaven.ggarrido.dev/img/reader-text-settings.png" alt="" />
+        <img src="https://bookheaven.ggarrido.dev/img/reader-text-settings.png?v=1" alt="" />
     </td>
     <td>
-        <img src="https://bookheaven.ggarrido.dev/img/reader-page-settings.png" alt="" />
+        <img src="https://bookheaven.ggarrido.dev/img/reader-page-settings.png?v=1" alt="" />
     </td>
     <td>
         <img src="https://bookheaven.ggarrido.dev/img/reader-apps.png" alt="" />
