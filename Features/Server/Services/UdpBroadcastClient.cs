@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using BookHeaven.Core.Constants;
 using BookHeaven.Core.Shared;
+
 #if ANDROID31_0_OR_GREATER
 using Android.App;
 using Android.Content;
@@ -13,7 +14,7 @@ using Android.App;
 using Android.Net.Wifi;
 #endif
 
-namespace BookHeaven.Reader.Services;
+namespace BookHeaven.Reader.Features.Server.Services;
 
 public class UdpBroadcastClient
 {
