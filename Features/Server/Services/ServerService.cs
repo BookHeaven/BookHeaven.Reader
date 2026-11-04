@@ -490,14 +490,24 @@ public sealed class ServerService(
 			foreach (var font in response)
 			{
 				var fontPath = urlBuilder.FontFilePath(font.Family, font.FileName);
+				if (File.Exists(fontPath))
+				{
+					await sender.Send(new AddFont.Command(font));
+					continue;
+				}
+
 				var folder = Path.GetDirectoryName(fontPath);
 				if (!Directory.Exists(folder))
 				{
 					Directory.CreateDirectory(folder!);
 				}
-					
-				var fileBytes = await _httpClient.GetByteArrayAsync(preferencesService.ServerUrl + urlBuilder.FontUrl(font.Family, font.FileName));
-				await File.WriteAllBytesAsync(fontPath, fileBytes);
+
+				using var download = await _httpClient.GetAsync(
+					preferencesService.ServerUrl + urlBuilder.FontUrl(font.Family, font.FileName),
+					HttpCompletionOption.ResponseHeadersRead);
+				download.EnsureSuccessStatusCode();
+				await using var fileStream = new FileStream(fontPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
+				await download.Content.CopyToAsync(fileStream);
 
 				await sender.Send(new AddFont.Command(font));
 			}
