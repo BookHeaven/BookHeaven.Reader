@@ -1,4 +1,5 @@
-﻿@using BookHeaven.Core.Features.Profiles
+﻿@using BookHeaven.Core.Abstractions
+@using BookHeaven.Core.Features.Profiles
 @using BookHeaven.Reader.Features.Preferences.Services
 @attribute [Route(Urls.Profiles)]
 @layout EmptyLayout
@@ -24,22 +25,20 @@
 	[Inject] private ISender Sender { get; set; } = null!;
 	[Inject] private PreferencesService PreferencesService { get; set; } = null!;
 	[Inject] private NavigationManager NavigationManager { get; set; } = null!;
+	[Inject] private IAlertService AlertService { get; set; } = null!;
 
-	private bool _initialized = false;
+	private bool _initialized;
 	private List<Profile> _profiles = [];
 
 	protected override async Task OnInitializedAsync()
 	{
 		var getProfiles = await Sender.Send(new GetAllProfiles.Query());
-		if (getProfiles.IsSuccess)
+		if (!getProfiles.IsSuccess)
 		{
-			_profiles = getProfiles.Value;
+			await AlertService.ShowToastAsync(getProfiles.Error.Description);
+			return;
 		}
-		else
-		{
-			// Handle error, e.g., show a message to the user
-			Console.WriteLine("Failed to load profiles: " + getProfiles.Error);
-		}
+		_profiles = getProfiles.Value;
 		_initialized = true;
 	}
 	
