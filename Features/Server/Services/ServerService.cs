@@ -2,34 +2,20 @@ using System.Net.Http.Json;
 using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Features.BookAnnotations;
 using BookHeaven.Core.Features.BookAnnotations.Abstractions;
-using Microsoft.Extensions.Logging;
 using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.BooksProgress;
 using BookHeaven.Core.Features.Fonts;
 using BookHeaven.Core.Features.Profiles;
-using BookHeaven.Core.Features.ReadingHistory;
 using BookHeaven.Core.Features.Reader.Abstractions;
+using BookHeaven.Core.Features.ReadingHistory;
 using BookHeaven.Core.Shared;
 using BookHeaven.Reader.Features.Preferences.Services;
+using BookHeaven.Reader.Features.Server.Abstractions;
+using Microsoft.Extensions.Logging;
 using Font = BookHeaven.Core.Entities.Font;
 
-namespace BookHeaven.Reader.Services;
+namespace BookHeaven.Reader.Features.Server.Services;
 
-public interface IServerService
-{
-	Task<Result> CanConnect();
-	Task<Result<List<Book>>> GetAllBooks();
-	Task<Result<List<Author>>> GetAllAuthors();
-	Task<Result<List<Profile>>> GetAllProfiles();
-	Task<Result<BookProgress?>> GetBookProgress(Guid profileId, Guid bookId);
-	Task<Result<List<BookProgress>>> GetAllBooksProgress(Guid profileId);
-	Task<Result> DownloadBook(Book book, Guid profileId);
-	Task<Result> UpdateBookProgress(BookProgress progress);
-	Task<Result> SyncProfile(Guid profileId);
-	Task<Result> UpdateProfileSettings(ProfileSettings settings);
-	Task<Result> UpdateLocalProfiles();
-	Task<Result> DownloadFonts();
-}
 public class ServerService(
 	ISender sender,
 	PreferencesService preferencesService,
