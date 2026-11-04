@@ -205,10 +205,10 @@ public class ServerService(
 				await sender.Send(new UpdateBookProgress.Command(progress));
 			}
 
-			var syncAnnotations = await SyncAnnotations(profileId, book.BookId);
-			if (syncAnnotations.IsFailure)
+			var pullAnnotations = await PullAnnotations(profileId, book.BookId);
+			if (pullAnnotations.IsFailure)
 			{
-				return syncAnnotations;
+				return pullAnnotations;
 			}
 
 			return Result.Success();
@@ -336,15 +336,74 @@ public class ServerService(
 		}
 
 		List<Guid> pendingDeletions;
-		List<BookAnnotation> serverAnnotations;
 		try
 		{
 			pendingDeletions = await pendingDeletionStore.GetAsync(bookId, profileId);
-			var command = new SyncBookAnnotations.Command(
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to get pending annotation deletions for book {BookId} and profile {ProfileId}",
 				bookId,
-				profileId,
-				localAnnotations.Value,
-				pendingDeletions);
+				profileId);
+			return new Error("Failed to sync book annotations with server");
+		}
+
+		var serverAnnotations = await PutAnnotationsSync(bookId, profileId, localAnnotations.Value, pendingDeletions);
+		if (serverAnnotations.IsFailure)
+		{
+			return serverAnnotations;
+		}
+
+		var applyChanges = await ApplyServerAnnotations(bookId, profileId, localAnnotations.Value, serverAnnotations.Value);
+		if (applyChanges.IsFailure)
+		{
+			return applyChanges;
+		}
+
+		try
+		{
+			await pendingDeletionStore.AcknowledgeAsync(bookId, profileId, pendingDeletions);
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Failed to acknowledge synced annotation deletions for book {BookId} and profile {ProfileId}",
+				bookId,
+				profileId);
+			return new Error("Failed to acknowledge synced annotation deletions");
+		}
+
+		return Result.Success();
+	}
+
+	// One-way pull used when downloading a book: fetches the server annotations
+	// without uploading the local ones, then converges the local database to the
+	// server state.
+	private async Task<Result> PullAnnotations(Guid profileId, Guid bookId)
+	{
+		var localAnnotations = await sender.Send(new GetBookAnnotations.Query(bookId, profileId));
+		if (localAnnotations.IsFailure)
+		{
+			return Result.Failure(localAnnotations.Error);
+		}
+
+		var serverAnnotations = await PutAnnotationsSync(bookId, profileId, [], []);
+		if (serverAnnotations.IsFailure)
+		{
+			return serverAnnotations;
+		}
+
+		return await ApplyServerAnnotations(bookId, profileId, localAnnotations.Value, serverAnnotations.Value);
+	}
+
+	private async Task<Result<List<BookAnnotation>>> PutAnnotationsSync(
+		Guid bookId,
+		Guid profileId,
+		List<BookAnnotation> annotations,
+		List<Guid> deletedAnnotationIds)
+	{
+		try
+		{
+			var command = new SyncBookAnnotations.Command(bookId, profileId, annotations, deletedAnnotationIds);
 			var response = await _httpClient.PutAsJsonAsync("api/annotations/sync", command);
 			if (!response.IsSuccessStatusCode)
 			{
@@ -358,15 +417,22 @@ public class ServerService(
 				return new Error("Failed to sync book annotations with server");
 			}
 
-			serverAnnotations = await response.Content.ReadFromJsonAsync<List<BookAnnotation>>() ?? [];
+			return await response.Content.ReadFromJsonAsync<List<BookAnnotation>>() ?? [];
 		}
 		catch (Exception ex)
 		{
 			logger.LogError(ex, "Failed to sync book annotations with server");
 			return new Error("Failed to sync book annotations with server");
 		}
+	}
 
-		var (upserts, deletedAnnotationIds) = SyncBookAnnotations.Merge(localAnnotations.Value, serverAnnotations);
+	private async Task<Result> ApplyServerAnnotations(
+		Guid bookId,
+		Guid profileId,
+		List<BookAnnotation> localAnnotations,
+		List<BookAnnotation> serverAnnotations)
+	{
+		var (upserts, deletedAnnotationIds) = SyncBookAnnotations.Merge(localAnnotations, serverAnnotations);
 		if (upserts.Count > 0 || deletedAnnotationIds.Count > 0)
 		{
 			var applyChanges = await sender.Send(new ApplyBookAnnotationChanges.Command(
@@ -378,18 +444,6 @@ public class ServerService(
 			{
 				return applyChanges;
 			}
-		}
-
-		try
-		{
-			await pendingDeletionStore.AcknowledgeAsync(bookId, profileId, pendingDeletions);
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Failed to acknowledge synced annotation deletions for book {BookId} and profile {ProfileId}",
-				bookId,
-				profileId);
-			return new Error("Failed to acknowledge synced annotation deletions");
 		}
 
 		return Result.Success();
