@@ -279,7 +279,6 @@ public sealed class ServerService(
 			var response = await _httpClient.PutAsJsonAsync(endpoint, progress);
 			if(!response.IsSuccessStatusCode)
 			{
-				var errorResponse = await response.Content.ReadAsStringAsync();
 				return new Error("Failed to update book progress from server");
 			}
 			return Result.Success();
@@ -444,7 +443,6 @@ public sealed class ServerService(
 			var response = await _httpClient.PutAsJsonAsync(endpoint, settings);
 			if(!response.IsSuccessStatusCode)
 			{
-				var errorResponse = await response.Content.ReadAsStringAsync();
 				return new Error("Failed to backup profile settings to server");
 			}
 			return Result.Success();
