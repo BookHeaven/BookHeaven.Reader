@@ -1,5 +1,5 @@
-﻿## Fixes
-- Fixed an issue with fetching book annotations when downloading a book.
+﻿## Changes
+- Removed obsolete "page gap" property from the reader.
 
-## Improvements
-- A bunch of optimizations which may or may not slightly improve performance and reduce memory usage.
+## Fixes
+- Fixed some UI issues on smaller screens.
