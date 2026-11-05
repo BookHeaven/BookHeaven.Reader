@@ -45,15 +45,15 @@
                     </Button>
                 </div>
             }
-            <div class="gap-3 px-2 flex items-center">
+            <div class="gap-2 px-2 flex flex-wrap items-center justify-between">
                 @if (!IsTocEmpty)
                 {
-                    <Button OnClick="@OverlayService.ToggleToc">
+                    <Button Class="max-[480px]:order-2" OnClick="@OverlayService.ToggleToc">
                         <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-list"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg>
                     </Button>
                 }
-                <span class="flex-1">@ChapterTitle</span>
-                <div class="flex items-center">
+                <span class="max-[480px]:order-1 max-[480px]:w-full max-[480px]:text-center min-[480px]:flex-1">@ChapterTitle</span>
+                <div class="flex items-center max-[480px]:order-3">
                     <Button OnClick="@(() => OverlayService.TogglePanel(OverlayService.OverlayPanel.Notes))">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-note">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
