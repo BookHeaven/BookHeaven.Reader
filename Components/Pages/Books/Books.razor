@@ -27,8 +27,8 @@
 <BookInfoDialog />
 
 <SectionContent SectionName="Filters">
-    <div class="@@container m-2 gap-2 flex flex-wrap justify-between">
-        <SearchBar Class="w-full @@min-[460px]:order-2 @@min-[460px]:w-[250px]" @bind-Filter="_filter" />
+    <div class="@@container m-2 gap-2 flex flex-wrap">
+        <SearchBar Class="w-full @@min-[460px]:order-2 @@min-[460px]:w-[250px] @@min-[460px]:ms-auto" @bind-Filter="_filter" />
         @if (string.IsNullOrEmpty(_filter))
         {
             <RadioButtonGroup Class="@@min-[460px]:order-1" @bind-SelectedOption="_currentTab">
