@@ -1,5 +1,5 @@
-﻿<div class="flex items-center w-[250px] bg-white border-2 border-neutral-700 rounded-full" @onclick:stopPropagation="true" @onclick:preventDefault="true">
-	<input tabindex="0" @bind="Filter" @bind:event="oninput" @bind:after="() => FilterChanged.InvokeAsync(Filter)" class="bg-transparent w-full ps-5 py-2 outline-none" placeholder="@Translations.SEARCH_BOOKS" type="text" />
+﻿<div class="bg-white border-neutral-700 @Class flex items-center rounded-full border-2" @onclick:stopPropagation="true" @onclick:preventDefault="true">
+	<input tabindex="0" @bind="Filter" @bind:event="oninput" @bind:after="() => FilterChanged.InvokeAsync(Filter)" class="ps-5 py-2 w-full bg-transparent outline-none" placeholder="@Translations.SEARCH_BOOKS" type="text" />
 	@if (!string.IsNullOrEmpty(Filter))
 	{
 		<button @onclick="Clear" class="ps-2 pe-3">
@@ -15,6 +15,7 @@
 </div>
 
 @code {
+	[Parameter] public string? Class { get; set; }
 	[Parameter] public string? Filter { get; set; } = string.Empty;
 	[Parameter] public EventCallback<string?> FilterChanged { get; set; }
 
