@@ -45,6 +45,7 @@ public sealed partial class Reader : IAsyncDisposable
         ReaderService.OnTotalPagesChanged += RefreshUi;
         ReaderSettingsService.OnSettingChanged += OnSettingChanged;
         LifeCycleService.Paused += OnPaused;
+        LifeCycleService.Stopped += OnPaused;
         LifeCycleService.Resumed += OnResumed;
         LifeCycleService.Destroyed += OnDestroy;
         
@@ -134,6 +135,7 @@ public sealed partial class Reader : IAsyncDisposable
         ReaderService.OnTotalPagesChanged -= RefreshUi;
         ReaderSettingsService.OnSettingChanged -= OnSettingChanged;
         LifeCycleService.Paused -= OnPaused;
+        LifeCycleService.Stopped -= OnPaused;
         LifeCycleService.Resumed -= OnResumed;
         LifeCycleService.Destroyed -= OnDestroy;
 
