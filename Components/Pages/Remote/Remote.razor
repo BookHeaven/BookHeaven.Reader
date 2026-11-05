@@ -20,15 +20,13 @@
     return;
 }
 <div class="flex h-full flex-col bg-[lightgray]">
-    <div class="m-2">
-        <div class="gap-2 flex items-center justify-between">
-            <RadioButtonGroup @bind-SelectedOption="_selectedBookStatus" @bind-SelectedOption:after="() => FilterBooks()">
-                <RadioButton Option="@BookStatus.Recommended" Label="@Translations.RECOMMENDED" />
-                <RadioButton Option="@BookStatus.Missing" Label="@Translations.BY_MISSING" />
-                <RadioButton Option="@BookStatus.All" Label="@Core.Localization.Translations.ALL_M"/>
-            </RadioButtonGroup>
-             <SearchBar @bind-Filter="_filter" @bind-Filter:after="() => FilterBooks()" />
-        </div>
+    <div class="@@container m-2 gap-2 flex flex-wrap justify-between">
+        <SearchBar Class="w-full @@min-[580px]:order-2 @@min-[580px]:w-[250px]" @bind-Filter="_filter" @bind-Filter:after="() => FilterBooks()" />
+        <RadioButtonGroup Class="@@min-[580px]:order-1" @bind-SelectedOption="_selectedBookStatus" @bind-SelectedOption:after="() => FilterBooks()">
+            <RadioButton Option="@BookStatus.Recommended" Label="@Translations.RECOMMENDED"/>
+            <RadioButton Option="@BookStatus.Missing" Label="@Translations.BY_MISSING"/>
+            <RadioButton Option="@BookStatus.All" Label="@Core.Localization.Translations.ALL_M"/>
+        </RadioButtonGroup>
     </div>
     <div class="flex-1 overflow-hidden">
         @if (_filteredBooks == null)
