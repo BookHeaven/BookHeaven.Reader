@@ -1,28 +1,42 @@
 ﻿@using System.Timers
+@using BookHeaven.Reader.Features.Lifecycle.Services
 @implements IDisposable
 <div>
     @_clock
 </div>
 
 @code {
+    [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     string _clock = DateTime.Now.ToString("HH:mm");
     readonly Timer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1).TotalMilliseconds };
 
     protected override void OnInitialized()
     {
-        _clockTimer.Elapsed += (_, _) =>
-        {
-            var time = DateTime.Now.ToString("HH:mm");
-            if (time == _clock) return;
-
-            _clock = time;
-            InvokeAsync(StateHasChanged);
-        };
+        _clockTimer.Elapsed += OnClockElapsed;
+        LifeCycleService.Paused += PauseClock;
+        LifeCycleService.Stopped += PauseClock;
+        LifeCycleService.Resumed += ResumeClock;
         _clockTimer.Start();
     }
 
+    private void OnClockElapsed(object? sender, ElapsedEventArgs args)
+    {
+        var time = DateTime.Now.ToString("HH:mm");
+        if (time == _clock) return;
+
+        _clock = time;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void PauseClock() => _clockTimer.Stop();
+
+    private void ResumeClock() => _clockTimer.Start();
+
     public void Dispose()
     {
+        LifeCycleService.Paused -= PauseClock;
+        LifeCycleService.Stopped -= PauseClock;
+        LifeCycleService.Resumed -= ResumeClock;
         _clockTimer.Dispose();
         GC.SuppressFinalize(this);
     }
