@@ -142,11 +142,12 @@
 <ColorTemperatureOverlay />
 <ImageViewer />
 
-@if (!ReaderService.IsReady)
+@if (!_firstLoadCompleted)
 {
 	<Message Content="@Translations.LOADING_BOOK" />
 }
-else
+
+@if(ReaderService.IsReady)
 {
 	<FontManager />
 	<Navigation />

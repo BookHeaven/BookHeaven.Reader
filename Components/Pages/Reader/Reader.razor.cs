@@ -21,7 +21,6 @@ public sealed partial class Reader : IAsyncDisposable
     [Parameter] public Guid Id { get; set; }
 
     [Inject] private PreferencesService PreferencesService { get; set; } = null!;
-    [Inject] private ISender Sender { get; set; } = null!;
     [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     [Inject] private IReaderService ReaderService { get; set; } = null!;
@@ -30,12 +29,13 @@ public sealed partial class Reader : IAsyncDisposable
     [Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
     [Inject] private IAlertService AlertService { get; set; } = null!;
 
+    private bool _firstLoadCompleted;
     private IJSObjectReference? _module;
     private ReaderState _readerState = ReaderState.Uninitialized;
     private bool _recountPagesOnNextRender;
     private TextSelectionHandler? _textSelection;
-    private BookAnnotation? _annotationToNavigate;
     private Guid _assetLoadToken = Guid.NewGuid();
+    private bool _stateMachineRunning;
 
 
     protected override async Task OnInitializedAsync()
@@ -68,60 +68,65 @@ public sealed partial class Reader : IAsyncDisposable
         
         if(_module is null) return;
 
-        if (_annotationToNavigate is not null && _readerState == ReaderState.Ready && _textSelection is not null)
+        // OnAfterRenderAsync is fire-and-forget: a StateHasChanged raised while a
+        // previous call is still awaiting (e.g. mid page-count) starts a concurrent
+        // run. Blazor's lifecycle is single-threaded, so a re-entrancy flag is
+        // enough: concurrent runs are skipped because the running one always ends
+        // by scheduling the render that performs the next transition.
+        if (_stateMachineRunning) return;
+        _stateMachineRunning = true;
+        try
         {
-            var annotation = _annotationToNavigate;
-            var targetPage = await _textSelection.GetPageForTextOffsetAsync(annotation.StartOffset);
-            _annotationToNavigate = null;
-            if (targetPage is null)
+            switch (_readerState)
             {
-                await AlertService.ShowToastAsync(
-                    Translations.ANNOTATION_LOCATION_NOT_FOUND,
-                    AlertSeverity.Warning);
-            }
-            else
-            {
-                ReaderService.NavigateToPage(targetPage.Value);
-            }
-        }
-
-        switch (_readerState)
-        {
-            case ReaderState.Initialized:
-                var readerContext = await GetReaderContextAsync();
-                await ReaderService.LoadCachedPagesAsync(readerContext);
-                if (ReaderService.State?.PagesPerChapter.Length > 0)
-                {
-                    ReaderService.NavigateToInitialPage();
-                }
-                else
-                {
-                    await UpdateTotalPages();
-                }
-                _assetLoadToken = Guid.NewGuid();
-                _readerState = ReaderState.WaitingForAssets;
-                StateHasChanged();
-                break;
-            case ReaderState.WaitingForAssets:
-                var assetLoadToken = _assetLoadToken;
-                await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
-                if (assetLoadToken != _assetLoadToken || _readerState != ReaderState.WaitingForAssets)
-                {
+                case ReaderState.Initialized:
+                    var readerContext = await GetReaderContextAsync();
+                    await ReaderService.LoadCachedPagesAsync(readerContext);
+                    if (ReaderService.State?.PagesPerChapter.Length > 0)
+                    {
+                        ReaderService.NavigateToInitialPage();
+                    }
+                    else
+                    {
+                        await UpdateTotalPages();
+                    }
+                    _assetLoadToken = Guid.NewGuid();
+                    _readerState = ReaderState.WaitingForAssets;
+                    StateHasChanged();
                     break;
-                }
-                if (_textSelection is not null)
-                {
-                    await _textSelection.RestoreHighlightsAsync();
-                }
-                _readerState = ReaderState.Ready;
-                RefreshUi();
-                break;
-        }
+                case ReaderState.WaitingForAssets:
+                    var assetLoadToken = _assetLoadToken;
+                    await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
+                    if (assetLoadToken != _assetLoadToken || _readerState != ReaderState.WaitingForAssets)
+                    {
+                        break;
+                    }
+                    // The first load is only complete when the ebook is loaded, the
+                    // page count has finished and the initial page/chapter applied.
+                    if (!ReaderService.IsReady || ReaderService.IsCalculatingPages)
+                    {
+                        StateHasChanged();
+                        break;
+                    }
+                    if (_textSelection is not null)
+                    {
+                        await _textSelection.RestoreHighlightsAsync();
+                    }
+                    _readerState = ReaderState.Ready;
+                    _firstLoadCompleted = true;
+                    RefreshUi();
+                    break;
+            }
 
-        if (_recountPagesOnNextRender)
+            if (_recountPagesOnNextRender)
+            {
+                _recountPagesOnNextRender = false;
+                _ = UpdateTotalPages();
+            }
+        }
+        finally
         {
-            _recountPagesOnNextRender = false;
-            _ = UpdateTotalPages();
+            _stateMachineRunning = false;
         }
     }
 
@@ -155,7 +160,6 @@ public sealed partial class Reader : IAsyncDisposable
 #if ANDROID
         SetFullscreen(false);
 #endif
-        GC.SuppressFinalize(this);
     }
 
 
@@ -200,18 +204,28 @@ public sealed partial class Reader : IAsyncDisposable
         };
     }
 
-    private Task NavigateToAnnotationAsync(BookAnnotation annotation)
+    private async Task NavigateToAnnotationAsync(BookAnnotation annotation)
     {
+        if(_textSelection is null) return;
         if (!ReaderService.NavigateToAnnotation(annotation))
         {
-            return AlertService.ShowToastAsync(
+            await AlertService.ShowToastAsync(
+                Translations.ANNOTATION_LOCATION_NOT_FOUND,
+                AlertSeverity.Warning);
+            return;
+        }
+        OverlayService.ToggleOverlay();
+        var targetPage = await _textSelection.GetPageForTextOffsetAsync(annotation.StartOffset);
+        if (targetPage is null)
+        {
+            await AlertService.ShowToastAsync(
                 Translations.ANNOTATION_LOCATION_NOT_FOUND,
                 AlertSeverity.Warning);
         }
-
-        _annotationToNavigate = annotation;
-        OverlayService.ToggleOverlay();
-        return Task.CompletedTask;
+        else
+        {
+            ReaderService.NavigateToPage(targetPage.Value);
+        }
     }
 
     private void OnPaused()
