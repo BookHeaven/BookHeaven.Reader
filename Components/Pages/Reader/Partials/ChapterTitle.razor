@@ -1,11 +1,12 @@
 ﻿@using BookHeaven.Core.Features.Reader.Abstractions
+@using BookHeaven.Core.Features.Reader.Enums
 @using Microsoft.JSInterop
 @implements IDisposable
 
 <div @ref="_containerRef" class="flex items-center justify-center">
     <span @ref="_textRef" class="text-nowrap">@DisplayText</span>
     <span @ref="_pageRef" class="ms-1 text-nowrap">
-        (@ReaderService.State?.PageNumber / @(ReaderService.IsCalculatingPages ? "..." : ReaderService.State?.TotalPages))
+        (@ReaderService.State?.PageNumber / @(ReaderService.PageCalculationState is ReaderPageCalculationState.CalculatingInitialPages or ReaderPageCalculationState.RecalculatingPages ? "..." : ReaderService.State?.TotalPages))
     </span>
 </div>
 

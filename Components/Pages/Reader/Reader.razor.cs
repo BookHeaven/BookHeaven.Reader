@@ -1,11 +1,8 @@
 using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Enums;
-using BookHeaven.Core.Entities;
-using BookHeaven.Core.DOM.Text.Enums;
-using BookHeaven.Core.Shared;
-using BookHeaven.Core.Features.Books;
 using BookHeaven.Core.Features.Reader.Abstractions;
+using BookHeaven.Core.Features.Reader.Enums;
 using BookHeaven.Core.Features.Reader.Models;
 using BookHeaven.Reader.Components.Pages.Reader.Partials;
 using BookHeaven.Reader.Features.Lifecycle.Services;
@@ -16,7 +13,7 @@ using Microsoft.JSInterop;
 
 namespace BookHeaven.Reader.Components.Pages.Reader;
 
-public sealed partial class Reader : IAsyncDisposable
+public sealed partial class Reader : IAsyncDisposable, IReaderViewAdapter
 {
     [Parameter] public Guid Id { get; set; }
 
@@ -29,13 +26,11 @@ public sealed partial class Reader : IAsyncDisposable
     [Inject] private IUrlBuilder UrlBuilder { get; set; } = null!;
     [Inject] private IAlertService AlertService { get; set; } = null!;
 
-    private bool _firstLoadCompleted;
     private IJSObjectReference? _module;
-    private ReaderState _readerState = ReaderState.Uninitialized;
-    private bool _recountPagesOnNextRender;
     private TextSelectionHandler? _textSelection;
-    private Guid _assetLoadToken = Guid.NewGuid();
-    private bool _stateMachineRunning;
+
+    private bool IsInitialLoadInProgress =>
+        ReaderService.FlowState is not (ReaderFlowState.Ready or ReaderFlowState.WaitingForChapterAssets);
 
 
     protected override async Task OnInitializedAsync()
@@ -50,8 +45,7 @@ public sealed partial class Reader : IAsyncDisposable
         LifeCycleService.Destroyed += OnDestroy;
         
         PreferencesService.CurrentScreenSaverCoverPath = UrlBuilder.CoverUrl(Id);
-        await ReaderService.InitializeAsync(Id, PreferencesService.ProfileId);
-        _readerState = ReaderState.Initialized;
+        await ReaderService.InitializeAsync(Id, PreferencesService.ProfileId, this);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -66,67 +60,11 @@ public sealed partial class Reader : IAsyncDisposable
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
         }
         
-        if(_module is null) return;
+        if (_module is null) return;
 
-        // OnAfterRenderAsync is fire-and-forget: a StateHasChanged raised while a
-        // previous call is still awaiting (e.g. mid page-count) starts a concurrent
-        // run. Blazor's lifecycle is single-threaded, so a re-entrancy flag is
-        // enough: concurrent runs are skipped because the running one always ends
-        // by scheduling the render that performs the next transition.
-        if (_stateMachineRunning) return;
-        _stateMachineRunning = true;
-        try
+        if (await ReaderService.AdvanceViewAsync())
         {
-            switch (_readerState)
-            {
-                case ReaderState.Initialized:
-                    var readerContext = await GetReaderContextAsync();
-                    await ReaderService.LoadCachedPagesAsync(readerContext);
-                    if (ReaderService.State?.PagesPerChapter.Length > 0)
-                    {
-                        ReaderService.NavigateToInitialPage();
-                    }
-                    else
-                    {
-                        await UpdateTotalPages();
-                    }
-                    _assetLoadToken = Guid.NewGuid();
-                    _readerState = ReaderState.WaitingForAssets;
-                    StateHasChanged();
-                    break;
-                case ReaderState.WaitingForAssets:
-                    var assetLoadToken = _assetLoadToken;
-                    await _module!.InvokeVoidAsync("WaitForAssetsToLoad");
-                    if (assetLoadToken != _assetLoadToken || _readerState != ReaderState.WaitingForAssets)
-                    {
-                        break;
-                    }
-                    // The first load is only complete when the ebook is loaded, the
-                    // page count has finished and the initial page/chapter applied.
-                    if (!ReaderService.IsReady || ReaderService.IsCalculatingPages)
-                    {
-                        StateHasChanged();
-                        break;
-                    }
-                    if (_textSelection is not null)
-                    {
-                        await _textSelection.RestoreHighlightsAsync();
-                    }
-                    _readerState = ReaderState.Ready;
-                    _firstLoadCompleted = true;
-                    RefreshUi();
-                    break;
-            }
-
-            if (_recountPagesOnNextRender)
-            {
-                _recountPagesOnNextRender = false;
-                _ = UpdateTotalPages();
-            }
-        }
-        finally
-        {
-            _stateMachineRunning = false;
+            StateHasChanged();
         }
     }
 
@@ -166,43 +104,30 @@ public sealed partial class Reader : IAsyncDisposable
     private void OnSettingChanged(string? settingName)
     {
         if(!string.IsNullOrEmpty(settingName) && settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedFont)) return;
-        _recountPagesOnNextRender = true;
+        ReaderService.RequestPageRecount();
         RefreshUi();
     }
 
     private void OnChapterChanged()
     {
-        _assetLoadToken = Guid.NewGuid();
-        _readerState = ReaderState.WaitingForAssets;
         RefreshUi();
     }
 
-    private async Task UpdateTotalPages()
-    {
-        if(_module is null) return;
-        var context = await GetReaderContextAsync();
-        await ReaderService.CalculatePagesAsync(context);
-        if (!ReaderService.IsReady)
-        {
-            ReaderService.NavigateToInitialPage();
-        }
-    }
-    
-    private async Task<ReaderContext> GetReaderContextAsync()
+    async Task<ReaderContext> IReaderViewAdapter.GetReaderContextAsync()
     {
         if(_module is null) throw new InvalidOperationException("JS module is not initialized.");
         var info = await _module.InvokeAsync<ReaderContextInfo>("GetReaderContext");
-        var mode = info.Engine == "gecko" ? LineBreakingMode.Firefox : LineBreakingMode.Chrome;
-        return new ReaderContext
-        {
-            ViewportWidth = info.ViewportWidth,
-            ViewportHeight = info.ViewportHeight,
-            PageWidth = (int)info.PageWidth,
-            PageHeight = (int)info.PageHeight,
-            LineBreakingMode = mode,
-            ColumnCount = info.ColumnCount
-        };
+        return ReaderContext.FromBrowserInfo(info);
     }
+
+    async Task IReaderViewAdapter.WaitForAssetsToLoadAsync()
+    {
+        if (_module is null) throw new InvalidOperationException("JS module is not initialized.");
+        await _module.InvokeVoidAsync("WaitForAssetsToLoad");
+    }
+
+    Task IReaderViewAdapter.RestoreHighlightsAsync() =>
+        _textSelection?.RestoreHighlightsAsync() ?? Task.CompletedTask;
 
     private async Task NavigateToAnnotationAsync(BookAnnotation annotation)
     {
@@ -262,13 +187,4 @@ public sealed partial class Reader : IAsyncDisposable
     }
 #endif
 
-    private record ReaderContextInfo(int ViewportWidth, int ViewportHeight, double PageWidth, double PageHeight, string Engine, int ColumnCount);
-
-    private enum ReaderState
-    {
-        Uninitialized,
-        Initialized,
-        WaitingForAssets,
-        Ready
-    }
 }

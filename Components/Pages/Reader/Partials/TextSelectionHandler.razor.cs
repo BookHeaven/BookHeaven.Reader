@@ -3,6 +3,7 @@ using BookHeaven.Core.Entities;
 using BookHeaven.Core.Enums;
 using BookHeaven.Core.Extensions;
 using BookHeaven.Core.Features.Reader.Abstractions;
+using BookHeaven.Core.Features.Reader.Enums;
 using BookHeaven.Core.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -38,7 +39,8 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (_module is null &&
+            ReaderService.PageCalculationState is ReaderPageCalculationState.Ready or ReaderPageCalculationState.RecalculatingPages)
         {
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TextSelectionHandler.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);

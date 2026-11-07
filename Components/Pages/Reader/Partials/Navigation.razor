@@ -15,22 +15,37 @@
 
     private NavigationLayoutType _selectedLayout;
     
-    private IJSObjectReference _module = null!;
+    private IJSObjectReference? _module;
     private DotNetObjectReference<Navigation> _dotNetReference = null!;
     
     private List<NavigationButton> Buttons => ReaderHelpers.GetLayoutForType(_selectedLayout);
     
     protected override void OnInitialized()
     {
-        _selectedLayout = (NavigationLayoutType)ReaderSettingsService.ReaderSettings!.SelectedLayout;
         ReaderSettingsService.OnSettingChanged += OnSelectedLayoutChanged;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_module is not null || ReaderSettingsService.ReaderSettings is not { } settings) return;
+
+        _selectedLayout = (NavigationLayoutType)settings.SelectedLayout;
+        _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/Navigation.razor.js");
+        _dotNetReference = DotNetObjectReference.Create(this);
+        await _module.InvokeVoidAsync("Initialize", _dotNetReference, Buttons.Select(button => (int)button).ToArray());
     }
     
     private void OnSelectedLayoutChanged(string? settingName)
     {
-        if(settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedLayout)) return;
-        _selectedLayout = (NavigationLayoutType)ReaderSettingsService.ReaderSettings!.SelectedLayout;
-        _ = _module?.InvokeVoidAsync("UpdateLayout", Buttons.Select(button => (int)button).ToArray());
+        if (!string.IsNullOrEmpty(settingName) &&
+            settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedLayout)) return;
+        if (ReaderSettingsService.ReaderSettings is not { } settings) return;
+
+        _selectedLayout = (NavigationLayoutType)settings.SelectedLayout;
+        if (_module is not null)
+        {
+            _ = _module.InvokeVoidAsync("UpdateLayout", Buttons.Select(button => (int)button).ToArray());
+        }
         InvokeAsync(StateHasChanged);
     }
 
@@ -64,15 +79,7 @@
             ImageViewerService.OnOpenImage?.Invoke(data);
     }
     
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/Navigation.razor.js");
-            _dotNetReference = DotNetObjectReference.Create(this);
-            await _module.InvokeVoidAsync("Initialize", _dotNetReference, Buttons.Select(button => (int)button).ToArray());
-        }
-    }
+    
 
     private void HandleNavigation(NavigationButton button)
     {

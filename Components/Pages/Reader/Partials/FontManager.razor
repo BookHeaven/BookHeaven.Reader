@@ -23,11 +23,20 @@
 	
 	List<Font> _fonts = [];
 	string? _fontFamily = string.Empty;
+	bool _hasLoadedFonts;
 
-	protected override async Task OnInitializedAsync()
+	protected override void OnInitialized()
 	{
 		ReaderSettingsService.OnSettingChanged += OnSelectedFontChanged;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (_hasLoadedFonts || ReaderSettingsService.ReaderSettings is null) return;
+
 		await GetFonts();
+		_hasLoadedFonts = true;
+		await InvokeAsync(StateHasChanged);
 	}
 	
 	private async Task GetFonts()
@@ -44,8 +53,8 @@
 	
 	private async void OnSelectedFontChanged(string? settingName)
 	{
-		if(!string.IsNullOrEmpty(settingName)) return;
-		if(settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedFont)) return;
+		if (!string.IsNullOrEmpty(settingName) &&
+		    settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedFont)) return;
 
 		await GetFonts();
 		await InvokeAsync(StateHasChanged);
