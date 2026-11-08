@@ -3,7 +3,7 @@ const highlights = { ranges: [], offsets: [] };
 const TIMING = Object.freeze({
     pageTurn: 1200,
     selectionChange: 100,
-    longPress: 500
+    mouseLongPress: 500
 });
 const THRESHOLD = Object.freeze({ pointerMove: 4 });
 const HANDLE = Object.freeze({
@@ -18,7 +18,7 @@ const SelectionGesture = Object.freeze({
     HIGHLIGHT: 'highlight',
     HIGHLIGHT_CANCELLED: 'highlight-cancelled',
     WORD: 'word',
-    WORD_DRAG: 'word-drag',
+    WORD_SELECTION_DRAG: 'word-selection-drag',
     TEXT: 'text',
     HANDLE: 'handle'
 });
@@ -78,9 +78,9 @@ const selectionGestureTransitions = new Map([
         SelectionGesture.HIGHLIGHT_CANCELLED,
         SelectionGesture.WORD
     ]],
-    [SelectionGesture.WORD, [SelectionGesture.WORD_DRAG]],
+    [SelectionGesture.WORD, [SelectionGesture.WORD_SELECTION_DRAG]],
     [SelectionGesture.TEXT, []],
-    [SelectionGesture.WORD_DRAG, []],
+    [SelectionGesture.WORD_SELECTION_DRAG, []],
     [SelectionGesture.HANDLE, []],
     [SelectionGesture.HIGHLIGHT, []],
     [SelectionGesture.HIGHLIGHT_CANCELLED, []]
@@ -401,6 +401,7 @@ const handleSelectionPointerDown = event => {
     clearTimeout(selection.pointer?.longPressTimeout);
     selection.pointer = {
         id: event.pointerId,
+        pointerType: event.pointerType,
         x: event.clientX,
         y: event.clientY,
         originX: event.clientX,
@@ -414,16 +415,19 @@ const handleSelectionPointerDown = event => {
         longPressTimeout: null
     };
 
-    if (selection.pointer.anchorOffset !== null) {
+    if (selection.pointer.anchorOffset !== null && event.pointerType !== 'touch') {
+        const pointerId = selection.pointer.id;
         selection.pointer.longPressTimeout = setTimeout(
-            () => selectLongPressAtPointer(selection.pointer.id),
-            TIMING.longPress);
+            () => selectLongPressAtPointer(pointerId),
+            TIMING.mouseLongPress);
     }
+
     pageTurn.blockedDirection = 0;
 };
 
 const selectLongPressAtPointer = pointerId => {
     if (selection.pointer?.id !== pointerId || !isWaitingForLongPress(selection.pointer)) return;
+    selection.pointer.longPressTimeout = null;
 
     if (selection.pointer.mode === SelectionGesture.HIGHLIGHT_PENDING &&
         SelectHighlightAt(selection.pointer.x, selection.pointer.y)) {
@@ -446,8 +450,11 @@ const selectWordAtPointer = pointerId => {
     clearEditingHighlightRange();
     const focusOffset = constrainSelectionOutsideHighlights(word.start, word.end);
     if (focusOffset === word.start) return;
+    const wordOriginOffset = selection.pointer.anchorOffset;
     transitionSelectionGesture(SelectionGesture.WORD);
     selection.pointer.anchorOffset = word.start;
+    selection.pointer.wordOriginOffset = wordOriginOffset;
+    selection.pointer.wordDragDirection = 0;
     selection.pointer.wordStart = word.start;
     selection.pointer.wordEnd = focusOffset;
     setSelection(word.start, focusOffset, false);
@@ -471,19 +478,20 @@ const handleSelectionPointerMove = event => {
         if (distance < THRESHOLD.pointerMove) return;
 
         clearTimeout(selection.pointer.longPressTimeout);
+        selection.pointer.longPressTimeout = null;
         if (wasHighlightPending) {
             transitionSelectionGesture(SelectionGesture.HIGHLIGHT_CANCELLED);
             return;
         }
         transitionSelectionGesture(selection.pointer.mode === SelectionGesture.WORD
-            ? SelectionGesture.WORD_DRAG
+            ? SelectionGesture.WORD_SELECTION_DRAG
             : SelectionGesture.TEXT);
     }
 
     if (selection.pointer.mode === SelectionGesture.HIGHLIGHT_CANCELLED) return;
 
-    if (selection.pointer.mode === SelectionGesture.WORD_DRAG) {
-        updateWordSelectionFocusAtPointer();
+    if (selection.pointer.mode === SelectionGesture.WORD_SELECTION_DRAG) {
+        updateWordAnchoredSelectionAtPointer();
     } else {
         updateSelectionFocusAtPointer();
     }
@@ -569,7 +577,7 @@ const constrainSelectionFocus = (anchorOffset, focusOffset) =>
         ? constrainEditedHighlightFocus(anchorOffset, focusOffset)
         : constrainSelectionOutsideHighlights(anchorOffset, focusOffset);
 
-const updateWordSelectionFocusAtPointer = () => {
+const updateWordAnchoredSelectionAtPointer = () => {
     if (!selection.pointer || selection.pointer.anchorOffset === null) return;
     const chapter = document.querySelector('.chapter.current');
     const viewer = chapter?.closest('.viewer');
@@ -583,17 +591,19 @@ const updateWordSelectionFocusAtPointer = () => {
     if (!position) return;
 
     const pointerOffset = getTextOffset(chapter, position.container, position.offset);
-    const word = getWordOffsets(chapter, pointerOffset);
-    let focusOffset = selection.pointer.wordEnd;
-    if (pointerOffset < selection.pointer.wordStart && word?.start < selection.pointer.wordStart) {
-        focusOffset = word.start;
-    } else if (pointerOffset >= selection.pointer.wordEnd && word?.end > selection.pointer.wordEnd) {
-        focusOffset = word.end;
+    if (selection.pointer.wordDragDirection === 0) {
+        selection.pointer.wordDragDirection = Math.sign(
+            pointerOffset - selection.pointer.wordOriginOffset);
     }
+    if (selection.pointer.wordDragDirection === 0) return;
+
+    const anchorOffset = selection.pointer.wordDragDirection < 0
+        ? selection.pointer.wordEnd
+        : selection.pointer.wordStart;
 
     setSelection(
-        selection.pointer.wordStart,
-        constrainSelectionOutsideHighlights(selection.pointer.wordStart, focusOffset),
+        anchorOffset,
+        constrainSelectionOutsideHighlights(anchorOffset, pointerOffset),
         selection.acrossPages);
     debounceSelectionChange();
 };
@@ -612,6 +622,13 @@ const handleSelectionPointerUp = event => {
 const handleSelectionContextMenu = event => {
     if (!event.target.closest?.('.chapter.current')) return;
     event.preventDefault();
+
+    if (selection.pointer?.pointerType !== 'touch' ||
+        !isWaitingForLongPress(selection.pointer)) return;
+
+    selection.pointer.x = event.clientX;
+    selection.pointer.y = event.clientY;
+    selectLongPressAtPointer(selection.pointer.id);
 };
 
 const getTouchSelectionHandleAtPoint = (x, y) => {
@@ -682,6 +699,7 @@ const beginSelectionHandleDrag = (event, handle) => {
     clearTimeout(selection.pointer?.longPressTimeout);
     selection.pointer = {
         id: event.pointerId,
+        pointerType: event.pointerType,
         x: event.clientX,
         y: event.clientY,
         originX: event.clientX,
@@ -689,8 +707,7 @@ const beginSelectionHandleDrag = (event, handle) => {
         anchorOffset,
         caretOffsetX: handlePoint ? event.clientX - handlePoint.x : 0,
         caretOffsetY: handlePoint ? event.clientY - handlePoint.y : 0,
-        mode: SelectionGesture.HANDLE,
-        longPressTimeout: null
+        mode: SelectionGesture.HANDLE
     };
 };
 
@@ -1111,7 +1128,7 @@ const getWordOffsets = (chapter, offset) => {
 const isWordCharacter = character => /[\p{L}\p{N}\p{M}_]/u.test(character);
 
 const getSelectionPageTurnDirection = () => {
-    if (![SelectionGesture.TEXT, SelectionGesture.WORD_DRAG, SelectionGesture.HANDLE]
+    if (![SelectionGesture.TEXT, SelectionGesture.WORD_SELECTION_DRAG, SelectionGesture.HANDLE]
         .includes(selection.pointer?.mode) ||
         document.querySelector('.reader-overlay') ||
         !HasTextSelection()) return 0;
@@ -1292,8 +1309,8 @@ const turnSelectionPage = async direction => {
             shouldContinue = false;
             return;
         }
-        if (selection.pointer.mode === SelectionGesture.WORD_DRAG) {
-            updateWordSelectionFocusAtPointer();
+        if (selection.pointer.mode === SelectionGesture.WORD_SELECTION_DRAG) {
+            updateWordAnchoredSelectionAtPointer();
         } else {
             updateSelectionFocusAtPointer();
         }
