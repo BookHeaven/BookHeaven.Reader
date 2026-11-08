@@ -2,7 +2,7 @@ import {
     ClearTextSelection,
     ConsumeSelectionCancellation,
     HasTextSelection
-} from './TextSelectionHandler.razor.js';
+} from './TextSelection/TextSelectionHandler.razor.js';
 
 let dotNetReference;
 let buttons = [];
