@@ -2,7 +2,6 @@ using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Enums;
 using BookHeaven.Core.Features.Reader.Abstractions;
-using BookHeaven.Core.Features.Reader.Enums;
 using BookHeaven.Core.Features.Reader.Models;
 using BookHeaven.Reader.Components.Pages.Reader.Partials;
 using BookHeaven.Reader.Features.Lifecycle.Services;
@@ -28,10 +27,6 @@ public sealed partial class Reader : IAsyncDisposable, IReaderViewAdapter
 
     private IJSObjectReference? _module;
     private TextSelectionHandler? _textSelection;
-
-    private bool IsInitialLoadInProgress =>
-        ReaderService.FlowState is not (ReaderFlowState.Ready or ReaderFlowState.WaitingForChapterAssets);
-
 
     protected override async Task OnInitializedAsync()
     {

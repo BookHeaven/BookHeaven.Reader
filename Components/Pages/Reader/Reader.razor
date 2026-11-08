@@ -1,7 +1,5 @@
 ﻿@using System.Globalization
 @using BookHeaven.Core.DOM.Text.Abstractions
-@using BookHeaven.Core.Features.Reader.Enums
-@using BookHeaven.Core.Features.Reader.Models
 @using BookHeaven.Reader.Components.Pages.Reader.Partials
 @attribute [Route($"{Urls.Reader}/{{id:guid}}")]
 @layout EmptyLayout
@@ -144,7 +142,7 @@
 <ColorTemperatureOverlay />
 <ImageViewer />
 
-@if (IsInitialLoadInProgress)
+@if (!ReaderService.IsInitialLoadReady)
 {
 	<Message Content="@Translations.LOADING_BOOK" />
 }
@@ -163,8 +161,8 @@
 	CurrentChapterId="@ReaderService.State?.CurrentChapter?.Identifier" />
 
 
-<div class="reader-surface flex h-screen flex-col select-none touch-none @(ReaderService.PageCalculationState is ReaderPageCalculationState.Ready or ReaderPageCalculationState.RecalculatingPages ? "" : "opacity-0")">
-	<div class="viewer flex-1 min-h-0 min-w-0 overflow-clip @(ReaderService.FlowState == ReaderFlowState.Ready ? "" : "opacity-0")">
+<div class="reader-surface flex h-screen flex-col select-none touch-none @(ReaderService.IsInitialLoadReady ? "" : "opacity-0")">
+	<div class="viewer flex-1 min-h-0 min-w-0 overflow-clip @(ReaderService.IsCurrentChapterLoaded ? "" : "opacity-0")">
 		<div
 			class="chapter current @(string.Join(" ", ReaderService.State?.CurrentChapter?.Stylesheets.Select(s => "stylesheet-" + s) ?? []))">
 			@if (ReaderService.State?.CurrentChapter is not null)
@@ -178,7 +176,7 @@
 			<Clock />
 			<BatteryInfo />
 		</div>
-		@if(ReaderService.FlowState == ReaderFlowState.Ready)
+		@if (ReaderService.IsCurrentChapterLoaded)
 		{
 			<ChapterTitle />
 		}
