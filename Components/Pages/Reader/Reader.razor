@@ -149,7 +149,10 @@
 
 <FontManager />
 <Navigation />
-<TextSelectionHandler @ref="_textSelection" />
+@if (ReaderService.State?.CurrentChapter is not null)
+{
+	<TextSelectionHandler @ref="_textSelection" />
+}
 <Overlay
 	Progress="@(ReaderService.State?.ProgressAsPercentage ?? 0)"
 	BookTitle="@ReaderService.State?.Ebook?.Title"

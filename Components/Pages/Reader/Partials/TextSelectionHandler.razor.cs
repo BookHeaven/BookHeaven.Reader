@@ -36,7 +36,7 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_module is null && ReaderService.IsCurrentChapterLoaded)
+        if (_module is null)
         {
             _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TextSelectionHandler.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
@@ -68,7 +68,12 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
 
     public async Task RestoreHighlightsAsync()
     {
-        if (_module is null) return;
+        if (_module is null)
+        {
+            _restoreHighlightsOnNextRender = true;
+            return;
+        }
+
         await _module.InvokeVoidAsync("RestoreHighlights", AnnotationService.GetAnnotationsForCurrentChapter());
     }
 
