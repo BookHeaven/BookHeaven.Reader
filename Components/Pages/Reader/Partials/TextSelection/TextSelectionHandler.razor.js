@@ -578,11 +578,11 @@ const beginSelectionHandleDrag = (event, handle) => {
     const knobOffsetY = event.pointerType === 'touch' ? selectionHandleKnobCenterOffsetY : 0;
     const startDistance = startPoint
         ? (event.clientX - startPoint.x) ** 2 +
-          (event.clientY - startPoint.y - knobOffsetY) ** 2
+        (event.clientY - startPoint.y - knobOffsetY) ** 2
         : Number.POSITIVE_INFINITY;
     const endDistance = endPoint
         ? (event.clientX - endPoint.x) ** 2 +
-          (event.clientY - endPoint.y - knobOffsetY) ** 2
+        (event.clientY - endPoint.y - knobOffsetY) ** 2
         : Number.POSITIVE_INFINITY;
     const isStartHandle = startDistance === endDistance
         ? handle === selectionStartHandle
@@ -1070,8 +1070,8 @@ const getSelectionPageTextOffsetRange = (chapter, page) => {
     const startOffset = findFirstOffset(offsetPage => offsetPage >= page);
     const endOffset = findFirstOffset(offsetPage => offsetPage > page);
     const pageTextRange = startOffset < endOffset &&
-                          startOffset < textLength &&
-                          getPageForTextOffsetForSearch(chapter, startOffset) === page
+    startOffset < textLength &&
+    getPageForTextOffsetForSearch(chapter, startOffset) === page
         ? { startOffset, endOffset }
         : null;
     selectionPageTextRangeCache.set(page, pageTextRange);

@@ -5,7 +5,22 @@ using BookHeaven.Core.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace BookHeaven.Reader.Components.Pages.Reader.Partials;
+namespace BookHeaven.Reader.Components.Pages.Reader.Partials.TextSelection;
+
+[Flags]
+internal enum SelectionAction : byte
+{
+    None = 0,
+    Highlight = 1 << 0,
+    RemoveHighlight = 1 << 1,
+    Combine = 1 << 2
+}
+
+internal static class SelectionActionExtensions
+{
+    internal static bool Contains(this SelectionAction actions, SelectionAction action) =>
+        (actions & action) == action;
+}
 
 public sealed partial class TextSelectionHandler : IAsyncDisposable
 {
@@ -16,18 +31,19 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
 
     private DotNetObjectReference<TextSelectionHandler>? _dotNetReference;
     private IJSObjectReference? _module;
-    private bool _isSelectionActionVisible;
-    private bool _selectionHasHighlight;
-    private bool _selectionCanHighlight;
-    private bool _selectionCanCombine;
-    private bool _selectionActionPositioned;
+    private SelectionActionState _selectionActionState;
+    private SelectionAction _selectionActions;
     private bool _restoreHighlightsOnNextRender;
-    private bool _isEditingHighlightModified;
-    private bool _isNoteEditorVisible;
-    private BookAnnotation? _editingHighlight;
+    private EditingHighlight? _editingHighlight;
     private BookAnnotation? _noteAnnotation;
     private double _selectionActionLeft;
     private double _selectionActionTop;
+
+    private bool IsSelectionActionVisible => _selectionActionState is not SelectionActionState.Hidden;
+    private bool IsSelectionActionPositioned => _selectionActionState is SelectionActionState.Positioned;
+    private bool IsEditedHighlightModified =>
+        _editingHighlight?.State is EditingHighlightState.Modified;
+    private bool IsNoteEditorVisible => _noteAnnotation is not null;
 
     protected override void OnInitialized()
     {
@@ -38,7 +54,7 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     {
         if (_module is null)
         {
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TextSelectionHandler.razor.js");
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TextSelection/TextSelectionHandler.razor.js");
             _dotNetReference = DotNetObjectReference.Create(this);
             await _module.InvokeVoidAsync(
                 "Initialize",
@@ -49,12 +65,12 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
 
         if (_module is null) return;
 
-        if (_isSelectionActionVisible)
+        if (IsSelectionActionVisible)
         {
             await _module.InvokeVoidAsync("ClampSelectionAction");
-            if (!_selectionActionPositioned)
+            if (_selectionActionState is SelectionActionState.AwaitingPosition)
             {
-                _selectionActionPositioned = true;
+                _selectionActionState = SelectionActionState.Positioned;
                 StateHasChanged();
             }
         }
@@ -95,38 +111,50 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
         int originalEndOffset,
         bool isEditingHighlightModified)
     {
-        _isSelectionActionVisible = !string.IsNullOrWhiteSpace(text);
-        _selectionActionPositioned = false;
+        _selectionActionState = string.IsNullOrWhiteSpace(text)
+            ? SelectionActionState.Hidden
+            : SelectionActionState.AwaitingPosition;
         _selectionActionLeft = left;
         _selectionActionTop = top;
         if (isEditingHighlight)
         {
-            if (_editingHighlight is null ||
-                _editingHighlight.StartOffset != originalStartOffset ||
-                _editingHighlight.EndOffset != originalEndOffset)
+            var annotation = _editingHighlight?.Annotation;
+            if (annotation is null ||
+                annotation.StartOffset != originalStartOffset ||
+                annotation.EndOffset != originalEndOffset)
             {
                 var existing = AnnotationService.GetAnnotationForRange(originalStartOffset, originalEndOffset);
-                _editingHighlight = existing is not null &&
-                                   existing.StartOffset == originalStartOffset &&
-                                   existing.EndOffset == originalEndOffset
+                annotation = existing is not null &&
+                             existing.StartOffset == originalStartOffset &&
+                             existing.EndOffset == originalEndOffset
                     ? existing.Clone()
                     : null;
             }
 
-            _isEditingHighlightModified = _editingHighlight is not null && isEditingHighlightModified;
+            _editingHighlight = annotation is null
+                ? null
+                : new EditingHighlight(
+                    annotation,
+                    isEditingHighlightModified
+                        ? EditingHighlightState.Modified
+                        : EditingHighlightState.Unmodified);
         }
         else
         {
             _editingHighlight = null;
-            _isEditingHighlightModified = false;
         }
 
-        _selectionHasHighlight = _isSelectionActionVisible && !_isEditingHighlightModified &&
-                                 AnnotationService.HasRemovableAnnotationsInRange(startOffset, endOffset);
-        _selectionCanHighlight = _isSelectionActionVisible && !_isEditingHighlightModified &&
-                                 AnnotationService.HasUnhighlightedInRange(startOffset, endOffset);
-        _selectionCanCombine = _isSelectionActionVisible && !isEditingHighlight &&
-                              AnnotationService.HasAdjacentAnnotations(startOffset, endOffset);
+        _selectionActions = !IsSelectionActionVisible || IsEditedHighlightModified
+            ? SelectionAction.None
+            : (AnnotationService.HasUnhighlightedInRange(startOffset, endOffset)
+                ? SelectionAction.Highlight
+                : SelectionAction.None)
+              | (AnnotationService.HasRemovableAnnotationsInRange(startOffset, endOffset)
+                  ? SelectionAction.RemoveHighlight
+                  : SelectionAction.None)
+              | (!isEditingHighlight && AnnotationService.HasAdjacentAnnotations(startOffset, endOffset)
+                  ? SelectionAction.Combine
+                  : SelectionAction.None);
         return InvokeAsync(StateHasChanged);
     }
 
@@ -179,11 +207,10 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     {
         if (_module is null || _editingHighlight is null) return;
 
-        var annotation = _editingHighlight.Clone();
+        var annotation = _editingHighlight.Annotation.Clone();
         var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection", true);
-        _isSelectionActionVisible = false;
+        HideSelectionAction();
         _editingHighlight = null;
-        _isEditingHighlightModified = false;
         if (range is null) return;
 
         annotation.StartOffset = range.StartOffset;
@@ -204,7 +231,7 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
         if (string.IsNullOrEmpty(text)) return;
 
         await Clipboard.SetTextAsync(text);
-        _isSelectionActionVisible = false;
+        HideSelectionAction();
     }
 
     private async Task UpdateHighlightsFromSelectionAsync(Func<HighlightRange, Task<Result>> update)
@@ -217,9 +244,8 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
         {
             result = await update(range);
         }
-        _isSelectionActionVisible = false;
+        HideSelectionAction();
         _editingHighlight = null;
-        _isEditingHighlightModified = false;
         if (result is { IsFailure: true })
         {
             await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
@@ -242,8 +268,7 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
             EndOffset = range.EndOffset,
             Text = range.Text
         };
-        _isSelectionActionVisible = false;
-        _isNoteEditorVisible = true;
+        HideSelectionAction();
     }
 
     private async Task SaveNote(BookAnnotation annotation)
@@ -260,9 +285,11 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
 
     private void CancelNote()
     {
-        _isNoteEditorVisible = false;
         _noteAnnotation = null;
     }
+
+    private void HideSelectionAction() =>
+        _selectionActionState = SelectionActionState.Hidden;
 
     private void OnHighlightsChanged()
     {
@@ -292,4 +319,17 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     }
 
     private record HighlightRange(int StartOffset, int EndOffset, string Text);
+    private sealed record EditingHighlight(BookAnnotation Annotation, EditingHighlightState State);
+    private enum SelectionActionState
+    {
+        Hidden,
+        AwaitingPosition,
+        Positioned
+    }
+
+    private enum EditingHighlightState
+    {
+        Unmodified,
+        Modified
+    }
 }

@@ -3,7 +3,7 @@ using BookHeaven.Core.Abstractions.Services;
 using BookHeaven.Core.Enums;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Features.Reader.Models;
-using BookHeaven.Reader.Components.Pages.Reader.Partials;
+using BookHeaven.Reader.Components.Pages.Reader.Partials.TextSelection;
 using BookHeaven.Reader.Features.Lifecycle.Services;
 using BookHeaven.Reader.Features.Preferences.Services;
 using BookHeaven.Reader.Features.Reader.Services;
@@ -181,5 +181,4 @@ public sealed partial class Reader : IAsyncDisposable, IReaderViewAdapter
         else window.ClearFlags(Android.Views.WindowManagerFlags.Fullscreen);
     }
 #endif
-
 }

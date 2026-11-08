@@ -1,30 +1,30 @@
 @using System.Globalization
 @using BookHeaven.Reader.Components.Dialogs.Annotations
 
-@if (_isSelectionActionVisible)
+@if (IsSelectionActionVisible)
 {
 	<div id="reader-selection-action" class="bg-white text-lg border-black divide-black fixed z-[1001] flex w-max items-center divide-x overflow-hidden rounded-full border select-none"
 		data-anchor-x="@_selectionActionLeft.ToString(CultureInfo.InvariantCulture)"
-		style="left: @_selectionActionLeft.ToString(CultureInfo.InvariantCulture)px; top: @_selectionActionTop.ToString(CultureInfo.InvariantCulture)px; visibility: @(_selectionActionPositioned ? "visible" : "hidden")"
+		style="left: @_selectionActionLeft.ToString(CultureInfo.InvariantCulture)px; top: @_selectionActionTop.ToString(CultureInfo.InvariantCulture)px; visibility: @(IsSelectionActionPositioned ? "visible" : "hidden")"
 		@onclick:stopPropagation="true">
-		@if (_editingHighlight is not null && _isEditingHighlightModified)
+		@if (IsEditedHighlightModified)
 		{
 			<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="ApplyEditedHighlight">@Translations.APPLY</button>
 		}
 		else
 		{
-			if (_selectionCanHighlight)
+			if (_selectionActions.Contains(SelectionAction.Highlight))
 			{
 				<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="ApplyHighlight">@Translations.HIGHLIGHT</button>
 			}
-			if (_selectionHasHighlight)
+			if (_selectionActions.Contains(SelectionAction.RemoveHighlight))
 			{
 				<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="RemoveHighlight">@Translations.REMOVE_HIGHLIGHT</button>
 			}
 			<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="EditNote">
 				@Translations.NOTE
 			</button>
-			if (_selectionCanCombine)
+			if (_selectionActions.Contains(SelectionAction.Combine))
 			{
 				<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="CombineHighlights">@Translations.COMBINE</button>
 			}
@@ -32,7 +32,7 @@
 		<button class="px-3 py-1 active:bg-black active:text-neutral-50 text-nowrap" @onclick="CopySelection">@Translations.COPY</button>
 	</div>
 }
-@if (_isNoteEditorVisible)
+@if (IsNoteEditorVisible)
 {
 	<AnnotationNoteDialog
 		Annotation="_noteAnnotation!"
