@@ -2,25 +2,12 @@ using BookHeaven.Core.Abstractions;
 using BookHeaven.Core.Enums;
 using BookHeaven.Core.Features.Reader.Abstractions;
 using BookHeaven.Core.Shared;
+using BookHeaven.Reader.Components.Pages.Reader.Partials.TextSelection.Enums;
+using BookHeaven.Reader.Components.Pages.Reader.Partials.TextSelection.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace BookHeaven.Reader.Components.Pages.Reader.Partials.TextSelection;
-
-[Flags]
-internal enum SelectionAction : byte
-{
-    None = 0,
-    Highlight = 1 << 0,
-    RemoveHighlight = 1 << 1,
-    Combine = 1 << 2
-}
-
-internal static class SelectionActionExtensions
-{
-    internal static bool Contains(this SelectionAction actions, SelectionAction action) =>
-        (actions & action) == action;
-}
 
 public sealed partial class TextSelectionHandler : IAsyncDisposable
 {
@@ -316,20 +303,5 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
         }
 
         GC.SuppressFinalize(this);
-    }
-
-    private record HighlightRange(int StartOffset, int EndOffset, string Text);
-    private sealed record EditingHighlight(BookAnnotation Annotation, EditingHighlightState State);
-    private enum SelectionActionState
-    {
-        Hidden,
-        AwaitingPosition,
-        Positioned
-    }
-
-    private enum EditingHighlightState
-    {
-        Unmodified,
-        Modified
     }
 }
