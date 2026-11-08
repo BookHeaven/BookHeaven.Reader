@@ -1,44 +1,114 @@
-const Reference = {
-    DotNet: null,
+const bridge = { dotNet: null };
+const highlights = { ranges: [], offsets: [] };
+const TIMING = Object.freeze({
+    pageTurn: 1200,
+    selectionChange: 100,
+    longPress: 500
+});
+const THRESHOLD = Object.freeze({ pointerMove: 4 });
+const HANDLE = Object.freeze({
+    height: 42,
+    mouseHitboxHeight: 16,
+    knobSize: 16,
+    touchStemExtension: 6
+});
+const SelectionGesture = Object.freeze({
+    PENDING: 'pending',
+    HIGHLIGHT_PENDING: 'highlight-pending',
+    HIGHLIGHT: 'highlight',
+    HIGHLIGHT_CANCELLED: 'highlight-cancelled',
+    WORD: 'word',
+    WORD_DRAG: 'word-drag',
+    TEXT: 'text',
+    HANDLE: 'handle'
+});
+const PageTurnPhase = Object.freeze({
+    IDLE: 'idle',
+    SCHEDULED: 'scheduled',
+    TURNING: 'turning'
+});
+const EditingHighlightPhase = Object.freeze({
+    NONE: 'none',
+    UNMODIFIED: 'unmodified',
+    MODIFIED: 'modified'
+});
+const SelectionCancellationPhase = Object.freeze({
+    INACTIVE: 'inactive',
+    PENDING: 'pending'
+});
+const selection = {
+    active: null,
+    inputType: 'mouse',
+    chapter: null,
+    chapterFirstChild: null,
+    editingHighlight: { range: null, phase: EditingHighlightPhase.NONE },
+    acrossPages: false,
+    pointer: null,
+    changeTimeout: null,
+    cancellation: { timeout: null, phase: SelectionCancellationPhase.INACTIVE },
+    ui: {
+        overlay: null,
+        startHandle: null,
+        endHandle: null,
+        fallbackRects: []
+    }
 };
-const highlightedRanges = [];
-const highlightedOffsets = [];
-const selectionPageTextRangeCache = new Map();
-const selectionPageTurnDelay = 1200;
-const selectionChangeDelay = 100;
-const longPressDelay = 500;
-const selectionMoveThreshold = 4;
-const selectionHandleKnobCenterOffsetY = 25;
-const selectionHandleHeight = 42;
-const selectionHandleMouseHitboxHeight = 16;
-const selectionHandleTouchStemExtension = 6;
+const pageTurn = {
+    phase: PageTurnPhase.IDLE,
+    timeout: null,
+    direction: 0,
+    blockedDirection: 0
+};
+const reader = {
+    pageTextRangeCache: new Map(),
+    pageStyleObserver: null,
+    observedPageStyle: null,
+    observedPageMarker: null,
+    chapterMutationObserver: null
+};
+const pageTurnTransitions = new Map([
+    [PageTurnPhase.IDLE, [PageTurnPhase.SCHEDULED]],
+    [PageTurnPhase.SCHEDULED, [PageTurnPhase.IDLE, PageTurnPhase.TURNING]],
+    [PageTurnPhase.TURNING, [PageTurnPhase.IDLE]]
+]);
+const selectionGestureTransitions = new Map([
+    [SelectionGesture.PENDING, [SelectionGesture.TEXT, SelectionGesture.WORD]],
+    [SelectionGesture.HIGHLIGHT_PENDING, [
+        SelectionGesture.HIGHLIGHT,
+        SelectionGesture.HIGHLIGHT_CANCELLED,
+        SelectionGesture.WORD
+    ]],
+    [SelectionGesture.WORD, [SelectionGesture.WORD_DRAG]],
+    [SelectionGesture.TEXT, []],
+    [SelectionGesture.WORD_DRAG, []],
+    [SelectionGesture.HANDLE, []],
+    [SelectionGesture.HIGHLIGHT, []],
+    [SelectionGesture.HIGHLIGHT_CANCELLED, []]
+]);
 
-let activeSelection = null;
-let selectionInputType = 'mouse';
-let selectionChapter = null;
-let selectionChapterFirstChild = null;
-let editingHighlightRange = null;
-let editingHighlightChanged = false;
-let selectionAcrossPages = false;
-let selectionPointer = null;
-let selectionPageTurnTimeout;
-let selectionPageTurnDirection = 0;
-let selectionPageTurnBlockedDirection = 0;
-let selectionPageTurnInProgress = false;
-let selectionChangeTimeout;
-let selectionCancellationTimeout;
-let selectionCancellationPending = false;
-let pageStyleObserver;
-let observedPageStyle;
-let observedPageMarker;
-let chapterMutationObserver;
-let selectionOverlay;
-let selectionStartHandle;
-let selectionEndHandle;
-let fallbackSelectionRects = [];
+const transitionSelectionGesture = nextMode => {
+    const currentMode = selection.pointer?.mode;
+    if (!selectionGestureTransitions.get(currentMode)?.includes(nextMode)) {
+        throw new Error(`Invalid selection gesture transition: ${currentMode} -> ${nextMode}`);
+    }
+
+    selection.pointer.mode = nextMode;
+};
+
+const isWaitingForLongPress = pointer =>
+    pointer?.mode === SelectionGesture.PENDING ||
+    pointer?.mode === SelectionGesture.HIGHLIGHT_PENDING;
+
+const transitionPageTurn = nextPhase => {
+    if (!pageTurnTransitions.get(pageTurn.phase)?.includes(nextPhase)) {
+        throw new Error(`Invalid page turn transition: ${pageTurn.phase} -> ${nextPhase}`);
+    }
+
+    pageTurn.phase = nextPhase;
+};
 
 export function Initialize(dotnet, startHandleLabel, endHandleLabel) {
-    Reference.DotNet = dotnet;
+    bridge.dotNet = dotnet;
     createSelectionOverlay(startHandleLabel, endHandleLabel);
     window.getSelection()?.removeAllRanges();
     updateSelectionEventListeners(true);
@@ -48,25 +118,24 @@ export function Initialize(dotnet, startHandleLabel, endHandleLabel) {
 
 export function Dispose() {
     updateSelectionEventListeners(false);
-    clearTimeout(selectionChangeTimeout);
-    clearTimeout(selectionCancellationTimeout);
+    clearTimeout(selection.changeTimeout);
+    clearTimeout(selection.cancellation.timeout);
     clearSelectionPageTurnTimer();
-    clearTimeout(selectionPointer?.longPressTimeout);
-    pageStyleObserver?.disconnect();
-    chapterMutationObserver?.disconnect();
-    activeSelection = null;
-    selectionChapter = null;
-    selectionChapterFirstChild = null;
+    clearTimeout(selection.pointer?.longPressTimeout);
+    reader.pageStyleObserver?.disconnect();
+    reader.chapterMutationObserver?.disconnect();
+    selection.active = null;
+    selection.chapter = null;
+    selection.chapterFirstChild = null;
     clearEditingHighlightRange();
-    selectionPointer = null;
-    selectionCancellationPending = false;
-    selectionAcrossPages = false;
-    selectionPageTurnBlockedDirection = 0;
-    selectionPageTurnInProgress = false;
-    selectionOverlay?.remove();
-    selectionOverlay = null;
-    selectionStartHandle = null;
-    selectionEndHandle = null;
+    selection.pointer = null;
+    selection.cancellation.phase = SelectionCancellationPhase.INACTIVE;
+    selection.acrossPages = false;
+    pageTurn.blockedDirection = 0;
+    selection.ui.overlay?.remove();
+    selection.ui.overlay = null;
+    selection.ui.startHandle = null;
+    selection.ui.endHandle = null;
     clearFallbackSelectionRects();
     if (window.CSS?.highlights) {
         CSS.highlights.delete('bookheaven-highlight');
@@ -90,18 +159,18 @@ function updateSelectionEventListeners(add) {
 }
 
 const createSelectionOverlay = (startHandleLabel, endHandleLabel) => {
-    selectionOverlay = document.createElement('div');
-    Object.assign(selectionOverlay.style, {
+    selection.ui.overlay = document.createElement('div');
+    Object.assign(selection.ui.overlay.style, {
         position: 'fixed',
         inset: '0',
         zIndex: '999',
         pointerEvents: 'none'
     });
 
-    selectionStartHandle = createSelectionHandle(startHandleLabel);
-    selectionEndHandle = createSelectionHandle(endHandleLabel);
-    selectionOverlay.append(selectionStartHandle, selectionEndHandle);
-    document.body.append(selectionOverlay);
+    selection.ui.startHandle = createSelectionHandle(startHandleLabel);
+    selection.ui.endHandle = createSelectionHandle(endHandleLabel);
+    selection.ui.overlay.append(selection.ui.startHandle, selection.ui.endHandle);
+    document.body.append(selection.ui.overlay);
 };
 
 const createSelectionHandle = label => {
@@ -113,7 +182,7 @@ const createSelectionHandle = label => {
         position: 'fixed',
         display: 'none',
         width: '36px',
-        height: `${selectionHandleMouseHitboxHeight}px`,
+        height: `${HANDLE.mouseHitboxHeight}px`,
         padding: '0',
         border: '0',
         background: 'transparent',
@@ -138,8 +207,8 @@ const createSelectionHandle = label => {
         position: 'absolute',
         left: '10px',
         top: '0',
-        width: '16px',
-        height: '16px',
+        width: `${HANDLE.knobSize}px`,
+        height: `${HANDLE.knobSize}px`,
         border: '2px solid white',
         borderRadius: '50%',
         boxSizing: 'border-box',
@@ -153,13 +222,13 @@ const createSelectionHandle = label => {
 };
 
 const observeReaderLayout = () => {
-    pageStyleObserver?.disconnect();
-    observedPageStyle = Array.from(document.querySelectorAll('style'))
+    reader.pageStyleObserver?.disconnect();
+    reader.observedPageStyle = Array.from(document.querySelectorAll('style'))
         .find(style => style.textContent.includes('--chapter-page')) ?? null;
-    observedPageMarker = getPageMarker();
-    if (observedPageStyle) {
-        pageStyleObserver = new MutationObserver(handleReaderLayoutChange);
-        pageStyleObserver.observe(observedPageStyle, {
+    reader.observedPageMarker = getPageMarker();
+    if (reader.observedPageStyle) {
+        reader.pageStyleObserver = new MutationObserver(handleReaderLayoutChange);
+        reader.pageStyleObserver.observe(reader.observedPageStyle, {
             childList: true,
             characterData: true,
             subtree: true
@@ -170,20 +239,20 @@ const observeReaderLayout = () => {
 };
 
 const observeCurrentChapter = () => {
-    chapterMutationObserver?.disconnect();
+    reader.chapterMutationObserver?.disconnect();
     const chapter = document.querySelector('.chapter.current');
     if (!chapter) return;
 
-    chapterMutationObserver = new MutationObserver(() => {
-        selectionPageTextRangeCache.clear();
-        if (selectionChapter && selectionChapterFirstChild !== selectionChapter.firstChild) {
+    reader.chapterMutationObserver = new MutationObserver(() => {
+        reader.pageTextRangeCache.clear();
+        if (selection.chapter && selection.chapterFirstChild !== selection.chapter.firstChild) {
             clearSelectionState();
             notifyNoSelection();
             return;
         }
         renderSelection();
     });
-    chapterMutationObserver.observe(chapter, { childList: true });
+    reader.chapterMutationObserver.observe(chapter, { childList: true });
 };
 
 const getPageMarker = () => {
@@ -194,10 +263,10 @@ const getPageMarker = () => {
 };
 
 const handleReaderLayoutChange = () => {
-    selectionPageTextRangeCache.clear();
+    reader.pageTextRangeCache.clear();
     const pageMarker = getPageMarker();
-    const pageChanged = pageMarker !== observedPageMarker;
-    observedPageMarker = pageMarker;
+    const pageChanged = pageMarker !== reader.observedPageMarker;
+    reader.observedPageMarker = pageMarker;
     observeCurrentChapter();
 
     requestAnimationFrame(() => {
@@ -216,13 +285,13 @@ export function ClampSelectionAction() {
     const margin = 24;
     let anchorX = Number(action.dataset.anchorX);
     let desiredTop = actionBounds.top;
-    const selection = getCurrentSelectionRange();
+    const selectedRange = getCurrentSelectionRange();
     const chapter = document.querySelector('.chapter.current');
     const viewer = chapter?.closest('.viewer');
     const viewerBounds = viewer?.getBoundingClientRect();
 
-    if (selection && viewer && viewerBounds) {
-        const visibleRects = getVisibleSelectionRects(selection, viewerBounds);
+    if (selectedRange && viewer && viewerBounds) {
+        const visibleRects = getVisibleSelectionRects(selectedRange, viewerBounds);
         if (visibleRects.length > 0) {
             const selectedBounds = visibleRects.reduce((bounds, rect) => ({
                 left: Math.min(bounds.left, rect.left),
@@ -235,19 +304,19 @@ export function ClampSelectionAction() {
                 top: Number.POSITIVE_INFINITY,
                 bottom: Number.NEGATIVE_INFINITY
             });
-            const focusAtStart = activeSelection.focusOffset < activeSelection.anchorOffset;
+            const focusAtStart = selection.active.focusOffset < selection.active.anchorOffset;
             const focusPoint = getVisibleCaretPoint(
                 chapter,
-                activeSelection.focusOffset,
+                selection.active.focusOffset,
                 viewerBounds,
                 focusAtStart);
             if (focusPoint) anchorX = focusPoint.x;
             const spaceAbove = selectedBounds.top - viewerBounds.top;
-            const spaceBelow = viewerBounds.bottom - selectedBounds.bottom - selectionHandleHeight;
+            const spaceBelow = viewerBounds.bottom - selectedBounds.bottom - HANDLE.height;
             if (spaceAbove >= actionBounds.height + margin) {
                 desiredTop = selectedBounds.top - actionBounds.height - margin;
             } else if (spaceBelow >= actionBounds.height + margin) {
-                desiredTop = selectedBounds.bottom + selectionHandleHeight + margin;
+                desiredTop = selectedBounds.bottom + HANDLE.height + margin;
             } else {
                 desiredTop = spaceAbove > spaceBelow
                     ? viewerBounds.top + margin
@@ -274,8 +343,9 @@ export function ClampSelectionAction() {
 }
 
 const handleSelectionPointerDown = event => {
-    clearTimeout(selectionCancellationTimeout);
-    selectionCancellationPending = false;
+    clearTimeout(selection.cancellation.timeout);
+    selection.cancellation.timeout = null;
+    selection.cancellation.phase = SelectionCancellationPhase.INACTIVE;
     if (event.button !== 0) return;
 
     const handleAction = event.target.closest?.('#reader-selection-action');
@@ -296,9 +366,10 @@ const handleSelectionPointerDown = event => {
         !isPointWithinSelection(event.clientX, event.clientY)) {
         clearSelectionState();
         notifyNoSelection();
-        selectionCancellationPending = true;
-        selectionCancellationTimeout = setTimeout(() => {
-            selectionCancellationPending = false;
+        selection.cancellation.phase = SelectionCancellationPhase.PENDING;
+        selection.cancellation.timeout = setTimeout(() => {
+            selection.cancellation.phase = SelectionCancellationPhase.INACTIVE;
+            selection.cancellation.timeout = null;
         }, 1000);
         return;
     }
@@ -327,8 +398,8 @@ const handleSelectionPointerDown = event => {
         getHighlightRangeAtPoint(event.clientX, event.clientY) !== undefined;
     if (!isTouchingHighlight) clearEditingHighlightRange();
     notifyNoSelection();
-    clearTimeout(selectionPointer?.longPressTimeout);
-    selectionPointer = {
+    clearTimeout(selection.pointer?.longPressTimeout);
+    selection.pointer = {
         id: event.pointerId,
         x: event.clientX,
         y: event.clientY,
@@ -337,26 +408,26 @@ const handleSelectionPointerDown = event => {
         anchorOffset: pointerCaret?.position
             ? getTextOffset(chapter, pointerCaret.position.container, pointerCaret.position.offset)
             : null,
-        moved: false,
-        mode: isTouchingHighlight ? 'highlight-pending' : 'pending',
+        mode: isTouchingHighlight
+            ? SelectionGesture.HIGHLIGHT_PENDING
+            : SelectionGesture.PENDING,
         longPressTimeout: null
     };
 
-    if (selectionPointer.anchorOffset !== null) {
-        selectionPointer.longPressTimeout = setTimeout(
-            () => selectLongPressAtPointer(selectionPointer.id),
-            longPressDelay);
+    if (selection.pointer.anchorOffset !== null) {
+        selection.pointer.longPressTimeout = setTimeout(
+            () => selectLongPressAtPointer(selection.pointer.id),
+            TIMING.longPress);
     }
-    selectionPageTurnBlockedDirection = 0;
+    pageTurn.blockedDirection = 0;
 };
 
 const selectLongPressAtPointer = pointerId => {
-    if (selectionPointer?.id !== pointerId || selectionPointer.moved) return;
+    if (selection.pointer?.id !== pointerId || !isWaitingForLongPress(selection.pointer)) return;
 
-    if (selectionPointer.mode === 'highlight-pending' &&
-        SelectHighlightAt(selectionPointer.x, selectionPointer.y)) {
-        selectionPointer.mode = 'highlight';
-        selectionPointer.moved = true;
+    if (selection.pointer.mode === SelectionGesture.HIGHLIGHT_PENDING &&
+        SelectHighlightAt(selection.pointer.x, selection.pointer.y)) {
+        transitionSelectionGesture(SelectionGesture.HIGHLIGHT);
         return;
     }
 
@@ -364,57 +435,54 @@ const selectLongPressAtPointer = pointerId => {
 };
 
 const selectWordAtPointer = pointerId => {
-    if (selectionPointer?.id !== pointerId || selectionPointer.moved ||
-        selectionPointer.anchorOffset === null) return;
+    if (selection.pointer?.id !== pointerId || !isWaitingForLongPress(selection.pointer) ||
+        selection.pointer.anchorOffset === null) return;
 
     const chapter = document.querySelector('.chapter.current');
     if (!chapter) return;
-    const word = getWordOffsets(chapter, selectionPointer.anchorOffset);
+    const word = getWordOffsets(chapter, selection.pointer.anchorOffset);
     if (!word) return;
 
     clearEditingHighlightRange();
     const focusOffset = constrainSelectionOutsideHighlights(word.start, word.end);
     if (focusOffset === word.start) return;
-    selectionPointer.mode = 'word';
-    selectionPointer.anchorOffset = word.start;
-    selectionPointer.wordStart = word.start;
-    selectionPointer.wordEnd = focusOffset;
-    selectionPointer.moved = false;
+    transitionSelectionGesture(SelectionGesture.WORD);
+    selection.pointer.anchorOffset = word.start;
+    selection.pointer.wordStart = word.start;
+    selection.pointer.wordEnd = focusOffset;
     setSelection(word.start, focusOffset, false);
     debounceSelectionChange();
 };
 
 const handleSelectionPointerMove = event => {
-    if (event.pointerId !== selectionPointer?.id) return;
+    if (event.pointerId !== selection.pointer?.id) return;
 
-    selectionPointer.x = event.clientX;
-    selectionPointer.y = event.clientY;
-    if (selectionPointer.mode === 'highlight') return;
+    selection.pointer.x = event.clientX;
+    selection.pointer.y = event.clientY;
+    if (selection.pointer.mode === SelectionGesture.HIGHLIGHT) return;
 
-    if (selectionPointer.mode === 'pending' ||
-        selectionPointer.mode === 'highlight-pending' ||
-        selectionPointer.mode === 'word') {
-        const wasHighlightPending = selectionPointer.mode === 'highlight-pending';
+    if (isWaitingForLongPress(selection.pointer) ||
+        selection.pointer.mode === SelectionGesture.WORD) {
+        const wasHighlightPending =
+            selection.pointer.mode === SelectionGesture.HIGHLIGHT_PENDING;
         const distance = Math.hypot(
-            event.clientX - selectionPointer.originX,
-            event.clientY - selectionPointer.originY);
-        if (distance < selectionMoveThreshold) return;
+            event.clientX - selection.pointer.originX,
+            event.clientY - selection.pointer.originY);
+        if (distance < THRESHOLD.pointerMove) return;
 
-        clearTimeout(selectionPointer.longPressTimeout);
+        clearTimeout(selection.pointer.longPressTimeout);
         if (wasHighlightPending) {
-            selectionPointer.mode = 'highlight-cancelled';
-            selectionPointer.moved = true;
+            transitionSelectionGesture(SelectionGesture.HIGHLIGHT_CANCELLED);
             return;
         }
-        selectionPointer.mode = selectionPointer.mode === 'word' ? 'word-drag' : 'text';
-        selectionPointer.moved = true;
-    } else {
-        selectionPointer.moved = true;
+        transitionSelectionGesture(selection.pointer.mode === SelectionGesture.WORD
+            ? SelectionGesture.WORD_DRAG
+            : SelectionGesture.TEXT);
     }
 
-    if (selectionPointer.mode === 'highlight-cancelled') return;
+    if (selection.pointer.mode === SelectionGesture.HIGHLIGHT_CANCELLED) return;
 
-    if (selectionPointer.mode === 'word-drag') {
+    if (selection.pointer.mode === SelectionGesture.WORD_DRAG) {
         updateWordSelectionFocusAtPointer();
     } else {
         updateSelectionFocusAtPointer();
@@ -423,36 +491,36 @@ const handleSelectionPointerMove = event => {
 };
 
 const updateSelectionFocusAtPointer = () => {
-    if (!selectionPointer || selectionPointer.anchorOffset === null) return;
+    if (!selection.pointer || selection.pointer.anchorOffset === null) return;
     const chapter = document.querySelector('.chapter.current');
     const viewer = chapter?.closest('.viewer');
     if (!chapter || !viewer) return;
 
     const position = getPointerPosition(
-        selectionPointer.mode === 'handle'
-            ? selectionPointer.x - selectionPointer.caretOffsetX
-            : selectionPointer.x,
-        selectionPointer.mode === 'handle'
-            ? selectionPointer.y - selectionPointer.caretOffsetY
-            : selectionPointer.y,
+        selection.pointer.mode === SelectionGesture.HANDLE
+            ? selection.pointer.x - selection.pointer.caretOffsetX
+            : selection.pointer.x,
+        selection.pointer.mode === SelectionGesture.HANDLE
+            ? selection.pointer.y - selection.pointer.caretOffsetY
+            : selection.pointer.y,
         chapter,
         viewer);
     if (!position) return;
 
     const focusOffset = getTextOffset(chapter, position.container, position.offset);
     setSelection(
-        selectionPointer.anchorOffset,
-        constrainSelectionFocus(selectionPointer.anchorOffset, focusOffset),
-        selectionAcrossPages);
+        selection.pointer.anchorOffset,
+        constrainSelectionFocus(selection.pointer.anchorOffset, focusOffset),
+        selection.acrossPages);
     debounceSelectionChange();
 };
 
 const constrainEditedHighlightFocus = (anchorOffset, focusOffset) => {
-    if (!editingHighlightRange) return focusOffset;
+    if (!selection.editingHighlight.range) return focusOffset;
 
-    const otherHighlights = highlightedOffsets.filter(highlight =>
-        highlight.start !== editingHighlightRange.start ||
-        highlight.end !== editingHighlightRange.end);
+    const otherHighlights = highlights.offsets.filter(highlight =>
+        highlight.start !== selection.editingHighlight.range.start ||
+        highlight.end !== selection.editingHighlight.range.end);
     if (focusOffset > anchorOffset) {
         const boundary = otherHighlights
             .filter(highlight => anchorOffset <= highlight.start && focusOffset > highlight.start)
@@ -465,29 +533,29 @@ const constrainEditedHighlightFocus = (anchorOffset, focusOffset) => {
         if (Number.isFinite(boundary)) focusOffset = boundary;
     }
 
-    if (anchorOffset <= editingHighlightRange.start ||
-        anchorOffset >= editingHighlightRange.end) return focusOffset;
+    if (anchorOffset <= selection.editingHighlight.range.start ||
+        anchorOffset >= selection.editingHighlight.range.end) return focusOffset;
 
-    if (focusOffset < anchorOffset) return Math.min(focusOffset, editingHighlightRange.start);
-    if (focusOffset > anchorOffset) return Math.max(focusOffset, editingHighlightRange.end);
-    return activeSelection.focusOffset;
+    if (focusOffset < anchorOffset) return Math.min(focusOffset, selection.editingHighlight.range.start);
+    if (focusOffset > anchorOffset) return Math.max(focusOffset, selection.editingHighlight.range.end);
+    return selection.active.focusOffset;
 };
 
 const constrainSelectionOutsideHighlights = (anchorOffset, focusOffset) => {
-    if (highlightedOffsets.some(highlight =>
+    if (highlights.offsets.some(highlight =>
         anchorOffset >= highlight.start && anchorOffset < highlight.end)) {
         return anchorOffset;
     }
 
     if (focusOffset > anchorOffset) {
-        const boundary = highlightedOffsets
+        const boundary = highlights.offsets
             .filter(highlight => anchorOffset <= highlight.start && focusOffset > highlight.start)
             .reduce((nearest, highlight) => Math.min(nearest, highlight.start), Number.POSITIVE_INFINITY);
         return Number.isFinite(boundary) ? boundary : focusOffset;
     }
 
     if (focusOffset < anchorOffset) {
-        const boundary = highlightedOffsets
+        const boundary = highlights.offsets
             .filter(highlight => anchorOffset >= highlight.end && focusOffset < highlight.end)
             .reduce((nearest, highlight) => Math.max(nearest, highlight.end), Number.NEGATIVE_INFINITY);
         return Number.isFinite(boundary) ? boundary : focusOffset;
@@ -497,46 +565,46 @@ const constrainSelectionOutsideHighlights = (anchorOffset, focusOffset) => {
 };
 
 const constrainSelectionFocus = (anchorOffset, focusOffset) =>
-    editingHighlightRange
+    selection.editingHighlight.range
         ? constrainEditedHighlightFocus(anchorOffset, focusOffset)
         : constrainSelectionOutsideHighlights(anchorOffset, focusOffset);
 
 const updateWordSelectionFocusAtPointer = () => {
-    if (!selectionPointer || selectionPointer.anchorOffset === null) return;
+    if (!selection.pointer || selection.pointer.anchorOffset === null) return;
     const chapter = document.querySelector('.chapter.current');
     const viewer = chapter?.closest('.viewer');
     if (!chapter || !viewer) return;
 
     const position = getPointerPosition(
-        selectionPointer.x,
-        selectionPointer.y,
+        selection.pointer.x,
+        selection.pointer.y,
         chapter,
         viewer);
     if (!position) return;
 
     const pointerOffset = getTextOffset(chapter, position.container, position.offset);
     const word = getWordOffsets(chapter, pointerOffset);
-    let focusOffset = selectionPointer.wordEnd;
-    if (pointerOffset < selectionPointer.wordStart && word?.start < selectionPointer.wordStart) {
+    let focusOffset = selection.pointer.wordEnd;
+    if (pointerOffset < selection.pointer.wordStart && word?.start < selection.pointer.wordStart) {
         focusOffset = word.start;
-    } else if (pointerOffset >= selectionPointer.wordEnd && word?.end > selectionPointer.wordEnd) {
+    } else if (pointerOffset >= selection.pointer.wordEnd && word?.end > selection.pointer.wordEnd) {
         focusOffset = word.end;
     }
 
     setSelection(
-        selectionPointer.wordStart,
-        constrainSelectionOutsideHighlights(selectionPointer.wordStart, focusOffset),
-        selectionAcrossPages);
+        selection.pointer.wordStart,
+        constrainSelectionOutsideHighlights(selection.pointer.wordStart, focusOffset),
+        selection.acrossPages);
     debounceSelectionChange();
 };
 
 const handleSelectionPointerUp = event => {
-    if (event.pointerId !== selectionPointer?.id) return;
+    if (event.pointerId !== selection.pointer?.id) return;
 
-    clearTimeout(selectionPointer.longPressTimeout);
+    clearTimeout(selection.pointer.longPressTimeout);
     const selectionWasCreated = HasTextSelection();
-    selectionPointer = null;
-    selectionPageTurnBlockedDirection = 0;
+    selection.pointer = null;
+    pageTurn.blockedDirection = 0;
     clearSelectionPageTurnTimer();
     if (selectionWasCreated) debounceSelectionChange();
 };
@@ -551,19 +619,36 @@ const getTouchSelectionHandleAtPoint = (x, y) => {
 
     const { startOffset, endOffset } = getSelectionOffsets();
     const candidates = [
-        { handle: selectionStartHandle, point: getTextCaretPoint(selectionChapter, startOffset, true) },
-        { handle: selectionEndHandle, point: getTextCaretPoint(selectionChapter, endOffset, false) }
-    ].filter(({ point }) =>
+        {
+            handle: selection.ui.startHandle,
+            point: getTextCaretPoint(selection.chapter, startOffset, true),
+            isStart: true
+        },
+        {
+            handle: selection.ui.endHandle,
+            point: getTextCaretPoint(selection.chapter, endOffset, false),
+            isStart: false
+        }
+    ].filter(({ point, isStart }) =>
         point &&
         x >= point.x - 18 &&
         x <= point.x + 18 &&
-        y >= point.y &&
-        y <= point.y + selectionHandleHeight);
+        Math.abs(y - getSelectionHandleKnobCenterY(point, isStart, true)) <= HANDLE.height / 2);
 
-    candidates.sort((first, second) =>
-        (x - first.point.x) ** 2 + (y - first.point.y - selectionHandleKnobCenterOffsetY) ** 2 -
-        ((x - second.point.x) ** 2 + (y - second.point.y - selectionHandleKnobCenterOffsetY) ** 2));
+    candidates.sort((first, second) => {
+        const firstCenterY = getSelectionHandleKnobCenterY(first.point, first.isStart, true);
+        const secondCenterY = getSelectionHandleKnobCenterY(second.point, second.isStart, true);
+        return (x - first.point.x) ** 2 + (y - firstCenterY) ** 2 -
+            ((x - second.point.x) ** 2 + (y - secondCenterY) ** 2);
+    });
     return candidates[0]?.handle ?? null;
+};
+
+const getSelectionHandleKnobCenterY = (point, isStart, isTouch) => {
+    const stemExtension = isTouch ? HANDLE.touchStemExtension : 0;
+    return isStart
+        ? point.y - point.lineHeight - stemExtension - HANDLE.knobSize / 2
+        : point.y + stemExtension + HANDLE.knobSize / 2;
 };
 
 const beginSelectionHandleDrag = (event, handle) => {
@@ -573,19 +658,19 @@ const beginSelectionHandleDrag = (event, handle) => {
 
     setSelectionInputType(event.pointerType);
     const { startOffset, endOffset } = getSelectionOffsets();
-    const startPoint = getTextCaretPoint(selectionChapter, startOffset, true);
-    const endPoint = getTextCaretPoint(selectionChapter, endOffset, false);
-    const knobOffsetY = event.pointerType === 'touch' ? selectionHandleKnobCenterOffsetY : 0;
+    const startPoint = getTextCaretPoint(selection.chapter, startOffset, true);
+    const endPoint = getTextCaretPoint(selection.chapter, endOffset, false);
+    const isTouch = event.pointerType === 'touch';
     const startDistance = startPoint
         ? (event.clientX - startPoint.x) ** 2 +
-        (event.clientY - startPoint.y - knobOffsetY) ** 2
+        (event.clientY - getSelectionHandleKnobCenterY(startPoint, true, isTouch)) ** 2
         : Number.POSITIVE_INFINITY;
     const endDistance = endPoint
         ? (event.clientX - endPoint.x) ** 2 +
-        (event.clientY - endPoint.y - knobOffsetY) ** 2
+        (event.clientY - getSelectionHandleKnobCenterY(endPoint, false, isTouch)) ** 2
         : Number.POSITIVE_INFINITY;
     const isStartHandle = startDistance === endDistance
-        ? handle === selectionStartHandle
+        ? handle === selection.ui.startHandle
         : startDistance < endDistance;
     const handlePoint = isStartHandle ? startPoint : endPoint;
     const anchorOffset = isStartHandle ? endOffset : startOffset;
@@ -593,9 +678,9 @@ const beginSelectionHandleDrag = (event, handle) => {
     setSelection(
         anchorOffset,
         constrainSelectionFocus(anchorOffset, focusOffset),
-        selectionAcrossPages);
-    clearTimeout(selectionPointer?.longPressTimeout);
-    selectionPointer = {
+        selection.acrossPages);
+    clearTimeout(selection.pointer?.longPressTimeout);
+    selection.pointer = {
         id: event.pointerId,
         x: event.clientX,
         y: event.clientY,
@@ -604,8 +689,7 @@ const beginSelectionHandleDrag = (event, handle) => {
         anchorOffset,
         caretOffsetX: handlePoint ? event.clientX - handlePoint.x : 0,
         caretOffsetY: handlePoint ? event.clientY - handlePoint.y : 0,
-        moved: false,
-        mode: 'handle',
+        mode: SelectionGesture.HANDLE,
         longPressTimeout: null
     };
 };
@@ -616,7 +700,7 @@ const moveSelectionHandleWithKeyboard = (event, handle) => {
 
     setSelectionInputType('mouse');
     const { startOffset, endOffset } = getSelectionOffsets();
-    const isStartHandle = handle === selectionStartHandle;
+    const isStartHandle = handle === selection.ui.startHandle;
     const anchorOffset = isStartHandle ? endOffset : startOffset;
     const currentFocusOffset = isStartHandle ? startOffset : endOffset;
     const chapter = document.querySelector('.chapter.current');
@@ -629,14 +713,17 @@ const moveSelectionHandleWithKeyboard = (event, handle) => {
     setSelection(
         anchorOffset,
         constrainEditedHighlightFocus(anchorOffset, focusOffset),
-        selectionAcrossPages);
+        selection.acrossPages);
     debounceSelectionChange();
 };
 
 const clearSelectionPageTurnTimer = () => {
-    clearTimeout(selectionPageTurnTimeout);
-    selectionPageTurnTimeout = null;
-    selectionPageTurnDirection = 0;
+    clearTimeout(pageTurn.timeout);
+    pageTurn.timeout = null;
+    pageTurn.direction = 0;
+    if (pageTurn.phase === PageTurnPhase.SCHEDULED) {
+        transitionPageTurn(PageTurnPhase.IDLE);
+    }
 };
 
 const getTextNodes = root => {
@@ -688,20 +775,20 @@ const createRangeFromOffsets = (root, start, end) => {
 };
 
 const getSelectionOffsets = () => ({
-    startOffset: Math.min(activeSelection.anchorOffset, activeSelection.focusOffset),
-    endOffset: Math.max(activeSelection.anchorOffset, activeSelection.focusOffset)
+    startOffset: Math.min(selection.active.anchorOffset, selection.active.focusOffset),
+    endOffset: Math.max(selection.active.anchorOffset, selection.active.focusOffset)
 });
 
 const getCurrentSelectionRange = () => {
     if (!HasTextSelection() || !isSelectionRootCurrent()) return null;
     const { startOffset, endOffset } = getSelectionOffsets();
-    return createRangeFromOffsets(selectionChapter, startOffset, endOffset);
+    return createRangeFromOffsets(selection.chapter, startOffset, endOffset);
 };
 
 const isSelectionRootCurrent = () => {
-    if (!activeSelection) return false;
+    if (!selection.active) return false;
     const chapter = document.querySelector('.chapter.current');
-    if (chapter === selectionChapter && chapter?.firstChild === selectionChapterFirstChild) return true;
+    if (chapter === selection.chapter && chapter?.firstChild === selection.chapterFirstChild) return true;
 
     clearSelectionState();
     notifyNoSelection();
@@ -713,30 +800,32 @@ const setSelection = (anchorOffset, focusOffset, acrossPages) => {
     if (!chapter || !getPositionAtTextOffset(chapter, anchorOffset) ||
         !getPositionAtTextOffset(chapter, focusOffset)) return false;
 
-    if (editingHighlightRange) {
+    if (selection.editingHighlight.range) {
         const startOffset = Math.min(anchorOffset, focusOffset);
         const endOffset = Math.max(anchorOffset, focusOffset);
-        editingHighlightChanged =
-            startOffset !== editingHighlightRange.start ||
-            endOffset !== editingHighlightRange.end;
+        selection.editingHighlight.phase =
+            startOffset !== selection.editingHighlight.range.start ||
+            endOffset !== selection.editingHighlight.range.end
+                ? EditingHighlightPhase.MODIFIED
+                : EditingHighlightPhase.UNMODIFIED;
     }
-    activeSelection = { anchorOffset, focusOffset };
-    selectionChapter = chapter;
-    selectionChapterFirstChild = chapter.firstChild;
-    selectionAcrossPages = acrossPages;
+    selection.active = { anchorOffset, focusOffset };
+    selection.chapter = chapter;
+    selection.chapterFirstChild = chapter.firstChild;
+    selection.acrossPages = acrossPages;
     renderSelection();
     return true;
 };
 
 const clearSelectionState = () => {
-    activeSelection = null;
-    selectionChapter = null;
-    selectionChapterFirstChild = null;
+    selection.active = null;
+    selection.chapter = null;
+    selection.chapterFirstChild = null;
     clearEditingHighlightRange();
-    selectionAcrossPages = false;
-    clearTimeout(selectionPointer?.longPressTimeout);
-    selectionPointer = null;
-    clearTimeout(selectionChangeTimeout);
+    selection.acrossPages = false;
+    clearTimeout(selection.pointer?.longPressTimeout);
+    selection.pointer = null;
+    clearTimeout(selection.changeTimeout);
     clearSelectionPageTurnTimer();
     if (window.CSS?.highlights) CSS.highlights.delete('bookheaven-selection');
     hideSelectionHandles();
@@ -779,14 +868,14 @@ const drawFallbackSelection = range => {
             background: 'rgba(51, 119, 255, .32)',
             pointerEvents: 'none'
         });
-        selectionOverlay.insertBefore(highlight, selectionStartHandle);
-        fallbackSelectionRects.push(highlight);
+        selection.ui.overlay.insertBefore(highlight, selection.ui.startHandle);
+        selection.ui.fallbackRects.push(highlight);
     }
 };
 
 const clearFallbackSelectionRects = () => {
-    for (const rect of fallbackSelectionRects) rect.remove();
-    fallbackSelectionRects = [];
+    for (const rect of selection.ui.fallbackRects) rect.remove();
+    selection.ui.fallbackRects = [];
 };
 
 const positionSelectionHandles = () => {
@@ -803,11 +892,11 @@ const positionSelectionHandles = () => {
     let endPoint = getTextCaretPoint(chapter, endOffset, false);
     const showStartHandle = startPoint !== null && isPointWithinBounds(startPoint, bounds);
     const showEndHandle = endPoint !== null && isPointWithinBounds(endPoint, bounds);
-    selectionStartHandle.style.display = 'none';
-    selectionEndHandle.style.display = 'none';
+    selection.ui.startHandle.style.display = 'none';
+    selection.ui.endHandle.style.display = 'none';
 
-    if (showStartHandle) setHandlePosition(selectionStartHandle, startPoint);
-    if (showEndHandle) setHandlePosition(selectionEndHandle, endPoint);
+    if (showStartHandle) setHandlePosition(selection.ui.startHandle, startPoint, true);
+    if (showEndHandle) setHandlePosition(selection.ui.endHandle, endPoint, false);
 };
 
 const isPointWithinBounds = (point, bounds) =>
@@ -816,15 +905,18 @@ const isPointWithinBounds = (point, bounds) =>
     point.y >= bounds.top &&
     point.y <= bounds.bottom;
 
-const setHandlePosition = (handle, point) => {
+const setHandlePosition = (handle, point, isStart) => {
     const [stem, knob] = handle.children;
-    const isTouch = selectionInputType === 'touch';
-    const handleTop = point.y - selectionHandleMouseHitboxHeight / 2;
-    const stemTop = point.y - point.lineHeight - handleTop;
-    const stemExtension = isTouch ? selectionHandleTouchStemExtension : 0;
+    const isTouch = selection.inputType === 'touch';
+    const handleTop = point.y - HANDLE.mouseHitboxHeight / 2;
+    const stemExtension = isTouch ? HANDLE.touchStemExtension : 0;
+    const stemTop = point.y - point.lineHeight - handleTop -
+        (isStart ? stemExtension : 0);
     stem.style.top = `${stemTop}px`;
     stem.style.height = `${point.lineHeight + stemExtension}px`;
-    knob.style.top = `${stemTop + point.lineHeight + stemExtension}px`;
+    knob.style.top = `${isStart
+        ? stemTop - HANDLE.knobSize
+        : stemTop + point.lineHeight + stemExtension}px`;
     handle.style.left = `${point.x - 18}px`;
     handle.style.top = `${handleTop}px`;
     handle.style.display = 'block';
@@ -832,15 +924,15 @@ const setHandlePosition = (handle, point) => {
 
 const setSelectionInputType = pointerType => {
     const inputType = pointerType === 'touch' ? 'touch' : 'mouse';
-    if (selectionInputType === inputType) return;
+    if (selection.inputType === inputType) return;
 
-    selectionInputType = inputType;
+    selection.inputType = inputType;
     if (HasTextSelection()) renderSelection();
 };
 
 const hideSelectionHandles = () => {
-    if (selectionStartHandle) selectionStartHandle.style.display = 'none';
-    if (selectionEndHandle) selectionEndHandle.style.display = 'none';
+    if (selection.ui.startHandle) selection.ui.startHandle.style.display = 'none';
+    if (selection.ui.endHandle) selection.ui.endHandle.style.display = 'none';
 };
 
 const getTextCaretPoint = (root, offset, isStart) => {
@@ -1019,7 +1111,9 @@ const getWordOffsets = (chapter, offset) => {
 const isWordCharacter = character => /[\p{L}\p{N}\p{M}_]/u.test(character);
 
 const getSelectionPageTurnDirection = () => {
-    if (!selectionPointer?.moved || document.querySelector('.reader-overlay') ||
+    if (![SelectionGesture.TEXT, SelectionGesture.WORD_DRAG, SelectionGesture.HANDLE]
+        .includes(selection.pointer?.mode) ||
+        document.querySelector('.reader-overlay') ||
         !HasTextSelection()) return 0;
 
     const chapter = document.querySelector('.chapter.current');
@@ -1027,9 +1121,9 @@ const getSelectionPageTurnDirection = () => {
     if (!viewer) return 0;
 
     const bounds = viewer.getBoundingClientRect();
-    if (selectionPointer.y < bounds.top || selectionPointer.y >= bounds.bottom) return 0;
+    if (selection.pointer.y < bounds.top || selection.pointer.y >= bounds.bottom) return 0;
 
-    const isForward = activeSelection.focusOffset >= activeSelection.anchorOffset;
+    const isForward = selection.active.focusOffset >= selection.active.anchorOffset;
     const page = Number.parseInt(getPageMarker(), 10);
     if (!Number.isFinite(page)) return 0;
     const pageTextRange = getSelectionPageTextOffsetRange(chapter, page);
@@ -1037,18 +1131,18 @@ const getSelectionPageTurnDirection = () => {
         chapter,
         bounds,
         pageTextRange,
-        activeSelection.focusOffset,
+        selection.active.focusOffset,
         isForward)) return 0;
 
     const edgeZone = Math.min(40, bounds.width / 4);
-    if (isForward && selectionPointer.x > bounds.right - edgeZone) return 1;
-    if (!isForward && selectionPointer.x < bounds.left + edgeZone) return -1;
+    if (isForward && selection.pointer.x > bounds.right - edgeZone) return 1;
+    if (!isForward && selection.pointer.x < bounds.left + edgeZone) return -1;
     return 0;
 };
 
 const getSelectionPageTextOffsetRange = (chapter, page) => {
-    if (selectionPageTextRangeCache.has(page)) {
-        return selectionPageTextRangeCache.get(page);
+    if (reader.pageTextRangeCache.has(page)) {
+        return reader.pageTextRangeCache.get(page);
     }
 
     const textLength = getTextLength(chapter);
@@ -1074,7 +1168,7 @@ const getSelectionPageTextOffsetRange = (chapter, page) => {
     getPageForTextOffsetForSearch(chapter, startOffset) === page
         ? { startOffset, endOffset }
         : null;
-    selectionPageTextRangeCache.set(page, pageTextRange);
+    reader.pageTextRangeCache.set(page, pageTextRange);
     return pageTextRange;
 };
 
@@ -1122,24 +1216,25 @@ const isFocusNearPageTextBoundary = (chapter, bounds, pageTextRange, focusOffset
 };
 
 const scheduleSelectionPageTurn = () => {
-    if (selectionPageTurnInProgress) return;
+    if (pageTurn.phase === PageTurnPhase.TURNING) return;
 
     const direction = getSelectionPageTurnDirection();
     if (direction === 0) {
-        selectionPageTurnBlockedDirection = 0;
+        pageTurn.blockedDirection = 0;
         clearSelectionPageTurnTimer();
         return;
     }
-    if (selectionPageTurnBlockedDirection === direction) return;
-    selectionPageTurnBlockedDirection = 0;
-    if (selectionPageTurnTimeout && selectionPageTurnDirection === direction) return;
+    if (pageTurn.blockedDirection === direction) return;
+    pageTurn.blockedDirection = 0;
+    if (pageTurn.timeout && pageTurn.direction === direction) return;
 
     clearSelectionPageTurnTimer();
-    selectionPageTurnDirection = direction;
-    selectionPageTurnTimeout = setTimeout(() => {
-        selectionPageTurnTimeout = null;
+    pageTurn.direction = direction;
+    pageTurn.timeout = setTimeout(() => {
+        pageTurn.timeout = null;
         turnSelectionPage(direction);
-    }, selectionPageTurnDelay);
+    }, TIMING.pageTurn);
+    transitionPageTurn(PageTurnPhase.SCHEDULED);
 };
 
 const waitForSelectionPageRender = (chapter, page, firstChild) => new Promise(resolve => {
@@ -1171,16 +1266,16 @@ const waitForSelectionPageRender = (chapter, page, firstChild) => new Promise(re
 });
 
 const turnSelectionPage = async direction => {
-    if (selectionPageTurnInProgress) return;
+    if (pageTurn.phase !== PageTurnPhase.SCHEDULED) return;
 
-    selectionPageTurnInProgress = true;
+    transitionPageTurn(PageTurnPhase.TURNING);
     const chapterBeforeTurn = document.querySelector('.chapter.current');
     const pageBeforeTurn = getPageMarker();
     const firstChildBeforeTurn = chapterBeforeTurn?.firstChild;
     let shouldContinue = true;
     try {
-        const pageChanged = await Reference.DotNet.invokeMethodAsync('OnSelectionPageTurn', direction);
-        selectionPageTurnBlockedDirection = direction;
+        const pageChanged = await bridge.dotNet.invokeMethodAsync('OnSelectionPageTurn', direction);
+        pageTurn.blockedDirection = direction;
         if (!pageChanged) {
             shouldContinue = false;
             return;
@@ -1192,8 +1287,12 @@ const turnSelectionPage = async direction => {
             return;
         }
 
-        selectionAcrossPages = true;
-        if (selectionPointer.mode === 'word-drag') {
+        selection.acrossPages = true;
+        if (!selection.pointer) {
+            shouldContinue = false;
+            return;
+        }
+        if (selection.pointer.mode === SelectionGesture.WORD_DRAG) {
             updateWordSelectionFocusAtPointer();
         } else {
             updateSelectionFocusAtPointer();
@@ -1202,27 +1301,27 @@ const turnSelectionPage = async direction => {
         shouldContinue = false;
         console.error('Unable to change page while selecting text.', error);
     } finally {
-        selectionPageTurnInProgress = false;
-        selectionPageTurnDirection = 0;
+        transitionPageTurn(PageTurnPhase.IDLE);
+        pageTurn.direction = 0;
         if (shouldContinue) scheduleSelectionPageTurn();
     }
 };
 
 const refreshHighlights = () => {
     if (!window.CSS?.highlights || typeof Highlight === 'undefined') return;
-    CSS.highlights.set('bookheaven-highlight', new Highlight(...highlightedRanges));
+    CSS.highlights.set('bookheaven-highlight', new Highlight(...highlights.ranges));
 };
 
-export function RestoreHighlights(highlights) {
-    highlightedRanges.length = 0;
-    highlightedOffsets.length = 0;
+export function RestoreHighlights(annotations) {
+    highlights.ranges.length = 0;
+    highlights.offsets.length = 0;
     const chapter = document.querySelector('.chapter.current');
     if (chapter) {
-        for (const highlight of highlights) {
+        for (const highlight of annotations) {
             const range = createRangeFromOffsets(chapter, highlight.startOffset, highlight.endOffset);
             if (range) {
-                highlightedRanges.push(range);
-                highlightedOffsets.push({ start: highlight.startOffset, end: highlight.endOffset });
+                highlights.ranges.push(range);
+                highlights.offsets.push({ start: highlight.startOffset, end: highlight.endOffset });
             }
         }
     }
@@ -1257,7 +1356,7 @@ export const SelectHighlightAt = (x, y) => {
 
     const rangeAtPoint = getHighlightRangeAtPoint(x, y);
     const offset = rangeAtPoint ? null : GetTextOffsetAt(x, y);
-    const range = rangeAtPoint ?? highlightedRanges.find(highlightRange => {
+    const range = rangeAtPoint ?? highlights.ranges.find(highlightRange => {
         if (offset === null) return false;
 
         const start = getTextOffset(chapter, highlightRange.startContainer, highlightRange.startOffset);
@@ -1269,13 +1368,13 @@ export const SelectHighlightAt = (x, y) => {
     const start = getTextOffset(chapter, range.startContainer, range.startOffset);
     const end = getTextOffset(chapter, range.endContainer, range.endOffset);
     if (!setSelection(start, end, true)) return false;
-    editingHighlightRange = { start, end };
-    editingHighlightChanged = false;
+    selection.editingHighlight.range = { start, end };
+    selection.editingHighlight.phase = EditingHighlightPhase.UNMODIFIED;
     debounceSelectionChange();
     return true;
 };
 
-const getHighlightRangeAtPoint = (x, y) => highlightedRanges.find(range =>
+const getHighlightRangeAtPoint = (x, y) => highlights.ranges.find(range =>
     Array.from(range.getClientRects()).some(rect =>
         x >= rect.left && x <= rect.right &&
         y >= rect.top && y <= rect.bottom));
@@ -1289,8 +1388,8 @@ export const GetTextOffsetAt = (x, y) => {
 };
 
 export const HasTextSelection = () => {
-    if (!activeSelection || !isSelectionRootCurrent()) return false;
-    return activeSelection.anchorOffset !== activeSelection.focusOffset;
+    if (!selection.active || !isSelectionRootCurrent()) return false;
+    return selection.active.anchorOffset !== selection.active.focusOffset;
 };
 
 export const ClearTextSelection = () => {
@@ -1299,9 +1398,10 @@ export const ClearTextSelection = () => {
 };
 
 export const ConsumeSelectionCancellation = () => {
-    const wasPending = selectionCancellationPending;
-    selectionCancellationPending = false;
-    clearTimeout(selectionCancellationTimeout);
+    const wasPending = selection.cancellation.phase === SelectionCancellationPhase.PENDING;
+    selection.cancellation.phase = SelectionCancellationPhase.INACTIVE;
+    clearTimeout(selection.cancellation.timeout);
+    selection.cancellation.timeout = null;
     return wasPending;
 };
 
@@ -1323,14 +1423,14 @@ export function GetSelectedText() {
 }
 
 const debounceSelectionChange = () => {
-    clearTimeout(selectionChangeTimeout);
+    clearTimeout(selection.changeTimeout);
     if (!HasTextSelection()) {
         notifyNoSelection();
         return;
     }
 
-    selectionChangeTimeout = setTimeout(() => {
-        if (selectionPointer !== null) {
+    selection.changeTimeout = setTimeout(() => {
+        if (selection.pointer !== null) {
             notifyNoSelection();
             return;
         }
@@ -1354,16 +1454,16 @@ const debounceSelectionChange = () => {
 
         const viewer = chapter.closest('.viewer');
         const bounds = viewer?.getBoundingClientRect();
-        const focusAtStart = activeSelection.focusOffset < activeSelection.anchorOffset;
+        const focusAtStart = selection.active.focusOffset < selection.active.anchorOffset;
         const point = bounds
-            ? getVisibleCaretPoint(chapter, activeSelection.focusOffset, bounds, focusAtStart)
+            ? getVisibleCaretPoint(chapter, selection.active.focusOffset, bounds, focusAtStart)
             : null;
         const left = point?.x ?? window.innerWidth / 2;
         const top = point
             ? (point.y > 56 ? point.y - 48 : point.y + 8)
             : 56;
         const { startOffset, endOffset } = getSelectionOffsets();
-        Reference.DotNet.invokeMethodAsync(
+        bridge.dotNet.invokeMethodAsync(
             'OnTextSelected',
             text,
             left,
@@ -1371,23 +1471,23 @@ const debounceSelectionChange = () => {
             startOffset,
             endOffset,
             ...getEditingHighlightMetadata());
-    }, selectionChangeDelay);
+    }, TIMING.selectionChange);
 };
 
 const clearEditingHighlightRange = () => {
-    editingHighlightRange = null;
-    editingHighlightChanged = false;
+    selection.editingHighlight.range = null;
+    selection.editingHighlight.phase = EditingHighlightPhase.NONE;
 };
 
 const getEditingHighlightMetadata = () => [
-    editingHighlightRange !== null,
-    editingHighlightRange?.start ?? 0,
-    editingHighlightRange?.end ?? 0,
-    editingHighlightChanged
+    selection.editingHighlight.phase !== EditingHighlightPhase.NONE,
+    selection.editingHighlight.range?.start ?? 0,
+    selection.editingHighlight.range?.end ?? 0,
+    selection.editingHighlight.phase === EditingHighlightPhase.MODIFIED
 ];
 
 const notifyNoSelection = () =>
-    Reference.DotNet?.invokeMethodAsync(
+    bridge.dotNet?.invokeMethodAsync(
         'OnTextSelected',
         null,
         0,
