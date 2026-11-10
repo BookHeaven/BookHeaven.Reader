@@ -81,7 +81,7 @@ public sealed class BookHeavenWebViewClient(WebViewClient? innerClient = null) :
 		}
 
 		var contentType = GetContentType(absolutePath);
-		var fileStream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+		var fileStream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
 		return new WebResourceResponse(contentType, null, 200, "OK", CacheHeaders, fileStream);
 	}
 

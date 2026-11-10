@@ -61,7 +61,7 @@ public sealed class BookHeavenWebViewHandler : BlazorWebViewHandler
 
 			var extension = Path.GetExtension(absolutePath).ToLowerInvariant();
 
-			var fileStream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+			var fileStream = new FileStream(absolutePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
 			args.Response = platformView.CoreWebView2.Environment.CreateWebResourceResponse(
 				fileStream.AsRandomAccessStream(),
 				200,
