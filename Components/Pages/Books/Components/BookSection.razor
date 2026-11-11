@@ -92,18 +92,25 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (firstRender)
+		try
 		{
-			_dotNetReference = DotNetObjectReference.Create(this);
-			_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Books/Components/BookSection.razor.js");
-			await _module.InvokeVoidAsync("initialize", _sectionId, _dotNetReference);
-			return;
-		}
+			if (firstRender)
+			{
+				_dotNetReference = DotNetObjectReference.Create(this);
+				_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Books/Components/BookSection.razor.js");
+				await _module.InvokeVoidAsync("initialize", _sectionId, _dotNetReference);
+				return;
+			}
 
-		if (_module is not null)
+			if (_module is not null)
+			{
+				await _module.InvokeVoidAsync("refresh", _sectionId, _dotNetReference);
+				await _module.InvokeVoidAsync("scrollToPage", _sectionId, _currentPage, _visibleBooksCount);
+			}
+		}
+		catch (Exception ex)
 		{
-			await _module.InvokeVoidAsync("refresh", _sectionId, _dotNetReference);
-			await _module.InvokeVoidAsync("scrollToPage", _sectionId, _currentPage, _visibleBooksCount);
+			throw new Exception("Error initializing BookSection component", ex);
 		}
 	}
 
