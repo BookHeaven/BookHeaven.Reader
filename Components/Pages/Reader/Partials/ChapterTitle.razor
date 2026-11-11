@@ -26,9 +26,17 @@
     {
         if (firstRender)
         {
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/ChapterTitle.razor.js");
-            _callbackRef = DotNetObjectReference.Create(this);
-            await _module.InvokeVoidAsync("observeResize", _containerRef, _callbackRef);
+            try
+            {
+                _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/ChapterTitle.razor.js");
+                _callbackRef = DotNetObjectReference.Create(this);
+                await _module.InvokeVoidAsync("observeResize", _containerRef, _callbackRef);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error initializing chapter title", ex);
+            }
+            
             ReaderService.OnPageChanged += RefreshUi;
             ReaderService.OnChapterChanged += UpdateTitle;
             ReaderService.OnTotalPagesChanged += RefreshUi;
@@ -51,26 +59,33 @@
     {
         if (_module is null) return;
 
-        var title = ReaderService.State?.ChapterTitle ?? string.Empty;
-        var m = await _module.InvokeAsync<TitleMeasurement>("measureTitle", _containerRef, _textRef, _pageRef, title);
-
-        if (m.AvailableWidth == _currentAvailableWidth && _currentTitle == title) return;
-        _currentTitle = title;
-        _currentAvailableWidth = m.AvailableWidth;
-
-        if (m.FullTextWidth <= m.AvailableWidth)
+        try
         {
-            DisplayText = title;
-        }
-        else
-        {
-            var avgCharWidth = m.FullTextWidth / (title.Length == 0 ? 1 : title.Length);
-            var maxChars = Math.Max(4, (int)(m.AvailableWidth / avgCharWidth));
-            var half = (maxChars - 1) / 2;
-            DisplayText = title[..half] + "…" + title[^half..];
-        }
+            var title = ReaderService.State?.ChapterTitle ?? string.Empty;
+            var titleMeasurement = await _module.InvokeAsync<TitleMeasurement>("measureTitle", _containerRef, _textRef, _pageRef, title);
 
-        await InvokeAsync(StateHasChanged);
+            if (titleMeasurement.AvailableWidth == _currentAvailableWidth && _currentTitle == title) return;
+            _currentTitle = title;
+            _currentAvailableWidth = titleMeasurement.AvailableWidth;
+
+            if (titleMeasurement.FullTextWidth <= titleMeasurement.AvailableWidth)
+            {
+                DisplayText = title;
+            }
+            else
+            {
+                var avgCharWidth = titleMeasurement.FullTextWidth / (title.Length == 0 ? 1 : title.Length);
+                var maxChars = Math.Max(4, (int)(titleMeasurement.AvailableWidth / avgCharWidth));
+                var half = (maxChars - 1) / 2;
+                DisplayText = title[..half] + "…" + title[^half..];
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error processing chapter title", ex);
+        }
     }
 
     private void RefreshUi()
@@ -84,8 +99,16 @@
         ReaderService.OnChapterChanged -= UpdateTitle;
         ReaderService.OnTotalPagesChanged -= RefreshUi;
         _callbackRef?.Dispose();
-        _module?.InvokeVoidAsync("dispose");
-        _module?.DisposeAsync();
+        try
+        {
+            _module?.InvokeVoidAsync("dispose");
+            _module?.DisposeAsync();
+        }
+        catch
+        {
+            // Ignore exceptions during disposal
+        }
+        
     }
 
     private sealed record TitleMeasurement(decimal AvailableWidth, decimal FullTextWidth);
