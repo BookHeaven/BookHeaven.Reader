@@ -1,8 +1,8 @@
 ﻿@using BookHeaven.Core.Enums
 @implements IAsyncDisposable
 
-<section class="flex flex-col h-full">
-	<div class="flex items-center h-[40px]">
+<section class="flex h-full flex-col">
+	<div class="flex h-[40px] items-center">
 		<div class="mx-3 flex items-center">
 			<h1 class="text-lg m-0 font-bold">@SectionName</h1>
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right">
@@ -12,7 +12,7 @@
 		</div>
 		@if(_visibleBooksCount < FilteredBooks.Count())
 		{
-			<div class="flex items-center ms-auto">
+			<div class="ms-auto flex items-center">
 				<Button Disabled="@IsPreviousDisabled" OnClick="GoToPreviousPage">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left @(IsPreviousDisabled ? "text-neutral-400" : "")">
 						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -31,7 +31,7 @@
 	
 	@if (!FilteredBooks.Any())
 	{
-		<div class="relative flex-1 flex items-center justify-center">
+		<div class="relative flex flex-1 items-center justify-center">
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-book-off size-20 text-neutral-300">
 				<path stroke="none" d="M0 0h24v24H0z" fill="none" />
 				<path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 5.899 -1.096" />
@@ -46,7 +46,7 @@
 	else
 	{
 		<div id="@_sectionId" class="h-[205px] overflow-hidden">
-			<div data-book-list class="grid grid-cols-[repeat(auto-fill,120px)] justify-evenly items-center px-3 py-2 gap-2 gap-y-5 h-full">
+			<div data-book-list class="px-3 py-2 gap-2 gap-y-5 grid h-full grid-cols-[repeat(auto-fill,120px)] items-center justify-evenly">
 				@foreach (var book in FilteredBooks)
 				{
 					<BookCard Book="book" HideBadge="HideBadges"/>
