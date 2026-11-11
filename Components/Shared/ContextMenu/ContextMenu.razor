@@ -37,13 +37,27 @@
 	{
 		if (firstRender)
 		{
-			_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Shared/ContextMenu/ContextMenu.razor.js");
-			_dotNetRef = DotNetObjectReference.Create(this);
-			await _module.InvokeVoidAsync("ctxRegisterOutsideClickHandler", _dotNetRef);
+			try
+			{
+				_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Shared/ContextMenu/ContextMenu.razor.js");
+				_dotNetRef = DotNetObjectReference.Create(this);
+				await _module.InvokeVoidAsync("ctxRegisterOutsideClickHandler", _dotNetRef);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Error initializing context menu", ex);
+			}
 		}
 		if (_module is not null && !_isPositioned)
 		{
-			await _module.InvokeVoidAsync("ctxPositionMenu", _menuRef, Reference.AnchorX, Reference.AnchorY);
+			try
+			{
+				await _module.InvokeVoidAsync("ctxPositionMenu", _menuRef, Reference.AnchorX, Reference.AnchorY);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Error positioning context menu", ex);
+			}
 			_isPositioned = true;
 			StateHasChanged();
 		}
