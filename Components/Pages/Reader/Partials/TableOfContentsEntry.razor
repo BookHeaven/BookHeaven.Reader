@@ -3,7 +3,7 @@
 @implements IAsyncDisposable
 @if (Entry.Title != null)
 {
-    <span id="@Entry.Id" class="flex items-center scroll-mt-40 w-full">
+    <span id="@Entry.Id" class="scroll-mt-40 flex w-full items-center">
         @if (Entry.Entries.Count > 0)
         {
             <Button OnClick="() => _collapsed = !_collapsed">
@@ -69,14 +69,21 @@
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        try
         {
-            _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TableOfContentsEntry.razor.js");
+            if (firstRender)
+            {
+                _jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TableOfContentsEntry.razor.js");
+            }
+            if (_shouldScroll && _jsModule is not null)
+            {
+                _shouldScroll = false;
+                await _jsModule!.InvokeVoidAsync("ScrollToChapterInIndex", CurrentChapterId);
+            }
         }
-        if (_shouldScroll && _jsModule is not null)
+        catch (Exception ex)
         {
-            _shouldScroll = false;
-            await _jsModule!.InvokeVoidAsync("ScrollToChapterInIndex", CurrentChapterId);
+            throw new Exception("Error in TableOfContentsEntry component", ex);
         }
     }
     
