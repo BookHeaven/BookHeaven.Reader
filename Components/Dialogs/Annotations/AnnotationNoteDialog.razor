@@ -8,9 +8,11 @@
             </Button>
         </header>
         
-        <p class="mb-3 bg-neutral-200 p-2 mx-4 text-sm line-clamp-3">
-            &ldquo;@Annotation.Text&rdquo;
-        </p>
+        <div class="mb-3 bg-neutral-200 p-2 mx-4 text-sm">
+            <p class="line-clamp-3">
+                @Annotation.Text
+            </p>
+        </div>
         <hr class="border-neutral-300"/>
         <textarea class="h-36 p-5 w-full resize-none scrollbar-gutter-both border-none outline-none"
             @bind="_noteDraft" autofocus></textarea>
