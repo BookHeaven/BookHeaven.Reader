@@ -108,14 +108,12 @@
             return;
         }
         _initialized = true;
-        StateHasChanged();
         await Discover();
     }
 
     private async Task Discover()
     {
         _state = PageState.Discovery;
-        StateHasChanged();
         var getServerUrl = await UdpBroadcastClient.StartAsync();
         if (getServerUrl.IsSuccess)
         {
@@ -127,13 +125,11 @@
             PreferencesService.ServerUrl = string.Empty;
             _state = PageState.DiscoveryFailed;
         }
-        StateHasChanged();
     }
 
     private async Task Connect()
     {
         _state = PageState.Connecting;
-        StateHasChanged();
         var canConnect = await ServerService.CanConnect();
         if (canConnect.IsFailure)
         {
@@ -142,8 +138,6 @@
             return;
         }
         _state = PageState.Success;
-        StateHasChanged();
-        
         var getProfiles = await ServerService.GetAllProfiles();
         if (getProfiles.IsFailure)
         {
@@ -161,7 +155,6 @@
         else
         {
             _state = PageState.ProfileSelection;
-            StateHasChanged();
         }
     }
     
