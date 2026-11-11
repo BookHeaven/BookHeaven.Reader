@@ -29,13 +29,21 @@
     {
         if (_module is not null || ReaderSettingsService.ReaderSettings is not { } settings) return;
 
-        _selectedLayout = (NavigationLayoutType)settings.SelectedLayout;
-        _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/Navigation.razor.js");
-        _dotNetReference = DotNetObjectReference.Create(this);
-        await _module.InvokeVoidAsync("Initialize", _dotNetReference, Buttons.Select(button => (int)button).ToArray());
+        try
+        {
+            _selectedLayout = (NavigationLayoutType)settings.SelectedLayout;
+            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/Navigation.razor.js");
+            _dotNetReference = DotNetObjectReference.Create(this);
+            await _module.InvokeVoidAsync("Initialize", _dotNetReference, Buttons.Select(button => (int)button).ToArray());
+        }
+        catch
+        {
+            throw new Exception("Error initializing Navigation component");
+        }
+        
     }
     
-    private void OnSelectedLayoutChanged(string? settingName)
+    private async void OnSelectedLayoutChanged(string? settingName)
     {
         if (!string.IsNullOrEmpty(settingName) &&
             settingName != nameof(ReaderSettingsService.ReaderSettings.SelectedLayout)) return;
@@ -44,9 +52,17 @@
         _selectedLayout = (NavigationLayoutType)settings.SelectedLayout;
         if (_module is not null)
         {
-            _ = _module.InvokeVoidAsync("UpdateLayout", Buttons.Select(button => (int)button).ToArray());
+            try
+            {
+                await _module.InvokeVoidAsync("UpdateLayout", Buttons.Select(button => (int)button).ToArray());
+            }
+            catch
+            {
+                throw new Exception("Error updating Navigation layout");
+            }
+            
         }
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
     [JSInvokable("OnNavigationTap")]
@@ -109,9 +125,13 @@
                 await _module.InvokeVoidAsync("Dispose");
                 await _module.DisposeAsync();
             }
+
             _dotNetReference?.Dispose();
         }
-        catch { }
+        catch
+        {
+            // Ignore exceptions during disposal
+        }
         
     }
 }
