@@ -41,20 +41,38 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     {
         if (_module is null)
         {
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Partials/TextSelection/TextSelectionHandler.razor.js");
-            _dotNetReference = DotNetObjectReference.Create(this);
-            await _module.InvokeVoidAsync(
-                "Initialize",
-                _dotNetReference,
-                Translations.SELECTION_START,
-                Translations.SELECTION_END);
+            try
+            {
+                _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import",
+                    "./Components/Pages/Reader/Partials/TextSelection/TextSelectionHandler.razor.js");
+                _dotNetReference = DotNetObjectReference.Create(this);
+                await _module.InvokeVoidAsync(
+                    "Initialize",
+                    _dotNetReference,
+                    Translations.SELECTION_START,
+                    Translations.SELECTION_END);
+            }
+            catch
+            {
+                await AlertService.ShowToastAsync($"Failed to initialize text selection module",
+                    AlertSeverity.Error);
+            }
+
         }
 
         if (_module is null) return;
 
         if (IsSelectionActionVisible)
         {
-            await _module.InvokeVoidAsync("ClampSelectionAction");
+            try
+            {
+                await _module.InvokeVoidAsync("ClampSelectionAction");
+            }
+            catch
+            {
+                // Ignore errors during clamping
+            }
+            
             if (_selectionActionState is SelectionActionState.AwaitingPosition)
             {
                 _selectionActionState = SelectionActionState.Positioned;
@@ -77,13 +95,28 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
             return;
         }
 
-        await _module.InvokeVoidAsync("RestoreHighlights", AnnotationService.GetAnnotationsForCurrentChapter());
+        try
+        {
+            await _module.InvokeVoidAsync("RestoreHighlights", AnnotationService.GetAnnotationsForCurrentChapter());
+        }
+        catch
+        {
+            await AlertService.ShowToastAsync($"Failed to restore highlights", AlertSeverity.Error);
+        }
+        
     }
 
     public async Task<int?> GetPageForTextOffsetAsync(int offset)
     {
         if (_module is null) return null;
-        return await _module.InvokeAsync<int?>("GetPageForTextOffset", offset);
+        try
+        {
+            return await _module.InvokeAsync<int?>("GetPageForTextOffset", offset);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     [JSInvokable("OnTextSelected")]
@@ -194,19 +227,26 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     {
         if (_module is null || _editingHighlight is null) return;
 
-        var annotation = _editingHighlight.Annotation.Clone();
-        var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection", true);
-        HideSelectionAction();
-        _editingHighlight = null;
-        if (range is null) return;
-
-        annotation.StartOffset = range.StartOffset;
-        annotation.EndOffset = range.EndOffset;
-        annotation.Text = range.Text;
-        var result = await AnnotationService.UpdateAnnotationRangeAsync(annotation);
-        if (result.IsFailure)
+        try
         {
-            await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+            var annotation = _editingHighlight.Annotation.Clone();
+            var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection", true);
+            HideSelectionAction();
+            _editingHighlight = null;
+            if (range is null) return;
+
+            annotation.StartOffset = range.StartOffset;
+            annotation.EndOffset = range.EndOffset;
+            annotation.Text = range.Text;
+            var result = await AnnotationService.UpdateAnnotationRangeAsync(annotation);
+            if (result.IsFailure)
+            {
+                await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+            }
+        }
+        catch
+        {
+            await AlertService.ShowToastAsync("Failed to save changes", AlertSeverity.Error);
         }
     }
 
@@ -214,28 +254,42 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     {
         if (_module is null) return;
 
-        var text = await _module.InvokeAsync<string?>("GetSelectedText");
-        if (string.IsNullOrEmpty(text)) return;
+        try
+        {
+            var text = await _module.InvokeAsync<string?>("GetSelectedText");
+            if (string.IsNullOrEmpty(text)) return;
 
-        await Clipboard.SetTextAsync(text);
-        HideSelectionAction();
+            await Clipboard.SetTextAsync(text);
+            HideSelectionAction();
+        }
+        catch
+        {
+            await AlertService.ShowToastAsync("Failed to copy selection", AlertSeverity.Error);
+        }
     }
 
     private async Task UpdateHighlightsFromSelectionAsync(Func<HighlightRange, Task<Result>> update)
     {
         if (_module is null) return;
 
-        var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection");
-        Result? result = null;
-        if (range is not null)
+        try
         {
-            result = await update(range);
+            var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection");
+            Result? result = null;
+            if (range is not null)
+            {
+                result = await update(range);
+            }
+            HideSelectionAction();
+            _editingHighlight = null;
+            if (result is { IsFailure: true })
+            {
+                await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+            }
         }
-        HideSelectionAction();
-        _editingHighlight = null;
-        if (result is { IsFailure: true })
+        catch
         {
-            await AlertService.ShowToastAsync(result.Error.Description, AlertSeverity.Error);
+            await AlertService.ShowToastAsync("Failed to update highlight", AlertSeverity.Error);
         }
     }
 
@@ -243,19 +297,26 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
     {
         if (_module is null) return;
 
-        var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection");
-        if (range is null) return;
-
-        var existingAnnotation = AnnotationService.GetAnnotationForRange(range.StartOffset, range.EndOffset);
-        _noteAnnotation = existingAnnotation?.Clone() ?? new BookAnnotation
+        try
         {
-            ChapterIndex = ReaderService.State?.ChapterNumber ?? 0,
-            ChapterTitle = ReaderService.State?.ChapterTitle ?? string.Empty,
-            StartOffset = range.StartOffset,
-            EndOffset = range.EndOffset,
-            Text = range.Text
-        };
-        HideSelectionAction();
+            var range = await _module.InvokeAsync<HighlightRange?>("ConsumeSelection");
+            if (range is null) return;
+
+            var existingAnnotation = AnnotationService.GetAnnotationForRange(range.StartOffset, range.EndOffset);
+            _noteAnnotation = existingAnnotation?.Clone() ?? new BookAnnotation
+            {
+                ChapterIndex = ReaderService.State?.ChapterNumber ?? 0,
+                ChapterTitle = ReaderService.State?.ChapterTitle ?? string.Empty,
+                StartOffset = range.StartOffset,
+                EndOffset = range.EndOffset,
+                Text = range.Text
+            };
+            HideSelectionAction();
+        }
+        catch
+        {
+            await AlertService.ShowToastAsync("Failed to edit note", AlertSeverity.Error);
+        }
     }
 
     private async Task SaveNote(BookAnnotation annotation)
@@ -301,7 +362,5 @@ public sealed partial class TextSelectionHandler : IAsyncDisposable
                 // Ignore errors during disposal
             }
         }
-
-        GC.SuppressFinalize(this);
     }
 }
