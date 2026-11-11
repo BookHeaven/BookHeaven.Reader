@@ -23,7 +23,7 @@ namespace BookHeaven.Reader;
 public static class MauiProgram
 {
 
-	internal static readonly IReadOnlyList<string> Assets = [
+	internal static readonly string[] Assets = [
 		"/cache",
 		"/covers",
 		"/books",
