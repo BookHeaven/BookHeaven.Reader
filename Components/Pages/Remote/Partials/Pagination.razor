@@ -3,7 +3,7 @@
 {
 	return;
 }
-<div class="flex gap-5 items-center py-1">
+<div class="gap-5 py-1 flex items-center">
 	<Button Disabled="@(CurrentPage == 1)" OnClick="@(() => ChangePage(Direction.Previous))">
 		<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
 	</Button>
@@ -38,8 +38,16 @@
 		if (firstRender)
 		{
 			_dotNetReference = DotNetObjectReference.Create(this);
-			_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Remote/Partials/Pagination.razor.js");
-			await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
+			try
+			{
+				_module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Remote/Partials/Pagination.razor.js");
+				await _module.InvokeVoidAsync("SetDotNetReference", _dotNetReference);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Error initializing pagination component", ex);
+			}
+			
 		}
 	}
 
