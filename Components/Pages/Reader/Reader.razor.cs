@@ -51,8 +51,15 @@ public sealed partial class Reader : IAsyncDisposable, IReaderViewAdapter
 #if ANDROID
             SetFullscreen(true);
 #endif
+            try
+            {
+                _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to load JS module for Reader.", ex);
+            }
             
-            _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Reader/Reader.razor.js");
         }
         
         if (_module is null) return;
@@ -111,14 +118,28 @@ public sealed partial class Reader : IAsyncDisposable, IReaderViewAdapter
     async Task<ReaderContext> IReaderViewAdapter.GetReaderContextAsync()
     {
         if(_module is null) throw new InvalidOperationException("JS module is not initialized.");
-        var info = await _module.InvokeAsync<ReaderContextInfo>("GetReaderContext");
-        return ReaderContext.FromBrowserInfo(info);
+        try
+        {
+            var info = await _module.InvokeAsync<ReaderContextInfo>("GetReaderContext");
+            return ReaderContext.FromBrowserInfo(info);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Failed to get reader context from JS.", ex);
+        }
     }
 
     async Task IReaderViewAdapter.WaitForAssetsToLoadAsync()
     {
         if (_module is null) throw new InvalidOperationException("JS module is not initialized.");
-        await _module.InvokeVoidAsync("WaitForAssetsToLoad");
+        try
+        {
+            await _module.InvokeVoidAsync("WaitForAssetsToLoad");
+        }
+        catch(Exception ex)
+        {
+            throw new Exception("Unexpected error while waiting for assets to load in JS.", ex);
+        }
     }
 
     Task IReaderViewAdapter.RestoreHighlightsAsync() =>
