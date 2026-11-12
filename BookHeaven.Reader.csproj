@@ -39,8 +39,7 @@
     <Features>runtime-async=on</Features>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)|$(Platform)'=='net11.0-android|AnyCPU'">
-    <PublishReadyToRun>False</PublishReadyToRun>
-    <PublishTrimmed>False</PublishTrimmed>
+    <PublishReadyToRun>True</PublishReadyToRun>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(IsPublishing)' != 'true'">
     <RuntimeIdentifiers>android-x64;android-arm;android-arm64</RuntimeIdentifiers>
