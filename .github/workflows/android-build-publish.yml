@@ -85,9 +85,6 @@ jobs:
     - name: Build tailwindcss
       run: npm run tailwindcss:build
     
-    - name: Restore dependencies
-      run: dotnet restore /p:UseNuget=true
-
     - name: Setup keystore file
       id: decode_keystore
       uses: timheuer/base64-to-file@v2
@@ -97,7 +94,7 @@ jobs:
     
     - name: Publish
       run: |
-          dotnet publish .\BookHeaven.Reader.csproj -c Release -f ${{ env.DOTNET_ANDROID_VERSION }} /p:IsPublishing=true /p:UseNuget=true /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} --no-restore
+          dotnet publish .\BookHeaven.Reader.csproj -c Release -f ${{ env.DOTNET_ANDROID_VERSION }} /p:IsPublishing=true /p:UseNuget=true /p:AndroidKeyStore=true /p:AndroidSigningKeyStore="${{ steps.decode_keystore.outputs.filePath }}" /p:AndroidSigningKeyAlias=bookheaven /p:AndroidSigningKeyPass=${{ secrets.KEYSTORE_PASSWORD }} /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }}
     
     - name: Create Tag
       uses: actions/github-script@v8
