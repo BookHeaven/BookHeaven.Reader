@@ -24,7 +24,6 @@
     <!-- Versions -->
     <ApplicationDisplayVersion>$(NBGV_BuildVersionSimple)</ApplicationDisplayVersion>
     <ApplicationVersion>$([System.DateTimeOffset]::Now.ToUnixTimeSeconds())</ApplicationVersion>
-<!--    <WindowsPackageType>None</WindowsPackageType>-->
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">26.0</SupportedOSPlatformVersion>
@@ -34,7 +33,7 @@
     <IsPackable>false</IsPackable>
     <NeutralLanguage>en</NeutralLanguage>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <LangVersion>default</LangVersion>
+    <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904;$(WarningsNotAsErrors)</WarningsNotAsErrors>
     <Features>runtime-async=on</Features>
