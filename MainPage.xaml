@@ -5,15 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:BookHeaven.Reader"
     xmlns:components="clr-namespace:BookHeaven.Reader.Components"
-    xmlns:blazorweb="clr-namespace:Microsoft.AspNetCore.Components.Web;assembly=Microsoft.AspNetCore.Components.Web"
     BackgroundColor="{DynamicResource PageBackgroundColor}"
     SafeAreaEdges="Container">
 
     <BlazorWebView x:Name="BlazorWebView" HostPage="wwwroot/index.html" StartPath="/setup">
         <BlazorWebView.RootComponents>
-            <RootComponent
-                Selector="head::after"
-                ComponentType="{x:Type blazorweb:HeadOutlet}" />
             <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
         </BlazorWebView.RootComponents>
     </BlazorWebView>
