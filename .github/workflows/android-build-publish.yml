@@ -54,7 +54,7 @@ jobs:
     if: needs.check-version.outputs.exists == 'false'
     env:
       VERSION: ${{ needs.check-version.outputs.version }}
-      DOTNET_ANDROID_VERSION: net10.0-android
+      DOTNET_ANDROID_VERSION: net11.0-android
       
     steps:
     - name: Checkout code
@@ -65,7 +65,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v6
       with:
-        dotnet-version: 10.x
+        dotnet-version: 11.x
         source-url: https://nuget.pkg.github.com/BookHeaven/index.json
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
