@@ -4,6 +4,7 @@ namespace BookHeaven.Reader.Features.Apps.Abstractions;
 
 public interface IAppsService
 {
+	bool IsLoaded { get; }
 	List<AppInfo> Apps { get; set; }
 	Action? OnAppsChanged { get; set; }
 	Task RefreshInstalledAppsAsync();

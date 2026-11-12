@@ -7,6 +7,7 @@ namespace BookHeaven.Reader.Services;
 
 public sealed class AppsService : IAppsService
 {
+	public bool IsLoaded { get; private set; }
 	public List<AppInfo> Apps { get; set; } = [];
 	public Action? OnAppsChanged { get; set; }
 	
@@ -64,6 +65,7 @@ public sealed class AppsService : IAppsService
 			    }
 		    }
         });
+        IsLoaded = true;
         OnAppsChanged?.Invoke();
     }
 

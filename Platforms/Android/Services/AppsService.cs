@@ -15,6 +15,7 @@ namespace BookHeaven.Reader.Services;
 
 public sealed class AppsService : IAppsService
 {
+    public bool IsLoaded { get; private set; }
     public List<AppInfo> Apps { get; set; } = [];
     public Action? OnAppsChanged { get; set; }
 
@@ -71,17 +72,18 @@ public sealed class AppsService : IAppsService
     public async Task RefreshInstalledAppsAsync()
     {
         var packageManager = Android.App.Application.Context.PackageManager!;
-        var apps = packageManager.QueryIntentActivities(new Intent(Intent.ActionMain).AddCategory(Intent.CategoryLauncher), 0);
-        Apps.Clear();
-
-        var appInfos = new List<AppInfo>(apps.Count);
         var launcherApps = Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop
             ? (LauncherApps)Android.App.Application.Context.GetSystemService(Context.LauncherAppsService)!
             : null;
         var userHandle = Process.MyUserHandle();
 
-        await Task.Run(() =>
+        var appInfos = await Task.Run(() =>
         {
+            var apps = packageManager.QueryIntentActivities(
+                new Intent(Intent.ActionMain).AddCategory(Intent.CategoryLauncher),
+                0);
+            var discoveredApps = new List<AppInfo>(apps.Count);
+
             Parallel.ForEach(apps, app =>
             {
                 if (app.ActivityInfo?.IsEnabled == false) return;
@@ -145,13 +147,17 @@ public sealed class AppsService : IAppsService
                 catch { }
 
 
-                lock (appInfos)
+                lock (discoveredApps)
                 {
-                    appInfos.Add(appInfo);
+                    discoveredApps.Add(appInfo);
                 }
             });
+            return discoveredApps;
         });
+
+        Apps.Clear();
         Apps.AddRange(appInfos);
+        IsLoaded = true;
         OnAppsChanged?.Invoke();
     }
 }
