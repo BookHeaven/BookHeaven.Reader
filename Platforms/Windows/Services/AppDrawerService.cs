@@ -1,11 +1,11 @@
 ﻿using Microsoft.Win32;
 using System.Drawing;
-using BookHeaven.Reader.Features.Apps.Abstractions;
-using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
+using BookHeaven.Reader.Features.AppDrawer.Abstractions;
+using AppInfo = BookHeaven.Reader.Features.AppDrawer.Models.AppInfo;
 
 namespace BookHeaven.Reader.Services;
 
-public sealed class AppsService : IAppsService
+public sealed class AppDrawerService : IAppDrawerService
 {
 	public bool IsLoaded { get; private set; }
 	public List<AppInfo> Apps { get; set; } = [];

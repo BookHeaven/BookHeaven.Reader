@@ -1,4 +1,4 @@
-﻿namespace BookHeaven.Reader.Features.Apps.Models;
+﻿namespace BookHeaven.Reader.Features.AppDrawer.Models;
 
 public sealed class AppInfo
 {

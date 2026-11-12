@@ -1,15 +1,15 @@
 ﻿@attribute [Route(Urls.Apps)]
 @using BookHeaven.Reader.Components.Shared.ContextMenu
 @using BookHeaven.Reader.Components.Shared.ContextMenu.Apps
-@using BookHeaven.Reader.Features.Apps.Abstractions
+@using BookHeaven.Reader.Features.AppDrawer.Abstractions
 @using BookHeaven.Reader.Features.Lifecycle.Services
-@using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo
+@using AppInfo = BookHeaven.Reader.Features.AppDrawer.Models.AppInfo
 @implements IDisposable
 
 <SectionContent SectionName="Header">
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold mx-4 my-3">@Translations.APPS</h1>
-        @if (AppsService.IsLoaded)
+        @if (AppDrawerService.IsLoaded)
         {
             <Button Class="h-full" OnClick="RefreshAppsAsync">
                 <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-reload"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1 7.935 1.007 9.425 4.747" /><path d="M20 4v5h-5" /></svg>
@@ -19,20 +19,20 @@
     <hr/>
 </SectionContent>
 
-@if (!AppsService.IsLoaded)
+@if (!AppDrawerService.IsLoaded)
 {
     <Message Content="@Translations.LOADING" />
     return;
 }
 
-@if (AppsService.Apps.Count > 0)
+@if (AppDrawerService.Apps.Count > 0)
 {
     <div class="gap-x-4 gap-y-6 p-4 grid auto-rows-fr grid-cols-6 justify-center">
         @foreach (var app in FilteredApps)
         {
             <div 
 	            class="gap-0.5 rounded active:bg-neutral-200 active:outline-neutral-200 grid w-full overflow-hidden active:outline-4" 
-	            @onclick="@(() => AppsService.OpenApp(app.PackageName!))"
+	            @onclick="@(() => AppDrawerService.OpenApp(app.PackageName!))"
 	            @oncontextmenu="@(e => ShowContextMenu(e, app))"
 	            @oncontextmenu:preventDefault="true">
                 <img src="data:image/png;base64,@app.IconBase64" class="w-16 px-2 mx-auto" alt="App icon" draggable="false"/>
@@ -44,15 +44,15 @@
 
 @code {
 	[Inject] private IContextMenuService ContextMenuService { get; set; } = null!;
-    [Inject] private IAppsService AppsService { get; set; } = null!;
+    [Inject] private IAppDrawerService AppDrawerService { get; set; } = null!;
     [Inject] private LifeCycleService LifeCycleService { get; set; } = null!;
     
     private IEnumerable<AppInfo> FilteredApps =>
         _sortBy switch
         {
-            SortBy.Added => AppsService.Apps.OrderBy(x => x.Date),
-            SortBy.Name => AppsService.Apps.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase),
-            _ => AppsService.Apps
+            SortBy.Added => AppDrawerService.Apps.OrderBy(x => x.Date),
+            SortBy.Name => AppDrawerService.Apps.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase),
+            _ => AppDrawerService.Apps
         };
     
     private enum SortBy
@@ -65,10 +65,10 @@
 
     protected override void OnInitialized()
     {
-        AppsService.OnAppsChanged += RefreshUiAsync;
+        AppDrawerService.OnAppsChanged += RefreshUiAsync;
         LifeCycleService.Resumed += RefreshAppsAsync;
 
-        if (!AppsService.IsLoaded)
+        if (!AppDrawerService.IsLoaded)
         {
             RefreshAppsAsync();
         }
@@ -88,13 +88,13 @@
     
     private async void RefreshAppsAsync()
     {
-        await AppsService.RefreshInstalledAppsAsync();
+        await AppDrawerService.RefreshInstalledAppsAsync();
         await InvokeAsync(StateHasChanged);
     }
     
     public void Dispose()
     {
-        AppsService.OnAppsChanged -= RefreshUiAsync;
+        AppDrawerService.OnAppsChanged -= RefreshUiAsync;
         LifeCycleService.Resumed -= RefreshAppsAsync;
         GC.SuppressFinalize(this);
     }

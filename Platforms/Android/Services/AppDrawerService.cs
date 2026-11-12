@@ -5,15 +5,15 @@ using Android.Provider;
 using Android.OS;
 using Android.Net;
 using Android.Graphics.Drawables;
-using BookHeaven.Reader.Features.Apps.Abstractions;
-using BookHeaven.Reader.Features.Apps.Models;
+using BookHeaven.Reader.Features.AppDrawer.Abstractions;
+using BookHeaven.Reader.Features.AppDrawer.Models;
 using BookHeaven.Reader.Helpers;
 using Microsoft.Maui.Controls.PlatformConfiguration;
-using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
+using AppInfo = BookHeaven.Reader.Features.AppDrawer.Models.AppInfo;
 
 namespace BookHeaven.Reader.Services;
 
-public sealed class AppsService : IAppsService
+public sealed class AppDrawerService : IAppDrawerService
 {
     public bool IsLoaded { get; private set; }
     public List<AppInfo> Apps { get; set; } = [];

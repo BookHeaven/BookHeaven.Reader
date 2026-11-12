@@ -1,8 +1,8 @@
-﻿using AppInfo = BookHeaven.Reader.Features.Apps.Models.AppInfo;
+﻿using AppInfo = BookHeaven.Reader.Features.AppDrawer.Models.AppInfo;
 
-namespace BookHeaven.Reader.Features.Apps.Abstractions;
+namespace BookHeaven.Reader.Features.AppDrawer.Abstractions;
 
-public interface IAppsService
+public interface IAppDrawerService
 {
 	bool IsLoaded { get; }
 	List<AppInfo> Apps { get; set; }
